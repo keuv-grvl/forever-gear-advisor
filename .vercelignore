@@ -1,0 +1,10 @@
+# Fichiers jamais envoyés à Vercel, y compris par `vercel deploy` depuis cette machine (secrets, caches, code de
+# l'addon Forever Leveling BiS). public/data/local/ n'est envoyé que par le déploiement privé de prototype (README).
+.env*
+.cache/
+.git/
+.vercel/
+node_modules/
+dist/
+docs/ForeverLevelingBiS/
+scripts/seeds.local.json

@@ -30,8 +30,11 @@ export function loadGameData(): Promise<GameData> {
     getJson<{ sources: Record<number, Source[]> }>('/data/sources.json'),
     getJson<WeightsFile>('/data/weights.json'),
     getJson<RandomData>('/data/random.json'),
-    // Jamais en production : ces poids ne peuvent pas être publiés sans l'accord de leur auteur.
-    import.meta.env.DEV ? getJson<FlbisFile>('/data/local/weights-flbis.json').catch(() => undefined) : undefined,
+    // Jamais en production : ces poids ne peuvent pas être publiés sans l'accord de leur auteur. Lus en développement,
+    // et dans le déploiement de prévisualisation privé construit avec VITE_LOCAL_WEIGHTS=1 depuis cette machine.
+    import.meta.env.DEV || import.meta.env.VITE_LOCAL_WEIGHTS === '1'
+      ? getJson<FlbisFile>('/data/local/weights-flbis.json').catch(() => undefined)
+      : undefined,
   ])
     .then(([items, sources, weights, random, flbis]) => ({
       items: items.items,
