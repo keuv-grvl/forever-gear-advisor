@@ -166,7 +166,7 @@ export function fromDb(it: DbItem): ScorableItem {
 }
 
 const ONE_HAND_MAIN = new Set(['WEAPON', 'WEAPONMAINHAND'])
-const OFF_HAND = new Set(['SHIELD', 'HOLDABLE', 'WEAPONOFFHAND'])
+const OFF_HAND = new Set(['SHIELD', 'HOLDABLE'])
 
 export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOptions): SlotAdvice[] {
   const maxLevel = o.level + o.anticipate
@@ -245,7 +245,9 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const mh = bySlot.get('MAIN_HAND')
   const twoHanded = mh?.inventory_type?.type === 'TWOHWEAPON'
   const currentSet = eqScore('MAIN_HAND') + eqScore('OFF_HAND', true)
-  const offHandOk = (it: DbItem) => OFF_HAND.has(it.slot) || (dualWield && it.slot === 'WEAPON')
+  // Arme en main gauche (« Left-Handed Blades », arme à une main) : seulement si la classe manie deux armes.
+  // Bouclier et objet tenu en main gauche : toutes les classes qui peuvent les porter (canWear).
+  const offHandOk = (it: DbItem) => OFF_HAND.has(it.slot) || (dualWield && (it.slot === 'WEAPON' || it.slot === 'WEAPONOFFHAND'))
   const offHands = usable
     .filter(offHandOk)
     .map((item) => ({ item, s: score(fromDb(item), item.cls === 2) }))
