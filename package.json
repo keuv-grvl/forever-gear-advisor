@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "data:weights": "node scripts/build-weights.ts",
+    "data:items": "node --env-file=.env.blizzard.local scripts/build-data.ts"
   },
   "dependencies": {
     "vue": "^3.5.44"

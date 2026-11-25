@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .vercel
 .env*
+
+# Données de travail des scripts
+.cache/
+scripts/seeds.local.json
