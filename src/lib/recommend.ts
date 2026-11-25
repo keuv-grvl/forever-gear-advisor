@@ -36,7 +36,16 @@ export interface DbItem {
 export const itemKey = (it: { id: number; sfx?: number }) => (it.sfx ? `${it.id}:${it.sfx}` : String(it.id))
 
 export type Source =
-  | { t: 'craft'; prof: string; recipe: string; reagents: [number, string, number][]; qty?: number }
+  | {
+      t: 'craft'
+      prof: string
+      /** Id du métier (171 Alchimie…) et de la recette, comparés aux métiers du perso. */
+      pid?: number
+      recipe: string
+      rid?: number
+      reagents: [number, string, number][]
+      qty?: number
+    }
   | {
       t: 'quest'
       id: number
@@ -56,18 +65,35 @@ export function sideOf(faction: string): 'A' | 'H' {
   return faction === 'HORDE' ? 'H' : 'A'
 }
 
+/** Métiers du perso (ids) et recettes qu'il connaît (ids), d'après /professions. */
+export interface Crafter {
+  professions: ReadonlySet<number>
+  recipes: ReadonlySet<number>
+}
+
+/** Ce qui rend une source accessible ou non au perso. */
+export interface SourceContext {
+  side: 'A' | 'H'
+  classId: number
+  /** Quêtes terminées. */
+  done?: ReadonlySet<number>
+  /** Métiers du perso ; absent si l'API ne les a pas donnés (aucun craft écarté). */
+  crafter?: Crafter
+}
+
 /**
- * Sources accessibles au perso : quêtes d'une autre faction ou classe, quêtes déjà faites (sauf répétables)
- * et vendeurs de l'autre faction écartés.
+ * Sources accessibles au perso : quêtes d'une autre faction ou classe, quêtes déjà faites (sauf répétables),
+ * vendeurs de l'autre faction et crafts liés quand ramassés d'un métier qu'il n'a pas écartés. Un craft lié quand
+ * équipé reste accessible : un autre joueur peut le fabriquer.
  */
-export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', classId: number, done?: ReadonlySet<number>): Source[] {
-  const questSide = side === 'A' ? 1 : 2
-  const classBit = 1 << (classId - 1)
+export function sourcesFor(sources: Source[] | undefined, item: { bop?: 1 }, ctx: SourceContext): Source[] {
+  const questSide = ctx.side === 'A' ? 1 : 2
+  const classBit = 1 << (ctx.classId - 1)
   return (sources ?? []).filter((s) => {
     if (s.t === 'quest')
-      return (!s.side || s.side === questSide) && (!s.cls || (s.cls & classBit) !== 0) && (s.rpt === 1 || !done?.has(s.id))
-    if (s.t === 'vendor') return !s.side || s.side.includes(side)
-    return true
+      return (!s.side || s.side === questSide) && (!s.cls || (s.cls & classBit) !== 0) && (s.rpt === 1 || !ctx.done?.has(s.id))
+    if (s.t === 'vendor') return !s.side || s.side.includes(ctx.side)
+    return !item.bop || !ctx.crafter || s.pid === undefined || ctx.crafter.professions.has(s.pid)
   })
 }
 
@@ -118,6 +144,8 @@ export interface RecommendOptions {
   origins?: ReadonlySet<Origin>
   /** Quêtes déjà faites par le perso : leurs récompenses ne sont plus accessibles (sauf quêtes répétables). */
   doneQuests?: ReadonlySet<number>
+  /** Métiers du perso : un craft lié quand ramassé d'un autre métier n'est pas accessible. */
+  crafter?: Crafter
 }
 
 // Slots d'armure où le type (tissu, cuir, mailles, plaques) compte ; le dos est toujours en tissu.
@@ -161,7 +189,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   // Sans source connue, on le garde.
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
-    const mine = sourcesFor(all, side, o.classId, o.doneQuests)
+    const mine = sourcesFor(all, it, { side, classId: o.classId, done: o.doneQuests, crafter: o.crafter })
     return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins))
   }
   const usable = db.filter(

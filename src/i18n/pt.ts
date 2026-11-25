@@ -84,7 +84,7 @@ export const pt: Messages = {
   'hint.anticipate':
     'Sugere também itens até 5 níveis acima do seu, para você se preparar. O nível necessário aparece ao lado de cada item.',
   'hint.origins':
-    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Desmarcar “Reputação” remove todos os itens que exigem reputação, seja qual for a fonte. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas).',
+    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Desmarcar “Reputação” remove todos os itens que exigem reputação, seja qual for a fonte. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas). Um item fabricado vinculado quando coletado só é sugerido se seu personagem tiver a profissão; um vinculado quando equipado é sempre sugerido (alguém pode fabricá-lo para você).',
   'hint.armorOnly': 'Sua classe só usa {best}: esta opção não muda nada.',
   'hint.armor':
     'Marcado: para cabeça, ombros, torso, pulsos, mãos, cintura, pernas e pés, só armadura de {best}, o tipo mais pesado que sua classe usa no nível {level}. Desmarcado: também armadura de {lighter} (menos armadura, às vezes atributos melhores). Costas, pescoço, dedos e berloques não são afetados.',
@@ -99,6 +99,9 @@ export const pt: Messages = {
   'cand.levelEstimated': 'Nível estimado: a API não informa o nível necessário',
   'cand.with': 'com',
   'src.craft': 'Criação: {prof}',
+  'src.craftKnown': "receita conhecida",
+  'src.craftToLearn': "receita a aprender",
+  'src.craftOther': "não é sua profissão: encomende",
   'src.vendor': 'Vendedor:',
   'src.quest': 'Missão:',
   'src.questDungeon': 'Missão de masmorra:',

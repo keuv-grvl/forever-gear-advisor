@@ -84,7 +84,7 @@ export const de: Messages = {
   'hint.anticipate':
     'Schlägt auch Gegenstände bis zu 5 Stufen über deiner vor, damit du vorausplanen kannst. Die benötigte Stufe steht neben jedem Gegenstand.',
   'hint.origins':
-    'Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus erhältlich. Wenn du „Ruf“ abwählst, fallen alle Gegenstände weg, die einen Ruf erfordern, egal aus welcher Quelle. Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“. Gegenstände mit Zufallswerten („des Wals“, „des Bären“…) werden nur vorgeschlagen, wenn sie im Auktionshaus angeboten werden (ohne Waffen).',
+    'Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus erhältlich. Wenn du „Ruf“ abwählst, fallen alle Gegenstände weg, die einen Ruf erfordern, egal aus welcher Quelle. Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“. Gegenstände mit Zufallswerten („des Wals“, „des Bären“…) werden nur vorgeschlagen, wenn sie im Auktionshaus angeboten werden (ohne Waffen). Ein hergestellter Gegenstand, der beim Aufheben gebunden wird, wird nur vorgeschlagen, wenn dein Charakter den Beruf hat; einer, der beim Anlegen gebunden wird, immer (jemand kann ihn für dich herstellen).',
   'hint.armorOnly': 'Deine Klasse trägt nur {best}: Diese Option ändert nichts.',
   'hint.armor':
     'Aktiviert: für Kopf, Schultern, Brust, Handgelenke, Hände, Taille, Beine und Füße nur Rüstungstyp „{best}“, der schwerste Typ, den deine Klasse auf Stufe {level} trägt. Deaktiviert: auch {lighter} (weniger Rüstung, manchmal bessere Werte). Rücken, Hals, Finger und Schmuck sind nicht betroffen.',
@@ -99,6 +99,9 @@ export const de: Messages = {
   'cand.levelEstimated': 'Geschätzte Stufe: Die API liefert keine benötigte Stufe',
   'cand.with': 'mit',
   'src.craft': 'Herstellung: {prof}',
+  'src.craftKnown': "Rezept bekannt",
+  'src.craftToLearn': "Rezept noch zu erlernen",
+  'src.craftOther': "nicht dein Beruf: herstellen lassen",
   'src.vendor': 'Händler:',
   'src.quest': 'Quest:',
   'src.questDungeon': 'Dungeonquest:',

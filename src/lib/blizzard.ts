@@ -102,6 +102,8 @@ export interface CharacterData {
   guildMembers?: string[]
   /** Ids des quêtes en cours et terminées (absents si l'API ne les a pas donnés). */
   quests?: { active?: number[]; done?: number[] }
+  /** Métiers : id (171 Alchimie…), compétence, recettes connues (ids). Absent si l'API ne les a pas donnés. */
+  professions?: { id: number; skill: number; max: number; recipes: number[] }[]
   /** Région de la recherche (ajoutée par fetchCharacter). */
   region?: Region
 }

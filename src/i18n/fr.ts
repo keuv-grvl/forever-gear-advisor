@@ -82,7 +82,7 @@ export const fr: Messages = {
   'hint.anticipate':
     "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
   'hint.origins':
-    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues).",
+    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues). Un craft lié quand ramassé n'est proposé que si ton perso a le métier ; un craft lié quand équipé l'est toujours (quelqu'un peut te le fabriquer).",
   'hint.armorOnly': 'Ta classe ne porte que du {best} : cette option ne change rien.',
   'hint.armor':
     "Coché : pour la tête, les épaules, le torse, les poignets, les mains, la taille, les jambes et les pieds, seulement de l'armure en {best}, le type le plus lourd que ta classe porte au niveau {level}. Décoché : aussi l'armure en {lighter} (moins d'armure, parfois de meilleures stats). Le dos, le cou, les doigts et les bijoux ne sont pas concernés.",
@@ -97,6 +97,9 @@ export const fr: Messages = {
   'cand.levelEstimated': "Niveau estimé : l'API ne donne pas de niveau requis",
   'cand.with': 'avec',
   'src.craft': 'Craft : {prof}',
+  'src.craftKnown': "recette connue",
+  'src.craftToLearn': "recette à apprendre",
+  'src.craftOther': "pas ton métier : à faire fabriquer",
   'src.vendor': 'Vendeur :',
   'src.quest': 'Quête :',
   'src.questDungeon': 'Quête de donjon :',

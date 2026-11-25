@@ -84,7 +84,7 @@ export const it: Messages = {
   'hint.anticipate':
     'Propone anche oggetti fino a 5 livelli sopra il tuo, per prepararti a ciò che verrà. Il livello richiesto è indicato accanto a ogni oggetto.',
   'hint.origins':
-    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso in vendita alla casa d'aste. Se deselezioni «Reputazione», vengono tolti tutti gli oggetti che richiedono una reputazione, qualunque sia la fonte. I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta». Gli oggetti con statistiche casuali («of the Whale», «of the Bear»…) vengono proposti solo se sono in vendita alla casa d'aste (armi escluse).",
+    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso in vendita alla casa d'aste. Se deselezioni «Reputazione», vengono tolti tutti gli oggetti che richiedono una reputazione, qualunque sia la fonte. I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta». Gli oggetti con statistiche casuali («of the Whale», «of the Bear»…) vengono proposti solo se sono in vendita alla casa d'aste (armi escluse). Un oggetto creato vincolato alla raccolta viene proposto solo se il tuo personaggio ha la professione; uno vincolato all'equipaggiamento sempre (qualcuno può crearlo per te).",
   'hint.armorOnly': 'La tua classe indossa solo {best}: questa opzione non cambia nulla.',
   'hint.armor':
     'Selezionato: per testa, spalle, torso, polsi, mani, fianchi, gambe e piedi, solo armature di {best}, il tipo più pesante che la tua classe indossa al livello {level}. Deselezionato: anche armature di {lighter} (meno armatura, a volte statistiche migliori). Schiena, collo, dita e monili non sono interessati.',
@@ -99,6 +99,9 @@ export const it: Messages = {
   'cand.levelEstimated': "Livello stimato: l'API non fornisce il livello richiesto",
   'cand.with': 'con',
   'src.craft': 'Creazione: {prof}',
+  'src.craftKnown': "ricetta conosciuta",
+  'src.craftToLearn': "ricetta da imparare",
+  'src.craftOther': "non è la tua professione: fallo creare",
   'src.vendor': 'Mercante:',
   'src.quest': 'Missione:',
   'src.questDungeon': 'Missione di spedizione:',

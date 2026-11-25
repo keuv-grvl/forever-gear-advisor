@@ -2,7 +2,7 @@
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
 import { factionName, formatMoney, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
-import type { Candidate, DbItem, Source } from '../lib/recommend'
+import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
 
 const props = defineProps<{
   c: Candidate
@@ -13,9 +13,20 @@ const props = defineProps<{
   priceNote?: string
   /** Camp du perso : la faction requise peut en dépendre (récompenses du Goulet des Chanteguerres). */
   side: 'A' | 'H'
+  /** Métiers du perso (absent : inconnus). */
+  crafter?: Crafter
 }>()
 
 const QUEST_KEY = { dungeon: 'src.questDungeon', raid: 'src.questRaid' } as const
+
+/** Précision sur un craft : recette connue ou à apprendre (métier du perso), sinon à faire fabriquer. */
+function craftNote(s: Extract<Source, { t: 'craft' }>): string {
+  const c = props.crafter
+  if (!c || s.pid === undefined) return ''
+  if (!c.professions.has(s.pid)) return t('src.craftOther')
+  if (s.rid === undefined) return ''
+  return t(c.recipes.has(s.rid) ? 'src.craftKnown' : 'src.craftToLearn')
+}
 
 function reagentsText(s: Extract<Source, { t: 'craft' }>): string {
   return s.reagents.map(([id, name, qty]) => `${qty} × ${itemName(id, name)}`).join(', ')
@@ -44,7 +55,11 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
     </span>
     <div class="sources">
       <template v-for="(s, i) in sources" :key="i">
-        <span v-if="s.t === 'craft'" :title="reagentsText(s)">{{ t('src.craft', { prof: professionName(s.prof) }) }}</span>
+        <span v-if="s.t === 'craft'" :title="reagentsText(s)"
+          >{{ t('src.craft', { prof: professionName(s.prof) }) }}<span v-if="craftNote(s)" class="muted">{{
+            ' (' + craftNote(s) + ')'
+          }}</span></span
+        >
         <span v-else-if="s.t === 'vendor'">
           {{ t('src.vendor') }}
           <a :href="wowheadNpcUrl(s.npc)" target="_blank" rel="noopener">{{ s.name }}</a>

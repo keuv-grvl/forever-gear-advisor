@@ -4,7 +4,7 @@ import { langInfo, specName as specLabel, t, type MessageKey } from '../i18n'
 import { detectSpec, fetchPrices, wowheadItemUrl, type CharacterData, type Prices } from '../lib/blizzard'
 import { SLOT_ORDER, type GameData } from '../lib/data'
 import { randomOffers } from '../lib/random'
-import { itemKey, ORIGINS, recommend, sideOf, sourcesFor, type DbItem, type Origin, type Source } from '../lib/recommend'
+import { itemKey, ORIGINS, recommend, sideOf, sourcesFor, type Crafter, type DbItem, type Origin, type Source } from '../lib/recommend'
 import { CLASS_KEYS, wearableArmorTypes } from '../lib/rules'
 import { findSpec, weightsAt } from '../lib/scoring'
 import { readPrefs, writePrefs } from '../lib/suggest'
@@ -55,6 +55,12 @@ const spec = computed(() => findSpec(game.value.weights, classKey.value, specNam
 const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
 const side = computed(() => sideOf(profile.value.faction.type))
 const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
+// Métiers et recettes connues (absents si l'API ne les a pas donnés : aucun craft écarté).
+const crafter = computed<Crafter | undefined>(() => {
+  const list = props.data.professions
+  if (!list) return undefined
+  return { professions: new Set(list.map((p) => p.id)), recipes: new Set(list.flatMap((p) => p.recipes)) }
+})
 const activeQuests = computed(() => new Set(props.data.quests?.active ?? []))
 
 // Prix HV (facultatifs) : chargés à chaque perso, servis par le cache CDN la plupart du temps.
@@ -99,6 +105,7 @@ const advice = computed(() => {
     sources: game.value.sources,
     origins: new Set(origins.value),
     doneQuests: doneQuests.value,
+    crafter: crafter.value,
   })
 })
 
@@ -108,7 +115,12 @@ const rows = computed(() =>
 )
 
 function sourcesOf(item: DbItem): Source[] {
-  return sourcesFor(game.value.sources[item.id], sideOf(profile.value.faction.type), profile.value.character_class.id, doneQuests.value)
+  return sourcesFor(game.value.sources[item.id], item, {
+    side: side.value,
+    classId: profile.value.character_class.id,
+    done: doneQuests.value,
+    crafter: crafter.value,
+  })
 }
 
 const armorHint = computed(() => {
@@ -195,6 +207,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                     :price="prices?.prices[itemKey(a.candidates[0].item)]"
                     :price-note="priceNote"
                     :side="side"
+                    :crafter="crafter"
                   />
                 </ul>
                 <details v-if="a.candidates.length > 1" class="more">
@@ -209,6 +222,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                       :price="prices?.prices[itemKey(c.item)]"
                       :price-note="priceNote"
                       :side="side"
+                      :crafter="crafter"
                     />
                   </ul>
                 </details>

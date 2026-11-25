@@ -25,7 +25,7 @@ export async function GET(request: Request): Promise<Response> {
       const guild = (p as { guild?: { slug?: string } }).guild?.slug
       return guild ? get(`/data/wow/guild/${guild}/roster`).catch(() => null) : null
     })
-    const [profile, equipment, specializations, roster, active, completed] = await Promise.all([
+    const [profile, equipment, specializations, roster, active, completed, professions] = await Promise.all([
       profileP,
       get(`${base}/equipment`),
       // Sans locale : nom anglais (clé des poids Polestar) et nom dans la langue, voir specNames.
@@ -34,6 +34,8 @@ export async function GET(request: Request): Promise<Response> {
       // Quêtes en cours et terminées : facultatives, comme le roster.
       get(`${base}/quests`).catch(() => null),
       get(`${base}/quests/completed`).catch(() => null),
+      // Métiers et recettes connues : un craft lié quand ramassé n'est accessible qu'avec le métier.
+      get(`${base}/professions`).catch(() => null),
     ])
     return json(
       200,
@@ -41,6 +43,7 @@ export async function GET(request: Request): Promise<Response> {
         ...(slim({ profile, equipment, specializations }) as object),
         guildMembers: memberNames(roster),
         quests: { active: questIds(active, 'in_progress'), done: questIds(completed, 'quests') },
+        professions: professionSkills(professions),
       },
       300,
     )
@@ -57,6 +60,32 @@ function memberNames(roster: unknown): string[] | undefined {
 }
 
 /** Ids des quêtes d'une liste du profil (`in_progress` ou `quests`), sans les noms ni les liens. */
+interface ProfessionTier {
+  skill_points?: number
+  max_skill_points?: number
+  known_recipes?: { id?: number }[]
+}
+
+/** Métiers du perso : id, points de compétence et recettes connues (ids), sans les noms. */
+function professionSkills(res: unknown) {
+  type P = { profession?: { id?: number }; tiers?: ProfessionTier[] } & ProfessionTier
+  const r = res as { primaries?: P[]; secondaries?: P[] } | null
+  if (!r) return undefined
+  return [...(r.primaries ?? []), ...(r.secondaries ?? [])].flatMap((p) => {
+    const id = p.profession?.id
+    if (typeof id !== 'number') return []
+    const tiers = p.tiers?.length ? p.tiers : [p]
+    return [
+      {
+        id,
+        skill: Math.max(0, ...tiers.map((t) => t.skill_points ?? 0)),
+        max: Math.max(0, ...tiers.map((t) => t.max_skill_points ?? 0)),
+        recipes: tiers.flatMap((t) => (t.known_recipes ?? []).flatMap((k) => (typeof k.id === 'number' ? [k.id] : []))),
+      },
+    ]
+  })
+}
+
 function questIds(res: unknown, key: string): number[] | undefined {
   const list = (res as Record<string, { id?: number }[] | undefined> | null)?.[key]
   return list?.flatMap((q) => (typeof q.id === 'number' ? [q.id] : []))

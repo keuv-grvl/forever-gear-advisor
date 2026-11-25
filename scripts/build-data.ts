@@ -393,7 +393,9 @@ async function harvestEquipment(known: Set<number>): Promise<{ items: OutItem[];
 interface CraftSource {
   t: 'craft'
   prof: string
+  pid: number // id du métier (171 Alchimie…), comparé aux métiers du perso
   recipe: string
+  rid: number // id de la recette, comparé aux recettes connues du perso
   reagents: [id: number, name: string, qty: number][]
   qty?: number
 }
@@ -404,13 +406,13 @@ async function buildCrafts(itemIds: Set<number>): Promise<Map<number, CraftSourc
       if (isLocalized(p.name)) addName('professions', p.name.en_US, p.name)
     }
   })
-  const recipes: { prof: string; id: number }[] = []
+  const recipes: { prof: string; pid: number; id: number }[] = []
   for (const prof of index?.professions ?? []) {
     if (JUNK_NAME.test(prof.name)) continue
     const p = await api<{ skill_tiers?: Ref[] }>('static', `/data/wow/profession/${prof.id}`)
     for (const tier of p?.skill_tiers ?? []) {
       const t = await api<{ categories?: { recipes: Ref[] }[] }>('static', `/data/wow/profession/${prof.id}/skill-tier/${tier.id}`)
-      for (const c of t?.categories ?? []) for (const r of c.recipes) recipes.push({ prof: prof.name, id: r.id })
+      for (const c of t?.categories ?? []) for (const r of c.recipes) recipes.push({ prof: prof.name, pid: prof.id, id: r.id })
     }
   }
   console.log(`  ${recipes.length} recettes`)
@@ -418,7 +420,7 @@ async function buildCrafts(itemIds: Set<number>): Promise<Map<number, CraftSourc
   const crafts = new Map<number, CraftSource[]>()
   await pool(
     recipes,
-    async ({ prof, id }) => {
+    async ({ prof, pid, id }) => {
       const r = await api<{
         name: string
         crafted_item?: Ref
@@ -436,7 +438,9 @@ async function buildCrafts(itemIds: Set<number>): Promise<Map<number, CraftSourc
       const src: CraftSource = {
         t: 'craft',
         prof,
+        pid,
         recipe: r.name,
+        rid: id,
         reagents: (r.reagents ?? []).map((x) => [x.reagent.id, x.reagent.name, x.quantity]),
       }
       if (r.crafted_quantity?.value && r.crafted_quantity.value !== 1) src.qty = r.crafted_quantity.value

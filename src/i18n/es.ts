@@ -84,7 +84,7 @@ export const es: Messages = {
   'hint.anticipate':
     'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
   'hint.origins':
-    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas).',
+    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo).',
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
   'hint.armor':
     'Marcado: para cabeza, hombros, pecho, muñecas, manos, cintura, piernas y pies, solo armadura de {best}, el tipo más pesado que lleva tu clase a nivel {level}. Desmarcado: también armadura de {lighter} (menos armadura, a veces mejores estadísticas). Espalda, cuello, dedos y abalorios no se ven afectados.',
@@ -99,6 +99,9 @@ export const es: Messages = {
   'cand.levelEstimated': 'Nivel estimado: la API no indica el nivel requerido',
   'cand.with': 'con',
   'src.craft': 'Fabricación: {prof}',
+  'src.craftKnown': "receta conocida",
+  'src.craftToLearn': "receta por aprender",
+  'src.craftOther': "no es tu profesión: encárgalo",
   'src.vendor': 'Vendedor:',
   'src.quest': 'Misión:',
   'src.questDungeon': 'Misión de mazmorra:',
