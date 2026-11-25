@@ -1,0 +1,39 @@
+{
+  "name": "forever-gear-advisor",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24-bookworm",
+  "remoteUser": "node",
+
+  "features": {
+    "ghcr.io/devcontainers-extra/features/claude-code:2": {}
+  },
+
+  "mounts": [
+    // Config et session Claude Code partagées avec les autres dev containers (même volume que KESAIO).
+    "source=global-claude-config,target=/home/node/.claude,type=volume",
+    // Session `vercel login`, conservée entre deux reconstructions.
+    "source=forever-gear-advisor-vercel,target=/home/node/.local/share/com.vercel.cli,type=volume"
+  ],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
+
+  // Vite (npm run dev) et `vercel dev` (front + fonctions /api).
+  "forwardPorts": [5173, 3000],
+  "portsAttributes": {
+    "5173": { "label": "Vite" },
+    "3000": { "label": "vercel dev" }
+  },
+
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["anthropic.claude-code", "Vue.volar"],
+      "settings": {
+        // Le conteneur sert de bac à sable : Claude Code y tourne sans demander de permission.
+        "claudeCode.allowDangerouslySkipPermissions": true,
+        "claudeCode.initialPermissionMode": "bypassPermissions"
+      }
+    }
+  }
+}

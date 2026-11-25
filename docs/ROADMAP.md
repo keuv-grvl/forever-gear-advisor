@@ -10,6 +10,7 @@ Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), pui
 ## Stack et déploiement
 
 - Vue 3 + Vite + TypeScript, dépôt GitHub, déploiement Vercel (`main` = prod, chaque branche = URL de preview).
+- Environnement de dev : `.devcontainer/` (Node 24, Vercel CLI, `npm ci` au démarrage). Node n'est pas installé dans le WSL hôte, il faut travailler dans le conteneur. Secrets en local : `vercel link` puis `vercel env pull .env.local` (ignoré par git via `*.local`).
 - Pas de vrai backend. Un dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy pour le token Blizzard.
 - **Le client secret Blizzard ne doit jamais atteindre le navigateur** : variables d'environnement Vercel uniquement, jamais commité.
 
