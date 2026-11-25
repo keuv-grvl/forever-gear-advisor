@@ -1,5 +1,6 @@
 // GET /api/character?region=eu&name=helga-tartine[&locale=fr_FR]
-// Renvoie profil, équipement et spés en une seule invocation (quota Vercel), réponses allégées et mises en cache CDN.
+// Renvoie profil, équipement, spés et membres de la guilde (autocomplétion) en une seule invocation (quota Vercel),
+// réponses allégées et mises en cache CDN.
 
 import { blizzardGet, HttpError, json, LOCALES, REGIONS, slim } from './_lib/blizzard.js'
 
@@ -16,13 +17,29 @@ export async function GET(request: Request): Promise<Response> {
   if (!NAME.test(name)) return json(400, { error: 'nom invalide, format attendu : prenom-nom' })
 
   const base = `/profile/wow/character/${name}`
+  const get = (path: string) => blizzardGet(region, 'profile', path, locale)
   try {
-    const [profile, equipment, specializations] = await Promise.all(
-      [base, `${base}/equipment`, `${base}/specializations`].map((p) => blizzardGet(region, 'profile', p, locale)),
-    )
-    return json(200, slim({ profile, equipment, specializations }), 300)
+    const profileP = get(base)
+    // Le roster dépend du profil (slug de guilde) ; son échec ne doit pas empêcher d'afficher le perso.
+    const rosterP = profileP.then((p) => {
+      const guild = (p as { guild?: { slug?: string } }).guild?.slug
+      return guild ? get(`/data/wow/guild/${guild}/roster`).catch(() => null) : null
+    })
+    const [profile, equipment, specializations, roster] = await Promise.all([
+      profileP,
+      get(`${base}/equipment`),
+      get(`${base}/specializations`),
+      rosterP,
+    ])
+    return json(200, { ...(slim({ profile, equipment, specializations }) as object), guildMembers: memberNames(roster) }, 300)
   } catch (err) {
     if (err instanceof HttpError) return json(err.status, { error: err.message }, err.status === 404 ? 60 : 0)
     return json(502, { error: err instanceof Error ? err.message : String(err) })
   }
+}
+
+/** « Prénom Nom » des membres de la guilde, sans le reste du roster. */
+function memberNames(roster: unknown): string[] | undefined {
+  const members = (roster as { members?: { character?: { name?: string; surname?: string } }[] } | null)?.members
+  return members?.flatMap(({ character: c }) => (c?.name && c.surname ? [`${c.name} ${c.surname}`] : []))
 }

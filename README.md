@@ -8,7 +8,7 @@ En ligne : https://forever-gear-advisor.vercel.app/ (par exemple `?c=helga-tarti
 ## Fonctionnement
 
 - Le navigateur appelle `/api/character` (fonction Vercel), qui interroge l'API Blizzard avec un token
-  gardé côté serveur.
+  gardé côté serveur (profil, équipement, spés et noms des membres de la guilde pour l'autocomplétion).
 - Les données d'objets sont des JSON statiques dans `public/data/`, générés en local et servis par le CDN.
 - Le score d'un objet est la somme de ses stats pondérées par les poids de la spé (Polestar), au niveau
   du personnage ; le gain est l'écart avec l'objet porté.

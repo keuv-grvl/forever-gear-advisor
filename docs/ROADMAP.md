@@ -13,7 +13,7 @@ Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), pui
 
 - Vue 3 + Vite + TypeScript, dépôt GitHub, déploiement Vercel (`main` = prod, chaque branche = URL de preview).
 - Environnement de dev : `.devcontainer/` (Node 24, Vercel CLI, `npm ci` au démarrage). Node n'est pas installé dans le WSL hôte, il faut travailler dans le conteneur. Secrets en local : `vercel link` puis `vercel env pull .env.local` (ignoré par git via `*.local`).
-- Pas de vrai backend. Le dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy vers Blizzard : `api/character.ts` (profil + équipement + spés en un appel), code partagé dans `api/_lib/` (le `_` empêche Vercel d'en faire une fonction). Imports en `.js` dans `api/` (Vercel compile le TS).
+- Pas de vrai backend. Le dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy vers Blizzard : `api/character.ts` (profil + équipement + spés + noms des membres de la guilde en un appel), code partagé dans `api/_lib/` (le `_` empêche Vercel d'en faire une fonction). Imports en `.js` dans `api/` (Vercel compile le TS).
 - En dev local, Vite redirige `/api` vers la prod (`vite.config.ts`, surcharge possible via `API_TARGET`).
 - **Le client secret Blizzard ne doit jamais atteindre le navigateur** : variables d'environnement Vercel uniquement, jamais commité. Ni le token : le proxy le garde côté serveur.
 - Les variables `BLIZZARD_*` sont de type *Sensitive* (Production + Preview) : `vercel env pull` ne les récupère pas. Les scripts locaux lisent `.env.blizzard.local` (client Blizzard dédié, rempli à la main, ignoré par git, à révoquer quand l'implémentation est stable).
@@ -85,7 +85,8 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 - [x] Créer le client sur develop.battle.net, ajouter `BLIZZARD_CLIENT_ID` / `BLIZZARD_CLIENT_SECRET` dans Vercel (Production + Preview).
 - [x] Fonction `/api/character` avec cache du token (pas de `/api/token` : le token ne doit pas sortir du serveur).
-- [x] Champ de saisie `prenom-nom` (normalisation), affichage du profil de base, URL partageable `?c=…&r=…`.
+- [x] Saisie région puis nom (« Helga Tartine », « helga tartine » ou « helga-tartine », normalisés), affichage du profil de base, URL partageable `?c=…&r=…` en forme canonique.
+- [x] Autocomplétion sans requête dédiée : l'API n'a pas de recherche de perso ; on retient dans le navigateur (localStorage) les persos consultés et les membres de leur guilde, renvoyés par `/api/character` (un appel Blizzard de plus, même invocation Vercel).
 
 **Phase 2, personnage**
 
@@ -100,11 +101,13 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 **Phase 4, moteur de recommandation**
 
 - [x] `weights.json` pour les 27 spés (Polestar).
-- [x] Filtrage des candidats, gain par slot, tri, affichage (`Recommendations.vue`), choix de la spé, options « Anticiper » et « type d'armure principal ».
+- [x] Filtrage des candidats, gain par slot, affichage (`Recommendations.vue`), choix de la spé, options « Anticiper » et « type d'armure principal », infobulles.
+- [x] Tri par gain ou par emplacement (ordre de la fiche personnage) ; meilleure option affichée, deux autres repliées ; préférences gardées dans le navigateur.
 
 **Phase 5, sources**
 
 - [x] Craft (métier, réactifs en infobulle), quêtes (lien Wowhead, niveau, faction et classe filtrées), vendeurs (lien Wowhead du PNJ, faction filtrée), réputation requise. 4 331 objets sur 6 150 ont une source. Un objet dont toutes les sources sont réservées à une autre faction ou classe n'est pas proposé.
+- [x] Filtre par origine : quêtes, quêtes de donjon ou raid (type de quête du client, table `quest` de forever-db Polestar : 81 donjon, 62 raid), craft, vendeurs, réputation (décochée : écarte tout objet qui demande une réputation), source inconnue. Les drops de donjon restent absents (décision « pas de drops »).
 - [ ] Prix HV (`/data/wow/ruleset/{id}/auctions/…`, namespace dynamic) pour les objets craftés ou vendus.
 - [ ] Indiquer si le perso a le métier (`/professions`) et le niveau de compétence de la recette (absent de l'API).
 - [ ] Plus d'objets observés : élargir `seeds.local.json` (autres guildes) pour couvrir les objets absents de l'API statique.

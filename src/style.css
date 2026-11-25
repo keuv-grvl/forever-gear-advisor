@@ -172,3 +172,85 @@ a.q:hover {
 .small {
   font-size: 0.85em;
 }
+
+.control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+fieldset.origins {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.4rem 0.75rem 0.6rem;
+  margin: 0 0 0.75rem;
+}
+
+fieldset.origins legend {
+  padding: 0 0.3rem;
+}
+
+/* Infobulle « ? » (src/components/Hint.vue). */
+.hint {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  cursor: help;
+  vertical-align: middle;
+}
+
+.hint:hover,
+.hint:focus-visible {
+  color: var(--fg);
+  border-color: var(--fg);
+}
+
+.hint-bubble {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(calc(-50% + var(--shift, 0px)));
+  z-index: 10;
+  width: max-content;
+  max-width: min(22rem, calc(100vw - 2rem));
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 0.18);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.4;
+  text-align: left;
+  white-space: normal;
+  cursor: auto;
+}
+
+.hint-bubble.below {
+  bottom: auto;
+  top: calc(100% + 6px);
+}
+
+details.more {
+  margin-top: 0.3rem;
+}
+
+details.more summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 0.85em;
+}
+
+details.more .candidates {
+  margin-top: 0.4rem;
+}

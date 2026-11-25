@@ -88,12 +88,19 @@ export function canDualWield(classId: number, level: number): boolean {
   return lvl !== undefined && level >= lvl
 }
 
+/** Types d'armure (tissu, cuir, mailles, plaques) que la classe porte à ce niveau, du plus léger au plus lourd. */
+export function wearableArmorTypes(classId: number, level: number): number[] {
+  const r = RULES[classId]
+  if (!r) return [CLOTH]
+  return [CLOTH, LEATHER, MAIL, PLATE].filter((t) => r.armor.includes(t) && level >= (r.armorFrom?.[t] ?? 0))
+}
+
 /** Armure la plus lourde que la classe porte à ce niveau (utile pour préférer le bon type). */
 export function bestArmorType(classId: number, level: number): number {
-  const r = RULES[classId]
-  if (!r) return CLOTH
-  return Math.max(...[CLOTH, LEATHER, MAIL, PLATE].filter((t) => r.armor.includes(t) && level >= (r.armorFrom?.[t] ?? 0)))
+  return Math.max(...wearableArmorTypes(classId, level))
 }
+
+export const ARMOR_NAMES: Record<number, string> = { [CLOTH]: 'tissu', [LEATHER]: 'cuir', [MAIL]: 'mailles', [PLATE]: 'plaques' }
 
 // inventory_type → slots d'équipement possibles.
 export const SLOTS_FOR: Record<string, string[]> = {

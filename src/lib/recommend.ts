@@ -31,7 +31,17 @@ export interface DbItem {
 
 export type Source =
   | { t: 'craft'; prof: string; recipe: string; reagents: [number, string, number][]; qty?: number }
-  | { t: 'quest'; id: number; title?: string; lvl?: number; min?: number; side?: number; cls?: number; choice?: 1 }
+  | {
+      t: 'quest'
+      id: number
+      title?: string
+      lvl?: number
+      min?: number
+      side?: number
+      cls?: number
+      choice?: 1
+      inst?: 'dungeon' | 'raid'
+    }
   | { t: 'vendor'; npc: number; name: string; sub?: string; side?: string }
 
 /** Côté du perso : A (Alliance) ou H (Horde). */
@@ -48,6 +58,20 @@ export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', class
     if (s.t === 'vendor') return !s.side || s.side.includes(side)
     return true
   })
+}
+
+/** Origine d'un objet, pour le filtre : `rep` = demande une réputation, `unknown` = aucune source connue. */
+export type Origin = 'quest' | 'dungeon' | 'craft' | 'vendor' | 'rep' | 'unknown'
+export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'rep', 'unknown']
+
+/**
+ * L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée ;
+ * un objet qui demande une réputation est écarté si `rep` est décoché, quelle que soit sa source.
+ */
+export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>): boolean {
+  if (item.rep && !allowed.has('rep')) return false
+  if (sources.length === 0) return item.rep ? true : allowed.has('unknown')
+  return sources.some((s) => allowed.has(s.t === 'quest' ? (s.inst ? 'dungeon' : 'quest') : s.t))
 }
 
 export interface Candidate {
@@ -75,6 +99,8 @@ export interface RecommendOptions {
   /** Ne proposer que le type d'armure le plus lourd de la classe (mailles pour un paladin 36…). */
   mainArmorOnly: boolean
   sources: Record<number, Source[]>
+  /** Origines acceptées (toutes si absent). */
+  origins?: ReadonlySet<Origin>
 }
 
 // Slots d'armure où le type (tissu, cuir, mailles, plaques) compte ; le dos est toujours en tissu.
@@ -116,7 +142,8 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   // vendu seulement par l'intendant Chanteguerre) ou à une autre classe : inaccessible. Sans source connue, on le garde.
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
-    return !all?.length || sourcesFor(all, side, o.classId).length > 0
+    const mine = sourcesFor(all, side, o.classId)
+    return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins))
   }
   const usable = db.filter(
     (it) =>

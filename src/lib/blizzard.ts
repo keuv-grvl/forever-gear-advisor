@@ -20,7 +20,8 @@ export interface CharacterProfile {
   faction: Typed
   race: Named
   character_class: Named
-  guild?: Named
+  guild?: Named & { slug?: string }
+  name_search?: string // « Helga Tartine »
   ruleset?: Named
   // Absents pour certains persos : l'API Forever ne garantit pas ces champs.
   average_item_level?: number
@@ -92,6 +93,13 @@ export interface CharacterData {
   profile: CharacterProfile
   equipment: Equipment
   specializations: Specializations
+  /** « Prénom Nom » des membres de la guilde (autocomplétion). */
+  guildMembers?: string[]
+}
+
+/** « Helga Tartine » : le nom tel qu'affiché en jeu. */
+export function displayName(p: CharacterProfile): string {
+  return p.name_search ?? `${p.name} ${p.surname}`
 }
 
 /** Un seul appel (une invocation Vercel) pour profil + équipement + spés. */

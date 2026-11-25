@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { onErrorCaptured, onMounted, ref } from 'vue'
+import { computed, onErrorCaptured, onMounted, ref } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
 import EquipmentTable from './components/EquipmentTable.vue'
 import Recommendations from './components/Recommendations.vue'
 import { loadGameData, type GameData } from './lib/data'
+import { remember, suggestions } from './lib/suggest'
 import {
   ApiError,
+  displayName,
   fetchCharacter,
   isValidCharacterName,
   normalizeCharacterName,
@@ -21,14 +23,19 @@ const error = ref('')
 const data = ref<CharacterData | null>(null)
 const game = ref<GameData | null>(null)
 const gameError = ref('')
+// Autocomplétion : relue après chaque recherche réussie (localStorage, aucune requête).
+const suggestTick = ref(0)
+const nameSuggestions = computed(() => {
+  void suggestTick.value // dépendance : relire après chaque recherche
+  return suggestions(region.value)
+})
 
 async function load() {
   const name = normalizeCharacterName(nameInput.value)
   if (!isValidCharacterName(name)) {
-    error.value = 'Saisis le prénom et le nom du personnage, par exemple « helga-tartine ».'
+    error.value = 'Saisis le prénom et le nom du personnage, par exemple « Helga Tartine ».'
     return
   }
-  nameInput.value = name
   error.value = ''
   loading.value = true
   // L'URL reflète la recherche, pour pouvoir la partager ou la recharger.
@@ -41,7 +48,11 @@ async function load() {
     })
     .catch((err) => (gameError.value = err instanceof Error ? err.message : String(err)))
   try {
-    data.value = await fetchCharacter(region.value, name)
+    const d = await fetchCharacter(region.value, name)
+    data.value = d
+    nameInput.value = displayName(d.profile)
+    remember(region.value, nameInput.value, d.profile.guild?.slug, d.guildMembers)
+    suggestTick.value++
   } catch (err) {
     data.value = null
     if (err instanceof ApiError && err.status === 404) {
@@ -76,10 +87,20 @@ onMounted(() => {
   <main>
     <h1>Forever Gear Advisor</h1>
     <form @submit.prevent="load">
-      <input v-model="nameInput" placeholder="prénom-nom (ex. helga-tartine)" aria-label="Personnage" autofocus />
       <select v-model="region" aria-label="Région">
         <option v-for="r in REGIONS" :key="r" :value="r">{{ r.toUpperCase() }}</option>
       </select>
+      <input
+        v-model="nameInput"
+        placeholder="Prénom Nom (ex. Helga Tartine)"
+        aria-label="Personnage"
+        list="character-suggestions"
+        autocomplete="off"
+        autofocus
+      />
+      <datalist id="character-suggestions">
+        <option v-for="n in nameSuggestions" :key="n" :value="n" />
+      </datalist>
       <button :disabled="loading">{{ loading ? 'Chargement…' : 'Charger' }}</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>

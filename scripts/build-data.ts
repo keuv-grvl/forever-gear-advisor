@@ -361,6 +361,7 @@ interface QuestSource {
   side?: number // 0 les deux, 1 Alliance, 2 Horde
   cls?: number // classes autorisées, masque (bit id-1) ; absent = toutes
   choice?: 1 // objet au choix parmi plusieurs
+  inst?: 'dungeon' | 'raid' // quête de donjon ou de raid (type QuestInfo du client : 81, 62)
 }
 
 async function readJsonl<T>(file: string): Promise<T[]> {
@@ -377,7 +378,10 @@ interface QuestInfo {
   min_level?: number
   side?: number
   classes?: number
+  type?: number // QuestInfo du client : 81 donjon, 62 raid, 41 JcJ, 1 groupe
 }
+
+const QUEST_INSTANCE: Record<number, QuestSource['inst']> = { 81: 'dungeon', 62: 'raid' }
 
 /** Source « quête » à partir de la table quest de forever-db (Polestar). */
 function questSource(id: number, q: QuestInfo | undefined): QuestSource {
@@ -387,6 +391,8 @@ function questSource(id: number, q: QuestInfo | undefined): QuestSource {
   if (q?.min_level) s.min = q.min_level
   if (q?.side) s.side = q.side
   if (q?.classes) s.cls = q.classes
+  const inst = q?.type !== undefined ? QUEST_INSTANCE[q.type] : undefined
+  if (inst) s.inst = inst
   return s
 }
 
