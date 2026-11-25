@@ -36,20 +36,22 @@ const specName = ref('')
 
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
-const prefs = readPrefs({ sort: 'gain', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[] })
+const prefs = readPrefs({ sort: 'gain', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[], repReachedOnly: false })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
 const sortBy = ref<'gain' | 'slot'>(prefs.sort === 'slot' ? 'slot' : 'gain')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
 const anticipate = ref(prefs.anticipate === true)
+const repReachedOnly = ref(prefs.repReachedOnly === true)
 const origins = ref<Origin[]>(ORIGINS.filter((o) => !hidden.includes(o)))
 watch(
-  [sortBy, mainArmorOnly, anticipate, origins],
+  [sortBy, mainArmorOnly, anticipate, origins, repReachedOnly],
   () =>
     writePrefs({
       sort: sortBy.value,
       mainArmorOnly: mainArmorOnly.value,
       anticipate: anticipate.value,
       hiddenOrigins: ORIGINS.filter((o) => !origins.value.includes(o)),
+      repReachedOnly: repReachedOnly.value,
     }),
   { deep: true },
 )
@@ -123,6 +125,8 @@ const advice = computed(() => {
     origins: new Set(origins.value),
     doneQuests: doneQuests.value,
     crafter: crafter.value,
+    reachedReputations:
+      repReachedOnly.value && props.data.reputations ? new Map(props.data.reputations.map((r) => [r.name, r.tier])) : undefined,
   })
 })
 
@@ -252,6 +256,10 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
       <span class="control">
         <label><input v-model="anticipate" type="checkbox" /> {{ t('reco.anticipate') }}</label>
         <Hint :text="t('hint.anticipate')" />
+      </span>
+      <span v-if="data.reputations" class="control">
+        <label><input v-model="repReachedOnly" type="checkbox" /> {{ t('reco.repReached') }}</label>
+        <Hint :text="t('hint.repReached')" />
       </span>
     </div>
     <fieldset class="controls origins">

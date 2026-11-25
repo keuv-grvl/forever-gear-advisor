@@ -56,15 +56,17 @@ export const pt: Messages = {
   'reco.sortSlot': 'Espaço',
   'reco.mainArmor': 'Só o tipo de armadura principal',
   'reco.anticipate': 'Antecipar (+5 níveis)',
+  'reco.repReached': "Só reputação alcançada",
+  'hint.repReached':
+    "Oculta os itens que exigem uma reputação que seu personagem ainda não alcançou. Desmarcado: eles são sugeridos, com a reputação que falta.",
   'reco.origin': 'Origem',
   'reco.pickOrigin': 'Marque pelo menos uma origem.',
   'origin.quest': 'Missões',
   'origin.dungeon': 'Missões de masmorra ou raide',
-  'origin.craft': "Fabricação (sua profissão)",
-  'origin.craftOther': "Fabricação por encomenda",
+  'origin.craft': "Suas profissões",
+  'origin.craftOther': "Outras profissões",
   'origin.vendor': 'Vendedores',
   'origin.boe': 'Saque vinculado quando equipado',
-  'origin.rep': 'Reputação',
   'origin.unknown': 'Fonte desconhecida',
 
   'reco.colEquippedTitle': 'Pontuação: soma dos atributos do item, ponderados para a especialização',
@@ -87,7 +89,7 @@ export const pt: Messages = {
   'hint.anticipate':
     'Sugere também itens até 5 níveis acima do seu, para você se preparar. O nível necessário aparece ao lado de cada item.',
   'hint.origins':
-    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Desmarcar “Reputação” remove todos os itens que exigem reputação, seja qual for a fonte. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas). Um item fabricado vinculado quando coletado só é sugerido se seu personagem tiver a profissão; um vinculado quando equipado é sempre sugerido (alguém pode fabricá-lo para você). “Fabricação por encomenda”: itens fabricados vinculados quando equipados, de uma profissão que você não tem, para comprar na Casa de Leilões (preço mostrado se estiver à venda) ou encomendar a um artesão.',
+    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas). Um item fabricado vinculado quando coletado só é sugerido se seu personagem tiver a profissão; um vinculado quando equipado é sempre sugerido (alguém pode fabricá-lo para você). “Outras profissões”: itens fabricados vinculados quando equipados, de uma profissão que você não tem, para comprar na Casa de Leilões (preço mostrado se estiver à venda) ou encomendar a um artesão.',
   'hint.armorOnly': 'Sua classe só usa {best}: esta opção não muda nada.',
   'hint.armor':
     'Marcado: para cabeça, ombros, torso, pulsos, mãos, cintura, pernas e pés, só armadura de {best}, o tipo mais pesado que sua classe usa no nível {level}. Desmarcado: também armadura de {lighter} (menos armadura, às vezes atributos melhores). Costas, pescoço, dedos e berloques não são afetados.',

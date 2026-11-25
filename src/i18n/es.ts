@@ -56,15 +56,17 @@ export const es: Messages = {
   'reco.sortSlot': 'Ranura',
   'reco.mainArmor': 'Solo el tipo de armadura principal',
   'reco.anticipate': 'Anticipar (+5 niveles)',
+  'reco.repReached': "Solo reputación alcanzada",
+  'hint.repReached':
+    "Oculta los objetos que requieren una reputación que tu personaje aún no tiene. Desmarcado: se proponen, con la reputación que falta.",
   'reco.origin': 'Origen',
   'reco.pickOrigin': 'Marca al menos un origen.',
   'origin.quest': 'Misiones',
   'origin.dungeon': 'Misiones de mazmorra o banda',
-  'origin.craft': "Fabricación (tu profesión)",
-  'origin.craftOther': "Fabricación por encargo",
+  'origin.craft': "Tus profesiones",
+  'origin.craftOther': "Otras profesiones",
   'origin.vendor': 'Vendedores',
   'origin.boe': 'Botín que se liga al equiparlo',
-  'origin.rep': 'Reputación',
   'origin.unknown': 'Fuente desconocida',
 
   'reco.colEquippedTitle': 'Puntuación: suma de las estadísticas del objeto, ponderadas para la especialización',
@@ -87,7 +89,7 @@ export const es: Messages = {
   'hint.anticipate':
     'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
   'hint.origins':
-    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo). «Fabricación por encargo»: objetos fabricados que se ligan al equiparlos, de una profesión que no tienes, para comprar en la casa de subastas (precio mostrado si está a la venta) o encargar a un artesano.',
+    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo). «Otras profesiones»: objetos fabricados que se ligan al equiparlos, de una profesión que no tienes, para comprar en la casa de subastas (precio mostrado si está a la venta) o encargar a un artesano.',
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
   'hint.armor':
     'Marcado: para cabeza, hombros, pecho, muñecas, manos, cintura, piernas y pies, solo armadura de {best}, el tipo más pesado que lleva tu clase a nivel {level}. Desmarcado: también armadura de {lighter} (menos armadura, a veces mejores estadísticas). Espalda, cuello, dedos y abalorios no se ven afectados.',

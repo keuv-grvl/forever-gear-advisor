@@ -98,11 +98,12 @@ export function sourcesFor(sources: Source[] | undefined, item: { bop?: 1 }, ctx
 }
 
 /**
- * Origine d'un objet, pour le filtre : `rep` = demande une réputation ; sans source connue, `boe` = lié quand
- * équipé (du butin, en général, qu'on peut acheter à l'HV), `unknown` = lié quand ramassé.
+ * Origine d'un objet, pour le filtre (d'où il vient ; la réputation requise est un filtre à part, repReachedOnly).
+ * Sans source connue : `vendor` s'il demande une réputation (récompenses d'intendants de faction), `boe` s'il est
+ * lié quand équipé (du butin, en général, qu'on peut acheter à l'HV), sinon `unknown`.
  */
-export type Origin = 'quest' | 'dungeon' | 'craft' | 'craftOther' | 'vendor' | 'boe' | 'rep' | 'unknown'
-export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'craftOther', 'vendor', 'boe', 'rep', 'unknown']
+export type Origin = 'quest' | 'dungeon' | 'craft' | 'craftOther' | 'vendor' | 'boe' | 'unknown'
+export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'craftOther', 'vendor', 'boe', 'unknown']
 
 /**
  * Origine d'une source. Craft : `craft` pour un métier du perso, `craftOther` (à faire fabriquer ou acheter) pour un
@@ -114,15 +115,21 @@ export function sourceOrigin(s: Source, crafter?: Crafter): Origin {
   return s.t
 }
 
-/**
- * L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée ;
- * un objet qui demande une réputation est écarté si `rep` est décoché, quelle que soit sa source.
- */
+/** L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée. */
 export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>, crafter?: Crafter): boolean {
-  if (item.rep && !allowed.has('rep')) return false
   if (sources.length > 0) return sources.some((s) => allowed.has(sourceOrigin(s, crafter)))
-  if (item.rep) return true
+  if (item.rep) return allowed.has('vendor')
   return allowed.has(item.bop ? 'unknown' : 'boe')
+}
+
+/** Rang de réputation du perso par faction (nom anglais), pour le filtre « réputation atteinte seulement ». */
+export type Standings = ReadonlyMap<string, number>
+
+/** La réputation requise par l'objet est-elle atteinte ? (faction côté Horde si elle diffère, rep[2]) */
+export function reputationReached(item: DbItem, side: 'A' | 'H', standings: Standings): boolean {
+  if (!item.rep) return true
+  const faction = (side === 'H' && item.rep[2]) || item.rep[0]
+  return (standings.get(faction) ?? 3) >= item.rep[1] // faction jamais rencontrée : Neutre
 }
 
 export interface Candidate {
@@ -156,6 +163,8 @@ export interface RecommendOptions {
   doneQuests?: ReadonlySet<number>
   /** Métiers du perso : un craft lié quand ramassé d'un autre métier n'est pas accessible. */
   crafter?: Crafter
+  /** Si présent : seulement les objets dont le perso a la réputation requise. */
+  reachedReputations?: Standings
 }
 
 // Slots d'armure où le type (tissu, cuir, mailles, plaques) compte ; le dos est toujours en tissu.
@@ -200,7 +209,11 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
     const mine = sourcesFor(all, it, { side, classId: o.classId, done: o.doneQuests, crafter: o.crafter })
-    return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins, o.crafter))
+    return (
+      (!all?.length || mine.length > 0) &&
+      (!o.origins || originAllowed(it, mine, o.origins, o.crafter)) &&
+      (!o.reachedReputations || reputationReached(it, side, o.reachedReputations))
+    )
   }
   const usable = db.filter(
     (it) =>

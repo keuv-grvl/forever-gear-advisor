@@ -56,15 +56,17 @@ export const fr: Messages = {
   'reco.sortSlot': 'Emplacement',
   'reco.mainArmor': "Type d'armure principal seulement",
   'reco.anticipate': 'Anticiper (+5 niveaux)',
+  'reco.repReached': "Réputation atteinte seulement",
+  'hint.repReached':
+    "Masque les objets qui demandent une réputation que ton perso n'a pas encore atteinte. Décoché : ils sont proposés, avec la réputation qui manque.",
   'reco.origin': 'Origine',
   'reco.pickOrigin': 'Coche au moins une origine.',
   'origin.quest': 'Quêtes',
   'origin.dungeon': 'Quêtes de donjon ou raid',
-  'origin.craft': "Craft (ton métier)",
-  'origin.craftOther': "Craft à faire fabriquer",
+  'origin.craft': "Tes métiers",
+  'origin.craftOther': "Autres métiers",
   'origin.vendor': 'Vendeurs',
   'origin.boe': 'Butin lié quand équipé',
-  'origin.rep': 'Réputation',
   'origin.unknown': 'Source inconnue',
 
   'reco.colEquippedTitle': "Score : somme des stats de l'objet, pondérées pour la spé",
@@ -85,7 +87,7 @@ export const fr: Messages = {
   'hint.anticipate':
     "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
   'hint.origins':
-    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues). Un craft lié quand ramassé n'est proposé que si ton perso a le métier ; un craft lié quand équipé l'est toujours (quelqu'un peut te le fabriquer). « Craft à faire fabriquer » : crafts liés quand équipé d'un métier que tu n'as pas, à acheter à l'HV (prix affiché s'il est en vente) ou à commander à un artisan.",
+    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues). Un craft lié quand ramassé n'est proposé que si ton perso a le métier ; un craft lié quand équipé l'est toujours (quelqu'un peut te le fabriquer). « Autres métiers » : crafts liés quand équipé d'un métier que tu n'as pas, à acheter à l'HV (prix affiché s'il est en vente) ou à commander à un artisan.",
   'hint.armorOnly': 'Ta classe ne porte que du {best} : cette option ne change rien.',
   'hint.armor':
     "Coché : pour la tête, les épaules, le torse, les poignets, les mains, la taille, les jambes et les pieds, seulement de l'armure en {best}, le type le plus lourd que ta classe porte au niveau {level}. Décoché : aussi l'armure en {lighter} (moins d'armure, parfois de meilleures stats). Le dos, le cou, les doigts et les bijoux ne sont pas concernés.",
