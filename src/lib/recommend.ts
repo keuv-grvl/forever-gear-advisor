@@ -102,22 +102,20 @@ export function sourcesFor(sources: Source[] | undefined, item: { bop?: 1 }, ctx
  * Sans source connue : `vendor` s'il demande une réputation (récompenses d'intendants de faction), `boe` s'il est
  * lié quand équipé (du butin, en général, qu'on peut acheter à l'HV), sinon `unknown`.
  */
-export type Origin = 'quest' | 'dungeon' | 'craft' | 'craftOther' | 'vendor' | 'boe' | 'unknown'
-export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'craftOther', 'vendor', 'boe', 'unknown']
+export type Origin = 'quest' | 'dungeon' | 'craft' | 'vendor' | 'boe' | 'unknown'
+export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'boe', 'unknown']
 
 /**
- * Origine d'une source. Craft : `craft` pour un métier du perso, `craftOther` (à faire fabriquer ou acheter) pour un
- * métier qu'il n'a pas ; sourcesFor n'a alors gardé que les crafts liés quand équipé.
+ * Origine d'une source. `craft` (« Métiers ») : sourcesFor n'a gardé que les crafts liés quand ramassé des métiers du
+ * perso, et tous les crafts liés quand équipé (à fabriquer soi-même, acheter à l'HV ou faire fabriquer).
  */
-export function sourceOrigin(s: Source, crafter?: Crafter): Origin {
-  if (s.t === 'quest') return s.inst ? 'dungeon' : 'quest'
-  if (s.t === 'craft') return crafter && s.pid !== undefined && !crafter.professions.has(s.pid) ? 'craftOther' : 'craft'
-  return s.t
+export function sourceOrigin(s: Source): Origin {
+  return s.t === 'quest' ? (s.inst ? 'dungeon' : 'quest') : s.t
 }
 
 /** L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée. */
-export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>, crafter?: Crafter): boolean {
-  if (sources.length > 0) return sources.some((s) => allowed.has(sourceOrigin(s, crafter)))
+export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>): boolean {
+  if (sources.length > 0) return sources.some((s) => allowed.has(sourceOrigin(s)))
   if (item.rep) return allowed.has('vendor')
   return allowed.has(item.bop ? 'unknown' : 'boe')
 }
@@ -211,7 +209,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
     const mine = sourcesFor(all, it, { side, classId: o.classId, done: o.doneQuests, crafter: o.crafter })
     return (
       (!all?.length || mine.length > 0) &&
-      (!o.origins || originAllowed(it, mine, o.origins, o.crafter)) &&
+      (!o.origins || originAllowed(it, mine, o.origins)) &&
       (!o.reachedReputations || reputationReached(it, side, o.reachedReputations))
     )
   }

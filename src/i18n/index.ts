@@ -145,7 +145,7 @@ export function formatMoney(copper: number): string {
 }
 
 /** Lien Wowhead Forever dans la langue choisie (`/forever/fr/item=…`, l'anglais sans préfixe). */
-export function wowheadUrl(kind: 'item' | 'quest' | 'npc', id: number): string {
+export function wowheadUrl(kind: 'item' | 'quest' | 'npc' | 'faction', id: number): string {
   const prefix = lang.value === 'en' ? '' : `${lang.value}/`
   return `https://www.wowhead.com/forever/${prefix}${kind}=${id}`
 }

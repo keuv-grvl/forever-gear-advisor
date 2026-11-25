@@ -151,6 +151,10 @@ export function wowheadQuestUrl(questId: number): string {
   return wowheadUrl('quest', questId)
 }
 
+export function wowheadFactionUrl(factionId: number): string {
+  return wowheadUrl('faction', factionId)
+}
+
 export function wowheadNpcUrl(npcId: number): string {
   return wowheadUrl('npc', npcId)
 }

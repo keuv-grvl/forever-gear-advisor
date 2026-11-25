@@ -63,8 +63,7 @@ export const es: Messages = {
   'reco.pickOrigin': 'Marca al menos un origen.',
   'origin.quest': 'Misiones',
   'origin.dungeon': 'Misiones de mazmorra o banda',
-  'origin.craft': "Tus profesiones",
-  'origin.craftOther': "Otras profesiones",
+  'origin.craft': "Profesiones",
   'origin.vendor': 'Vendedores',
   'origin.boe': 'Botín que se liga al equiparlo',
   'origin.unknown': 'Fuente desconocida',
@@ -89,7 +88,7 @@ export const es: Messages = {
   'hint.anticipate':
     'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
   'hint.origins':
-    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo). «Otras profesiones»: objetos fabricados que se ligan al equiparlos, de una profesión que no tienes, para comprar en la casa de subastas (precio mostrado si está a la venta) o encargar a un artesano.',
+    "Se propone un objeto si al menos una de sus fuentes está marcada. «Profesiones»: un objeto fabricado que se liga al recogerlo solo si es de tu profesión; uno que se liga al equiparlo siempre, con su precio en la casa de subastas si está a la venta (si no, encárgalo). «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo en la casa de subastas; los objetos con estadísticas aleatorias («de la ballena»…) solo si están a la venta (sin armas). Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida».",
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
   'hint.armor':
     'Marcado: para cabeza, hombros, pecho, muñecas, manos, cintura, piernas y pies, solo armadura de {best}, el tipo más pesado que lleva tu clase a nivel {level}. Desmarcado: también armadura de {lighter} (menos armadura, a veces mejores estadísticas). Espalda, cuello, dedos y abalorios no se ven afectados.',

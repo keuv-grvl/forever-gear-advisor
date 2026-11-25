@@ -36,9 +36,10 @@ const specName = ref('')
 
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
-const prefs = readPrefs({ sort: 'gain', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[], repReachedOnly: false })
+// `sortBy` remplace `sort` (défaut passé de « gain » à « emplacement ») : l'ancien choix est ignoré une fois.
+const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[], repReachedOnly: false })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
-const sortBy = ref<'gain' | 'slot'>(prefs.sort === 'slot' ? 'slot' : 'gain')
+const sortBy = ref<'gain' | 'slot'>(prefs.sortBy === 'gain' ? 'gain' : 'slot')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
 const anticipate = ref(prefs.anticipate === true)
 const repReachedOnly = ref(prefs.repReachedOnly === true)
@@ -47,7 +48,7 @@ watch(
   [sortBy, mainArmorOnly, anticipate, origins, repReachedOnly],
   () =>
     writePrefs({
-      sort: sortBy.value,
+      sortBy: sortBy.value,
       mainArmorOnly: mainArmorOnly.value,
       anticipate: anticipate.value,
       hiddenOrigins: ORIGINS.filter((o) => !origins.value.includes(o)),
@@ -229,7 +230,8 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
 <template>
   <section>
     <h3>{{ t('equip.title') }}</h3>
-    <div class="controls">
+    <!-- Ligne 1 : spé à gauche, tri à droite. Ligne 2 : les cases à cocher. -->
+    <div class="controls controls-top">
       <span class="control">
         <label>
           {{ t('reco.spec') }}
@@ -249,17 +251,19 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
         </label>
         <Hint :text="t('hint.sort')" />
       </span>
+    </div>
+    <div class="controls">
       <span class="control">
         <label><input v-model="mainArmorOnly" type="checkbox" /> {{ t('reco.mainArmor') }}</label>
         <Hint :text="armorHint" />
       </span>
-      <span class="control">
-        <label><input v-model="anticipate" type="checkbox" /> {{ t('reco.anticipate') }}</label>
-        <Hint :text="t('hint.anticipate')" />
-      </span>
       <span v-if="data.reputations" class="control">
         <label><input v-model="repReachedOnly" type="checkbox" /> {{ t('reco.repReached') }}</label>
         <Hint :text="t('hint.repReached')" />
+      </span>
+      <span class="control">
+        <label><input v-model="anticipate" type="checkbox" /> {{ t('reco.anticipate') }}</label>
+        <Hint :text="t('hint.anticipate')" />
       </span>
     </div>
     <fieldset class="controls origins">
@@ -342,6 +346,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                     :price="prices?.prices[itemKey(c.item)]"
                     :price-note="priceNote"
                     :prices-loaded="!!prices"
+                    :faction-ids="game.factions"
                     :side="side"
                     :crafter="crafter"
                     :reputations="reputations"

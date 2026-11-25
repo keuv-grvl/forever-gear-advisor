@@ -11,6 +11,8 @@ export interface GameData {
   weights: WeightsFile
   /** Objets à stats aléatoires (proposés seulement s'ils sont en vente à l'HV). */
   random: RandomData
+  /** Factions des réputations requises : nom anglais → id (liens Wowhead). */
+  factions: Record<string, number>
 }
 
 let pending: Promise<GameData> | null = null
@@ -23,13 +25,14 @@ async function getJson<T>(path: string): Promise<T> {
 
 export function loadGameData(): Promise<GameData> {
   pending ??= Promise.all([
-    getJson<{ generated: string; items: DbItem[] }>('/data/items.json'),
+    getJson<{ generated: string; items: DbItem[]; factions?: Record<string, number> }>('/data/items.json'),
     getJson<{ sources: Record<number, Source[]> }>('/data/sources.json'),
     getJson<WeightsFile>('/data/weights.json'),
     getJson<RandomData>('/data/random.json'),
   ])
     .then(([items, sources, weights, random]) => ({
       items: items.items,
+      factions: items.factions ?? {},
       generated: items.generated,
       sources: sources.sources,
       weights,

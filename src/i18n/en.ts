@@ -69,8 +69,7 @@ export const en = {
   'reco.pickOrigin': 'Check at least one origin.',
   'origin.quest': 'Quests',
   'origin.dungeon': 'Dungeon or raid quests',
-  'origin.craft': "Your professions",
-  'origin.craftOther': "Other professions",
+  'origin.craft': "Professions",
   'origin.vendor': 'Vendors',
   'origin.boe': 'Bind on Equip loot',
   'origin.unknown': 'Unknown source',
@@ -94,7 +93,7 @@ export const en = {
   'hint.sort': 'Gain: slots with the biggest upgrade first. Slot: character sheet order (head, neck, shoulder…).',
   'hint.anticipate': 'Also suggests items up to 5 levels above yours, to plan ahead. The required level is shown next to each item.',
   'hint.origins':
-    'An item is suggested if at least one of its sources is checked. “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House. Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”. Random-stat items (“of the Whale”, “of the Bear”…) are suggested only when they are for sale at the Auction House (weapons excluded). A Bind on Pickup craft is suggested only if your character has the profession; a Bind on Equip craft always is (someone can craft it for you). “Other professions”: Bind on Equip crafts from a profession you don’t have, to buy at the Auction House (price shown when for sale) or to order from a crafter.',
+    "An item is suggested if at least one of its sources is checked. “Professions”: a Bind on Pickup craft only if it is from your profession; a Bind on Equip craft always, with its Auction House price when for sale (otherwise, have it crafted). “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House; random-stat items (“of the Whale”…) only when for sale (weapons excluded). Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”.",
   'hint.armorOnly': 'Your class only wears {best}: this option changes nothing.',
   'hint.armor':
     'Checked: for head, shoulders, chest, wrists, hands, waist, legs and feet, only {best} armor, the heaviest type your class wears at level {level}. Unchecked: {lighter} armor too (less armor, sometimes better stats). Back, neck, fingers and trinkets are not affected.',

@@ -63,8 +63,7 @@ export const it: Messages = {
   'reco.pickOrigin': "Seleziona almeno un'origine.",
   'origin.quest': 'Missioni',
   'origin.dungeon': 'Missioni di spedizioni o incursioni',
-  'origin.craft': "Le tue professioni",
-  'origin.craftOther': "Altre professioni",
+  'origin.craft': "Professioni",
   'origin.vendor': 'Mercanti',
   'origin.boe': "Bottino vincolato all'equipaggiamento",
   'origin.unknown': 'Fonte sconosciuta',
@@ -89,7 +88,7 @@ export const it: Messages = {
   'hint.anticipate':
     'Propone anche oggetti fino a 5 livelli sopra il tuo, per prepararti a ciò che verrà. Il livello richiesto è indicato accanto a ogni oggetto.',
   'hint.origins':
-    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso in vendita alla casa d'aste. I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta». Gli oggetti con statistiche casuali («of the Whale», «of the Bear»…) vengono proposti solo se sono in vendita alla casa d'aste (armi escluse). Un oggetto creato vincolato alla raccolta viene proposto solo se il tuo personaggio ha la professione; uno vincolato all'equipaggiamento sempre (qualcuno può crearlo per te). «Altre professioni»: oggetti creati vincolati all’equipaggiamento di una professione che non hai, da comprare alla casa d’aste (prezzo indicato se in vendita) o da ordinare a un artigiano.",
+    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Professioni»: un oggetto creato vincolato alla raccolta solo se è della tua professione; uno vincolato all'equipaggiamento sempre, con il prezzo alla casa d'aste se in vendita (altrimenti, fallo creare). «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso alla casa d'aste; gli oggetti con statistiche casuali («of the Whale»…) solo se in vendita (armi escluse). I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta».",
   'hint.armorOnly': 'La tua classe indossa solo {best}: questa opzione non cambia nulla.',
   'hint.armor':
     'Selezionato: per testa, spalle, torso, polsi, mani, fianchi, gambe e piedi, solo armature di {best}, il tipo più pesante che la tua classe indossa al livello {level}. Deselezionato: anche armature di {lighter} (meno armatura, a volte statistiche migliori). Schiena, collo, dita e monili non sono interessati.',

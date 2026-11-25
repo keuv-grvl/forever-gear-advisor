@@ -63,8 +63,7 @@ export const de: Messages = {
   'reco.pickOrigin': 'Wähle mindestens eine Herkunft aus.',
   'origin.quest': 'Quests',
   'origin.dungeon': 'Dungeon- oder Schlachtzugsquests',
-  'origin.craft': "Deine Berufe",
-  'origin.craftOther': "Andere Berufe",
+  'origin.craft': "Berufe",
   'origin.vendor': 'Händler',
   'origin.boe': 'Beute (beim Anlegen gebunden)',
   'origin.unknown': 'Unbekannte Quelle',
@@ -89,7 +88,7 @@ export const de: Messages = {
   'hint.anticipate':
     'Schlägt auch Gegenstände bis zu 5 Stufen über deiner vor, damit du vorausplanen kannst. Die benötigte Stufe steht neben jedem Gegenstand.',
   'hint.origins':
-    'Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus erhältlich. Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“. Gegenstände mit Zufallswerten („des Wals“, „des Bären“…) werden nur vorgeschlagen, wenn sie im Auktionshaus angeboten werden (ohne Waffen). Ein hergestellter Gegenstand, der beim Aufheben gebunden wird, wird nur vorgeschlagen, wenn dein Charakter den Beruf hat; einer, der beim Anlegen gebunden wird, immer (jemand kann ihn für dich herstellen). „Andere Berufe“: beim Anlegen gebundene Gegenstände eines Berufs, den du nicht hast, im Auktionshaus zu kaufen (Preis angezeigt, wenn angeboten) oder bei einem Handwerker zu bestellen.',
+    "Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Berufe“: beim Aufheben gebundene Herstellung nur aus deinem Beruf; beim Anlegen gebundene immer, mit Auktionshauspreis, wenn angeboten (sonst herstellen lassen). „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus; Gegenstände mit Zufallswerten („des Wals“…) nur, wenn sie angeboten werden (ohne Waffen). Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“.",
   'hint.armorOnly': 'Deine Klasse trägt nur {best}: Diese Option ändert nichts.',
   'hint.armor':
     'Aktiviert: für Kopf, Schultern, Brust, Handgelenke, Hände, Taille, Beine und Füße nur Rüstungstyp „{best}“, der schwerste Typ, den deine Klasse auf Stufe {level} trägt. Deaktiviert: auch {lighter} (weniger Rüstung, manchmal bessere Werte). Rücken, Hals, Finger und Schmuck sind nicht betroffen.',

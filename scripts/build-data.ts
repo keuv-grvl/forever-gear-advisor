@@ -280,6 +280,9 @@ export interface OutItem {
   src: 'api' | 'seen' // fiche API ou objet observé sur un perso
 }
 
+/** Id des factions de réputation (nom anglais → id), pour les liens Wowhead de l'app. */
+const factionIds = new Map<string, number>()
+
 const EXCLUDED_SLOTS = new Set(['NON_EQUIP', 'BODY', 'TABARD', 'BAG', 'AMMO', 'QUIVER'])
 const JUNK_NAME = /^\[PH\]|^Monster - |Deprecated|\bTEST\b|\bTesting\b|\bQA ?Test|^Bland |\(old\)|\bDEBUG\b|\bDNT\b/i
 
@@ -314,7 +317,10 @@ function toOutItem(p: ApiItemPreview, extra: { il?: number; rl?: number; src: Ou
   if (p.unique_equipped) out.u = 1
   if (p.binding?.type === 'ON_ACQUIRE') out.bop = 1
   const r = p.requirements?.reputation
-  if (r) out.rep = [r.faction.name, r.min_reputation_level]
+  if (r) {
+    out.rep = [r.faction.name, r.min_reputation_level]
+    factionIds.set(r.faction.name, r.faction.id)
+  }
   return out
 }
 
@@ -761,6 +767,7 @@ const VENDOR_FACTIONS: Record<number, number> = {
         if (isLocalized(n)) addName('factions', n.en_US, n)
       })
       factionNames.set(id, f?.name ?? '')
+      if (f?.name) factionIds.set(f.name, id)
     }
     return factionNames.get(id) ?? ''
   }
@@ -867,6 +874,13 @@ await writeFile(
     region: REGION,
     source: 'API Blizzard WoW Forever (static-forever + équipement observé), © Blizzard Entertainment',
     items: [...items.values()].sort((a, b) => a.id - b.id),
+    // Factions des réputations requises : nom anglais → id (liens Wowhead).
+    factions: Object.fromEntries(
+      [...new Set([...items.values()].flatMap((it) => (it.rep ? [it.rep[0], it.rep[2]] : [])))]
+        .filter((n): n is string => !!n && factionIds.has(n))
+        .sort()
+        .map((n) => [n, factionIds.get(n)!]),
+    ),
   }) + '\n',
 )
 await writeFile(

@@ -2,8 +2,8 @@
 import { computed } from 'vue'
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
 import { factionName, formatMoney, formatNumber, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
-import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl, type Reputation } from '../lib/blizzard'
-import { sourceOrigin, type Candidate, type Crafter, type DbItem, type Source } from '../lib/recommend'
+import { wowheadFactionUrl, wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl, type Reputation } from '../lib/blizzard'
+import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
 
 const props = defineProps<{
   c: Candidate
@@ -18,20 +18,33 @@ const props = defineProps<{
   crafter?: Crafter
   /** Réputations du perso, par nom anglais de faction (absent : inconnues). */
   reputations?: ReadonlyMap<string, Reputation>
-  /** Prix de l'HV chargés : sans prix, un craft à faire fabriquer n'est pas en vente. */
+  /** Prix de l'HV chargés : sans prix, un craft lié quand équipé n'est pas en vente. */
   pricesLoaded?: boolean
+  /** Id des factions (nom anglais → id), pour le lien Wowhead. */
+  factionIds?: Record<string, number>
 }>()
 
-/** Craft d'un métier que le perso n'a pas : à acheter à l'HV ou à faire fabriquer. */
-const toCommission = computed(() => props.sources.some((s) => sourceOrigin(s, props.crafter) === 'craftOther'))
+/** Craft lié quand équipé : on indique son prix à l'HV, ou qu'il n'y est pas. */
+const tradableCraft = computed(() => !props.c.item.bop && props.sources.some((s) => s.t === 'craft'))
 
 // Points de réputation (depuis le début de Neutre) où commence chaque rang : Détesté … Exalté.
 const REP_START = [-42000, -6000, -3000, 0, 3000, 9000, 21000, 42000]
 
-const repFaction = computed(() => {
+// Faction de la réputation requise (côté Horde si elle diffère) : nom anglais, nom affiché, lien Wowhead.
+const repFactionEn = computed(() => {
   const r = props.c.item.rep
-  return r ? factionName((props.side === 'H' && r[2]) || r[0]) : ''
+  return r ? (props.side === 'H' && r[2]) || r[0] : ''
 })
+const repFaction = computed(() => (repFactionEn.value ? factionName(repFactionEn.value) : ''))
+const repFactionUrl = computed(() => {
+  const id = props.factionIds?.[repFactionEn.value]
+  return id ? wowheadFactionUrl(id) : undefined
+})
+/** Texte traduit coupé autour de {faction}, pour y mettre le lien. */
+const aroundFaction = (text: string) => {
+  const i = text.indexOf('{faction}')
+  return i < 0 ? [text, ''] : [text.slice(0, i), text.slice(i + '{faction}'.length)]
+}
 
 /**
  * Réputation requise, en court : « atteinte » ou les points qui manquent, envers la faction. Le détail (rang requis,
@@ -40,13 +53,12 @@ const repFaction = computed(() => {
 const repStatus = computed(() => {
   const r = props.c.item.rep
   if (!r || !props.reputations) return null
-  const cur = props.reputations.get((props.side === 'H' && r[2]) || r[0])
+  const cur = props.reputations.get(repFactionEn.value)
   const required = t('src.repRequired', { standing: standing(r[1]) })
   const title = `${required} · ${cur ? t('src.repCurrent', { standing: standing(cur.tier), value: cur.value, max: cur.max }) : t('src.repNever')}`
-  const faction = repFaction.value
-  if (cur && cur.tier >= r[1]) return { met: true, text: t('src.repMet', { faction }), title }
+  if (cur && cur.tier >= r[1]) return { met: true, parts: aroundFaction(t('src.repMet')), title }
   const missing = formatNumber(Math.max(0, (REP_START[r[1]] ?? 0) - (cur?.raw ?? 0)), 0)
-  return { met: false, text: t('src.repMissing', { missing, faction }), title }
+  return { met: false, parts: aroundFaction(t('src.repMissing', { missing })), title }
 })
 
 /** Effets de l'objet dans la langue (« Equipé : … »). */
@@ -112,17 +124,22 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
       </template>
       <!-- Réputation : faction et points manquants (détail en infobulle) ; rang requis seul si on ne connaît pas
            les réputations du perso. -->
-      <span v-if="c.item.rep && repStatus" :title="repStatus.title" :class="repStatus.met ? 'rep-ok' : 'rep-todo'">{{
-        repStatus.text
-      }}</span>
-      <span v-else-if="c.item.rep">{{ t('src.rep', { faction: repFaction, standing: standing(c.item.rep[1]) }) }}</span>
+      <span v-if="c.item.rep && repStatus" :title="repStatus.title" :class="repStatus.met ? 'rep-ok' : 'rep-todo'"
+        >{{ repStatus.parts[0] }}<a v-if="repFactionUrl" :href="repFactionUrl" target="_blank" rel="noopener">{{ repFaction }}</a
+        ><template v-else>{{ repFaction }}</template>{{ repStatus.parts[1] }}</span
+      >
+      <span v-else-if="c.item.rep"
+        >{{ aroundFaction(t('src.rep', { standing: standing(c.item.rep[1]) }))[0]
+        }}<a v-if="repFactionUrl" :href="repFactionUrl" target="_blank" rel="noopener">{{ repFaction }}</a
+        ><template v-else>{{ repFaction }}</template>{{ aroundFaction(t('src.rep', { standing: standing(c.item.rep[1]) }))[1] }}</span
+      >
       <template v-if="sources.length === 0 && !c.item.rep">
         <span v-if="c.item.sfx" :title="t('src.randomNote')">{{ t('src.random') }}</span>
         <span v-else-if="!c.item.bop">{{ t('src.boe') }}</span>
         <span v-else class="muted">{{ t('src.unknown') }}</span>
       </template>
       <span v-if="price" :title="priceNote">{{ t('src.ah', { price: formatMoney(price[0]) }) }}</span>
-      <span v-else-if="pricesLoaded && toCommission" class="muted">{{ t('src.notOnAh') }}</span>
+      <span v-else-if="pricesLoaded && tradableCraft" class="muted">{{ t('src.notOnAh') }}</span>
     </div>
   </li>
 </template>

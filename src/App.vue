@@ -135,11 +135,17 @@ window.addEventListener('popstate', () => openFromUrl(true))
       <button :disabled="loading">{{ loading ? t('form.loading') : t('form.load') }}</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>
-    <template v-if="data">
+    <!-- Chargement : petite animation plutôt qu'une page vide ; le perso précédent reste affiché, grisé. -->
+    <p v-if="loading" class="loader" role="status">
+      <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{{ t('form.loading') }}
+    </p>
+    <div v-if="data" :class="{ stale: loading }">
       <CharacterSummary :data="data" />
       <GearTable v-if="game" :data="data" :game="game" />
       <p v-else-if="gameError" class="error">{{ t('error.gameData', { message: gameError }) }}</p>
-      <p v-else class="muted">{{ t('loading.gameData') }}</p>
-    </template>
+      <p v-else class="loader" role="status">
+        <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{{ t('loading.gameData') }}
+      </p>
+    </div>
   </main>
 </template>
