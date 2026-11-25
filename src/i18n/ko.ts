@@ -45,7 +45,7 @@ export const ko: Messages = {
   'equip.itemLevel': '아이템 레벨',
   'equip.reqLevel': '요구 레벨',
   'equip.type': '종류',
-  'equip.stats': '능력치',
+  'equip.stats': '능력치 및 효과',
   'equip.empty': '비어 있음',
   'equip.armor': '방어도 {value}',
   'equip.dps': '초당 공격력 {dps} ({speed})',

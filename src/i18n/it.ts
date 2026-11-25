@@ -45,7 +45,7 @@ export const it: Messages = {
   'equip.itemLevel': 'Livello oggetto',
   'equip.reqLevel': 'Liv. richiesto',
   'equip.type': 'Tipo',
-  'equip.stats': 'Statistiche',
+  'equip.stats': 'Statistiche ed effetti',
   'equip.empty': 'vuoto',
   'equip.armor': '{value} armatura',
   'equip.dps': '{dps} DPS ({speed})',

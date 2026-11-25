@@ -45,7 +45,7 @@ export const ru: Messages = {
   'equip.itemLevel': 'Уровень предмета',
   'equip.reqLevel': 'Треб. уровень',
   'equip.type': 'Тип',
-  'equip.stats': 'Характеристики',
+  'equip.stats': 'Характеристики и эффекты',
   'equip.empty': 'пусто',
   'equip.armor': 'Броня: {value}',
   'equip.dps': '{dps} урона/с ({speed})',

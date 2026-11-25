@@ -130,6 +130,10 @@ th {
 td.stats {
   font-size: 0.9em;
 }
+/* Effets d'objet : en vert, comme dans l'infobulle du jeu. */
+.effect {
+  color: var(--q-uncommon);
+}
 
 a.q {
   text-decoration: none;

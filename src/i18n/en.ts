@@ -50,7 +50,7 @@ export const en = {
   'equip.itemLevel': 'Item level',
   'equip.reqLevel': 'Req. level',
   'equip.type': 'Type',
-  'equip.stats': 'Stats',
+  'equip.stats': 'Stats and effects',
   'equip.empty': 'empty',
   'equip.armor': '{value} armor',
   'equip.dps': '{dps} DPS ({speed})',

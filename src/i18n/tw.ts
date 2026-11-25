@@ -45,7 +45,7 @@ export const tw: Messages = {
   'equip.itemLevel': '物品等級',
   'equip.reqLevel': '需要等級',
   'equip.type': '類型',
-  'equip.stats': '屬性',
+  'equip.stats': '屬性和效果',
   'equip.empty': '空',
   'equip.armor': '{value}點護甲',
   'equip.dps': '每秒傷害 {dps}（{speed}）',

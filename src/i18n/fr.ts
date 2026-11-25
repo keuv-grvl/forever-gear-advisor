@@ -45,7 +45,7 @@ export const fr: Messages = {
   'equip.itemLevel': 'Niv. objet',
   'equip.reqLevel': 'Niv. requis',
   'equip.type': 'Type',
-  'equip.stats': 'Caractéristiques',
+  'equip.stats': 'Caractéristiques et effets',
   'equip.empty': 'vide',
   'equip.armor': '{value} armure',
   'equip.dps': '{dps} DPS ({speed})',

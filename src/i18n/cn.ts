@@ -45,7 +45,7 @@ export const cn: Messages = {
   'equip.itemLevel': '物品等级',
   'equip.reqLevel': '需要等级',
   'equip.type': '类型',
-  'equip.stats': '属性',
+  'equip.stats': '属性和效果',
   'equip.empty': '空',
   'equip.armor': '{value}点护甲',
   'equip.dps': '每秒伤害 {dps}（{speed}）',
