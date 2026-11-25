@@ -1,5 +1,6 @@
 // Données statiques (public/data/, servies par le CDN) : chargées une fois, à la première recherche.
 
+import type { RandomData } from './random'
 import type { DbItem, Source } from './recommend'
 import type { WeightsFile } from './scoring'
 
@@ -8,6 +9,8 @@ export interface GameData {
   generated: string
   sources: Record<number, Source[]>
   weights: WeightsFile
+  /** Objets à stats aléatoires (proposés seulement s'ils sont en vente à l'HV). */
+  random: RandomData
 }
 
 let pending: Promise<GameData> | null = null
@@ -23,12 +26,14 @@ export function loadGameData(): Promise<GameData> {
     getJson<{ generated: string; items: DbItem[] }>('/data/items.json'),
     getJson<{ sources: Record<number, Source[]> }>('/data/sources.json'),
     getJson<WeightsFile>('/data/weights.json'),
+    getJson<RandomData>('/data/random.json'),
   ])
-    .then(([items, sources, weights]) => ({
+    .then(([items, sources, weights, random]) => ({
       items: items.items,
       generated: items.generated,
       sources: sources.sources,
       weights,
+      random,
     }))
     .catch((err) => {
       pending = null // permettre un nouvel essai

@@ -84,7 +84,7 @@ export const it: Messages = {
   'hint.anticipate':
     'Propone anche oggetti fino a 5 livelli sopra il tuo, per prepararti a ciò che verrà. Il livello richiesto è indicato accanto a ogni oggetto.',
   'hint.origins':
-    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso in vendita alla casa d'aste. Se deselezioni «Reputazione», vengono tolti tutti gli oggetti che richiedono una reputazione, qualunque sia la fonte. I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta».",
+    "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso in vendita alla casa d'aste. Se deselezioni «Reputazione», vengono tolti tutti gli oggetti che richiedono una reputazione, qualunque sia la fonte. I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta». Gli oggetti con statistiche casuali («of the Whale», «of the Bear»…) vengono proposti solo se sono in vendita alla casa d'aste (armi escluse).",
   'hint.armorOnly': 'La tua classe indossa solo {best}: questa opzione non cambia nulla.',
   'hint.armor':
     'Selezionato: per testa, spalle, torso, polsi, mani, fianchi, gambe e piedi, solo armature di {best}, il tipo più pesante che la tua classe indossa al livello {level}. Deselezionato: anche armature di {lighter} (meno armatura, a volte statistiche migliori). Schiena, collo, dita e monili non sono interessati.',
@@ -108,6 +108,9 @@ export const it: Messages = {
   'src.rep': 'Reputazione: {faction} ({standing})',
   'src.boe': "Bottino vincolato all'equipaggiamento",
   'src.unknown': 'fonte sconosciuta, vedi Wowhead',
+  'src.random': "Bottino con statistiche casuali",
+  'src.randomNote':
+    "Statistiche calcolate con le tabelle del client di WoW Forever. Qualità e livelli dell'oggetto base: dal client se li ha, altrimenti da forever-db (fatedfr), perché l'API di Forever non conosce questi oggetti.",
   'src.ah': 'AH: {price}',
   'price.note':
     "Prezzo più basso, mediana sulle {houses} case d'aste ({faction}) di questa modalità di gioco (l'API non dice quale usa il tuo personaggio). Rilevamento del {when}.",
@@ -124,6 +127,6 @@ export const it: Messages = {
   'money.c': 'r',
 
   'reco.footer':
-    "Punteggio: somma delle statistiche ponderate per la specializzazione (pesi {polestar}, GPL-3.0). Il guadagno è la differenza con l'oggetto equipaggiato. «~»: livello stimato, l'API non fornisce il livello richiesto. Oggetti: API Blizzard, WoW Forever ({date}); missioni: forever-db (Polestar); mercanti: forever-db (fatedfr). I drop vincolati alla raccolta non sono indicati e gli oggetti con suffisso casuale («of the Owl») non vengono proposti.",
+    "Punteggio: somma delle statistiche ponderate per la specializzazione (pesi {polestar}, GPL-3.0). Il guadagno è la differenza con l'oggetto equipaggiato. «~»: livello stimato, l'API non fornisce il livello richiesto. Oggetti: API Blizzard, WoW Forever ({date}); missioni: forever-db (Polestar); mercanti: forever-db (fatedfr). I drop vincolati alla raccolta non sono indicati. Oggetti con statistiche casuali («of the Whale»): solo quelli in vendita alla casa d'aste, armi escluse; statistiche dal client di WoW Forever, qualità e livelli dell'oggetto base da forever-db (fatedfr).",
   'reco.footerNpc': "I nomi dei PNG restano in inglese: l'API di Forever non li fornisce in altre lingue.",
 }

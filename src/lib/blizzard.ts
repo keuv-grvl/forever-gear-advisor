@@ -41,6 +41,8 @@ export interface ItemStat {
 // Seuls item, slot et name sont garantis. Ex. : `pal-ouffette` n'a `level` sur aucun objet.
 export interface EquippedItem {
   item: { id: number }
+  /** Suffixe aléatoire (« of the Whale »). */
+  bonus_list?: number[]
   slot: Typed
   quality?: Typed
   name: string
@@ -129,8 +131,8 @@ export function detectSpec(specs: Specializations): { name: string; label?: stri
   return { ...best.specialization, points: best.spent_points }
 }
 
-export function wowheadItemUrl(itemId: number): string {
-  return wowheadUrl('item', itemId)
+export function wowheadItemUrl(itemId: number, suffix?: number): string {
+  return wowheadUrl('item', itemId) + (suffix ? `?bonus=${suffix}` : '')
 }
 
 export function wowheadQuestUrl(questId: number): string {
@@ -145,7 +147,8 @@ export function wowheadNpcUrl(npcId: number): string {
 export interface Prices {
   generated: string
   houses: number
-  prices: Record<number, [copper: number, houses: number]>
+  /** Clé : id de l'objet, ou « id:suffixe » pour un objet à stats aléatoires. */
+  prices: Record<string, [copper: number, houses: number]>
 }
 
 export async function fetchPrices(region: Region, ruleset: number, faction: string): Promise<Prices> {

@@ -9,7 +9,8 @@ En ligne : https://forever-gear-advisor.vercel.app/ (par exemple `?c=helga-tarti
 
 - Le navigateur appelle `/api/character` (fonction Vercel), qui interroge l'API Blizzard avec un token
   gardé côté serveur (profil, équipement, spés, quêtes et noms des membres de la guilde pour l'autocomplétion).
-- `/api/prices` donne des prix indicatifs à l'hôtel des ventes (médiane des maisons de la faction), mis en cache 6 h.
+- `/api/prices` donne des prix indicatifs à l'hôtel des ventes (médiane des maisons de la faction), mis en cache 6 h ;
+  les objets à stats aléatoires (« of the Whale ») en vente sont proposés, stats calculées avec les tables du client Forever.
 - Interface dans les langues de Wowhead : textes dans `src/i18n/`, noms du jeu dans `public/data/i18n/`.
 - Les données d'objets sont des JSON statiques dans `public/data/`, générés en local et servis par le CDN.
 - Le score d'un objet est la somme de ses stats pondérées par les poids de la spé (Polestar), au niveau
@@ -30,7 +31,7 @@ npm run build    # vérification TypeScript + build
 
 ```sh
 npm run data:weights   # public/data/weights.json depuis Polestar (commit figé dans le script)
-npm run data:items     # public/data/items.json et sources.json (API Blizzard Forever + forever-db)
+npm run data:items     # public/data/items.json, sources.json, random.json, i18n/ (API Blizzard Forever, client Forever, forever-db)
 ```
 
 `data:items` lit les identifiants Blizzard dans `.env.blizzard.local` (non versionné) :

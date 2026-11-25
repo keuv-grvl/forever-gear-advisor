@@ -89,7 +89,7 @@ export const en = {
   'hint.sort': 'Gain: slots with the biggest upgrade first. Slot: character sheet order (head, neck, shoulder…).',
   'hint.anticipate': 'Also suggests items up to 5 levels above yours, to plan ahead. The required level is shown next to each item.',
   'hint.origins':
-    'An item is suggested if at least one of its sources is checked. “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House. Unchecking “Reputation” removes every item that requires a reputation, whatever its source. Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”.',
+    'An item is suggested if at least one of its sources is checked. “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House. Unchecking “Reputation” removes every item that requires a reputation, whatever its source. Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”. Random-stat items (“of the Whale”, “of the Bear”…) are suggested only when they are for sale at the Auction House (weapons excluded).',
   'hint.armorOnly': 'Your class only wears {best}: this option changes nothing.',
   'hint.armor':
     'Checked: for head, shoulders, chest, wrists, hands, waist, legs and feet, only {best} armor, the heaviest type your class wears at level {level}. Unchecked: {lighter} armor too (less armor, sometimes better stats). Back, neck, fingers and trinkets are not affected.',
@@ -114,6 +114,9 @@ export const en = {
   'src.rep': 'Reputation: {faction} ({standing})',
   'src.boe': 'Bind on Equip loot',
   'src.unknown': 'unknown source, see Wowhead',
+  'src.random': "Random-stat loot",
+  'src.randomNote':
+    "Stats computed from the WoW Forever client tables. Base item quality and levels: from the client when it has them, otherwise from forever-db (fatedfr), since the Forever API does not know these items.",
   'src.ah': 'AH: {price}',
   'price.note':
     'Lowest price, median over the {houses} {faction} auction houses of this game mode (the API does not say which one your character uses). Snapshot from {when}.',
@@ -132,7 +135,7 @@ export const en = {
 
   // Pied du tableau ({polestar} : lien)
   'reco.footer':
-    'Score: sum of the stats weighted for the spec ({polestar} weights, GPL-3.0). The gain is the difference with the equipped item. “~”: estimated level, the API gives no required level. Items: Blizzard API, WoW Forever ({date}); quests: forever-db (Polestar); vendors: forever-db (fatedfr). Bind on Pickup drops are not shown, and random-suffix items (“of the Owl”) are not suggested.',
+    'Score: sum of the stats weighted for the spec ({polestar} weights, GPL-3.0). The gain is the difference with the equipped item. “~”: estimated level, the API gives no required level. Items: Blizzard API, WoW Forever ({date}); quests: forever-db (Polestar); vendors: forever-db (fatedfr). Bind on Pickup drops are not shown. Random-stat items (“of the Whale”): only those for sale at the Auction House, weapons excluded; stats from the WoW Forever client, base item quality and levels from forever-db (fatedfr).',
   'reco.footerNpc': '',
 }
 

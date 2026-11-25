@@ -82,7 +82,7 @@ export const fr: Messages = {
   'hint.anticipate':
     "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
   'hint.origins':
-    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ».",
+    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues).",
   'hint.armorOnly': 'Ta classe ne porte que du {best} : cette option ne change rien.',
   'hint.armor':
     "Coché : pour la tête, les épaules, le torse, les poignets, les mains, la taille, les jambes et les pieds, seulement de l'armure en {best}, le type le plus lourd que ta classe porte au niveau {level}. Décoché : aussi l'armure en {lighter} (moins d'armure, parfois de meilleures stats). Le dos, le cou, les doigts et les bijoux ne sont pas concernés.",
@@ -106,6 +106,9 @@ export const fr: Messages = {
   'src.rep': 'Réputation : {faction} ({standing})',
   'src.boe': 'Butin lié quand équipé',
   'src.unknown': 'source inconnue, voir Wowhead',
+  'src.random': "Butin à stats aléatoires",
+  'src.randomNote':
+    "Stats calculées avec les tables du client WoW Forever. Qualité et niveaux de l'objet de base : client Forever s'il les a, sinon forever-db (fatedfr), car l'API Forever ne connaît pas ces objets.",
   'src.ah': 'HV : {price}',
   'price.note':
     "Prix le plus bas, médiane sur les {houses} hôtels des ventes {faction} de ce mode de jeu (l'API ne dit pas lequel sert ton perso). Relevé du {when}.",
@@ -122,6 +125,6 @@ export const fr: Messages = {
   'money.c': 'pc',
 
   'reco.footer':
-    "Score : somme des stats pondérées pour la spé (poids {polestar}, GPL-3.0). Le gain est l'écart avec l'objet porté. « ~ » : niveau estimé, l'API ne donne pas de niveau requis. Objets : API Blizzard WoW Forever ({date}) ; quêtes : forever-db (Polestar) ; vendeurs : forever-db (fatedfr). Les drops liés quand ramassés ne sont pas indiqués, et les objets à suffixe aléatoire (« of the Owl ») ne sont pas proposés.",
+    "Score : somme des stats pondérées pour la spé (poids {polestar}, GPL-3.0). Le gain est l'écart avec l'objet porté. « ~ » : niveau estimé, l'API ne donne pas de niveau requis. Objets : API Blizzard WoW Forever ({date}) ; quêtes : forever-db (Polestar) ; vendeurs : forever-db (fatedfr). Les drops liés quand ramassés ne sont pas indiqués. Objets à stats aléatoires (« de la baleine ») : seulement ceux en vente à l'HV, hors armes ; stats calculées avec le client WoW Forever, qualité et niveaux de l'objet de base : forever-db (fatedfr).",
   'reco.footerNpc': "Les noms de PNJ restent en anglais : l'API Forever ne les donne pas dans d'autres langues.",
 }

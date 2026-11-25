@@ -81,6 +81,8 @@ export interface GameNames {
   factions: Record<string, string>
   /** Spés, clé = nom anglais de l'API (« Elemental Combat »). */
   specs: Record<string, string>
+  /** Suffixes aléatoires (« de la baleine »), clé = liste de bonus du client. */
+  suffixes?: Record<number, string>
 }
 const names = shallowRef<GameNames | null>(null)
 const namesCache = new Map<Lang, Promise<GameNames | null>>()
@@ -98,6 +100,18 @@ function loadNames(code: Lang): Promise<GameNames | null> {
 }
 
 export const itemName = (id: number, fallback: string) => names.value?.items[id] ?? fallback
+/**
+ * Nom d'un objet à stats aléatoires : nom de base et suffixe traduits, dans l'ordre du jeu (« Chapeau de sorcier de
+ * l'Ancien », « 고래의 … », « 巨鲸之… »). S'il manque l'un des deux, le nom anglais complet.
+ */
+export function suffixedName(id: number, suffix: number, fallback: string): string {
+  const base = names.value?.items[id]
+  const sfx = names.value?.suffixes?.[suffix]
+  if (!base || !sfx) return fallback
+  if (lang.value === 'ko') return `${sfx} ${base}`
+  if (lang.value === 'cn' || lang.value === 'tw') return sfx + base
+  return `${base} ${sfx}`
+}
 export const questTitle = (id: number, fallback: string) => names.value?.quests[id] ?? fallback
 export const subclassName = (en: string) => names.value?.subclasses[en] ?? en
 export const professionName = (en: string) => names.value?.professions[en] ?? en

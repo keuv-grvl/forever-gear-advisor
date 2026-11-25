@@ -51,7 +51,7 @@ function statsText(item: EquippedItem): string {
             <td>{{ row.label }}</td>
             <template v-if="row.item">
               <td>
-                <a :href="wowheadItemUrl(row.item.item.id)" target="_blank" rel="noopener" :class="['q', row.item.quality?.type.toLowerCase()]">
+                <a :href="wowheadItemUrl(row.item.item.id, row.item.bonus_list?.[0])" target="_blank" rel="noopener" :class="['q', row.item.quality?.type.toLowerCase()]">
                   {{ row.item.name }}
                 </a>
               </td>

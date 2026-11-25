@@ -25,9 +25,15 @@ export interface DbItem {
   fac?: string
   u?: 1
   bop?: 1
-  rep?: [string, number]
+  /** Réputation requise : faction, rang (0 Détesté … 7 Exalté), faction côté Horde si elle diffère. */
+  rep?: [string, number, string?]
   src: 'api' | 'seen'
+  /** Suffixe aléatoire (liste de bonus du client), pour les objets « … of the Whale » en vente à l'HV. */
+  sfx?: number
 }
+
+/** Identifiant d'un objet proposé : l'id, plus le suffixe pour un objet à stats aléatoires. */
+export const itemKey = (it: { id: number; sfx?: number }) => (it.sfx ? `${it.id}:${it.sfx}` : String(it.id))
 
 export type Source =
   | { t: 'craft'; prof: string; recipe: string; reagents: [number, string, number][]; qty?: number }
@@ -93,7 +99,7 @@ export interface Candidate {
 
 export interface SlotAdvice {
   slot: string
-  equipped?: { name: string; id: number; score: number }
+  equipped?: { name: string; id: number; sfx?: number; score: number }
   candidates: Candidate[]
 }
 
@@ -138,7 +144,8 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const maxLevel = o.level + o.anticipate
   const dualWield = canDualWield(o.classId, maxLevel)
   const bySlot = new Map(equipped.map((e) => [e.slot.type, e]))
-  const equippedIds = new Set(equipped.map((e) => e.item.id))
+  // Objet déjà porté : même id, et même suffixe pour un objet à stats aléatoires.
+  const equippedKeys = new Set(equipped.map((e) => itemKey({ id: e.item.id, sfx: e.bonus_list?.length === 1 ? e.bonus_list[0] : undefined })))
 
   const score = (it: ScorableItem, offHand = false) => scoreItem(it, o.weights, offHand)
   const eqScore = (slot: string, offHand = false) => {
@@ -163,7 +170,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
       (it.al ?? it.rl ?? 0) <= maxLevel &&
       (!o.mainArmorOnly || it.cls !== 4 || !TYPED_ARMOR_SLOTS.has(it.slot) || it.sub === mainArmor) &&
       (!it.fac || it.fac === o.faction) &&
-      !equippedIds.has(it.id) &&
+      !equippedKeys.has(itemKey(it)) &&
       SLOTS_FOR[it.slot] &&
       canWear(o.classId, maxLevel, it),
   )
@@ -177,7 +184,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
     const e = bySlot.get(slot)
     return {
       slot,
-      equipped: e ? { name: e.name, id: e.item.id, score: eqScore(slot, offHand) } : undefined,
+      equipped: e ? { name: e.name, id: e.item.id, sfx: e.bonus_list?.[0], score: eqScore(slot, offHand) } : undefined,
       candidates: top(candidates),
     }
   }
@@ -222,7 +229,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
     if (c.item.slot === 'TWOHWEAPON') mainList.push({ item: c.item, score: c.s, gain: c.s - currentSet })
     else if (ONE_HAND_MAIN.has(c.item.slot)) {
       // On remplace une 2M : il faut aussi une main gauche, la meilleure autre que cette arme.
-      const off = twoHanded ? offHands.find((x) => x.item.id !== c.item.id) : undefined
+      const off = twoHanded ? offHands.find((x) => itemKey(x.item) !== itemKey(c.item)) : undefined
       mainList.push({
         item: c.item,
         score: c.s,

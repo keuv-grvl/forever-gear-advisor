@@ -84,7 +84,7 @@ export const es: Messages = {
   'hint.anticipate':
     'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
   'hint.origins':
-    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida».',
+    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas).',
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
   'hint.armor':
     'Marcado: para cabeza, hombros, pecho, muñecas, manos, cintura, piernas y pies, solo armadura de {best}, el tipo más pesado que lleva tu clase a nivel {level}. Desmarcado: también armadura de {lighter} (menos armadura, a veces mejores estadísticas). Espalda, cuello, dedos y abalorios no se ven afectados.',
@@ -108,6 +108,9 @@ export const es: Messages = {
   'src.rep': 'Reputación: {faction} ({standing})',
   'src.boe': 'Botín que se liga al equiparlo',
   'src.unknown': 'fuente desconocida, consulta Wowhead',
+  'src.random': "Botín con estadísticas aleatorias",
+  'src.randomNote':
+    "Estadísticas calculadas con las tablas del cliente de WoW Forever. Calidad y niveles del objeto base: del cliente si los tiene, si no de forever-db (fatedfr), porque la API de Forever no conoce estos objetos.",
   'src.ah': 'Subasta: {price}',
   'price.note':
     'Precio más bajo, mediana de las {houses} casas de subastas ({faction}) de este modo de juego (la API no indica cuál usa tu personaje). Datos del {when}.',
@@ -124,6 +127,6 @@ export const es: Messages = {
   'money.c': 'c',
 
   'reco.footer':
-    'Puntuación: suma de las estadísticas ponderadas para la especialización (pesos de {polestar}, GPL-3.0). La ganancia es la diferencia con el objeto equipado. «~»: nivel estimado, la API no indica el nivel requerido. Objetos: API de Blizzard, WoW Forever ({date}); misiones: forever-db (Polestar); vendedores: forever-db (fatedfr). No se muestran los objetos que se ligan al recogerlos, y no se proponen los objetos con sufijo aleatorio («of the Owl»).',
+    'Puntuación: suma de las estadísticas ponderadas para la especialización (pesos de {polestar}, GPL-3.0). La ganancia es la diferencia con el objeto equipado. «~»: nivel estimado, la API no indica el nivel requerido. Objetos: API de Blizzard, WoW Forever ({date}); misiones: forever-db (Polestar); vendedores: forever-db (fatedfr). No se muestran los objetos que se ligan al recogerlos. Objetos con estadísticas aleatorias («de la ballena»): solo los que están a la venta en la casa de subastas, sin armas; estadísticas del cliente de WoW Forever, calidad y niveles del objeto base de forever-db (fatedfr).',
   'reco.footerNpc': 'Los nombres de los PNJ se quedan en inglés: la API de Forever no los da en otros idiomas.',
 }

@@ -3,7 +3,8 @@ import { computed, ref, watch } from 'vue'
 import { langInfo, specName as specLabel, t, type MessageKey } from '../i18n'
 import { detectSpec, fetchPrices, wowheadItemUrl, type CharacterData, type Prices } from '../lib/blizzard'
 import { SLOT_ORDER, type GameData } from '../lib/data'
-import { ORIGINS, recommend, sideOf, sourcesFor, type DbItem, type Origin, type Source } from '../lib/recommend'
+import { randomOffers } from '../lib/random'
+import { itemKey, ORIGINS, recommend, sideOf, sourcesFor, type DbItem, type Origin, type Source } from '../lib/recommend'
 import { CLASS_KEYS, wearableArmorTypes } from '../lib/rules'
 import { findSpec, weightsAt } from '../lib/scoring'
 import { readPrefs, writePrefs } from '../lib/suggest'
@@ -52,6 +53,7 @@ watch(
 
 const spec = computed(() => findSpec(game.value.weights, classKey.value, specName.value))
 const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
+const side = computed(() => sideOf(profile.value.faction.type))
 const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
 const activeQuests = computed(() => new Set(props.data.quests?.active ?? []))
 
@@ -77,9 +79,16 @@ const priceNote = computed(() => {
   return t('price.note', { houses: p.houses, faction: profile.value.faction.name, when })
 })
 
+// Objets à stats aléatoires : seulement ceux en vente (clés « objet:suffixe » des prix).
+const items = computed(() => {
+  const p = prices.value?.prices
+  if (!p) return game.value.items
+  return [...game.value.items, ...randomOffers(game.value.random, Object.keys(p).filter((k) => k.includes(':')))]
+})
+
 const advice = computed(() => {
   if (!spec.value) return []
-  return recommend(props.data.equipment.equipped_items, game.value.items, {
+  return recommend(props.data.equipment.equipped_items, items.value, {
     classId: profile.value.character_class.id,
     level: profile.value.level,
     faction: profile.value.faction.type,
@@ -170,7 +179,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
             <td>{{ slotLabel(a.slot) }}</td>
             <td>
               <template v-if="a.equipped">
-                <a :href="wowheadItemUrl(a.equipped.id)" target="_blank" rel="noopener">{{ a.equipped.name }}</a>
+                <a :href="wowheadItemUrl(a.equipped.id, a.equipped.sfx)" target="_blank" rel="noopener">{{ a.equipped.name }}</a>
                 <span class="muted"> ({{ a.equipped.score.toFixed(1) }})</span>
               </template>
               <span v-else class="empty">{{ t('reco.empty') }}</span>
@@ -183,8 +192,9 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                     :c="a.candidates[0]"
                     :sources="sourcesOf(a.candidates[0].item)"
                     :active-quests="activeQuests"
-                    :price="prices?.prices[a.candidates[0].item.id]"
+                    :price="prices?.prices[itemKey(a.candidates[0].item)]"
                     :price-note="priceNote"
+                    :side="side"
                   />
                 </ul>
                 <details v-if="a.candidates.length > 1" class="more">
@@ -192,12 +202,13 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                   <ul class="candidates">
                     <CandidateLine
                       v-for="c in a.candidates.slice(1)"
-                      :key="c.item.id"
+                      :key="itemKey(c.item)"
                       :c="c"
                       :sources="sourcesOf(c.item)"
                       :active-quests="activeQuests"
-                      :price="prices?.prices[c.item.id]"
+                      :price="prices?.prices[itemKey(c.item)]"
                       :price-note="priceNote"
+                      :side="side"
                     />
                   </ul>
                 </details>

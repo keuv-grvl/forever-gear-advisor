@@ -1,16 +1,18 @@
 <script setup lang="ts">
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
-import { factionName, formatMoney, itemName, professionName, questTitle, subclassName, t, type MessageKey } from '../i18n'
+import { factionName, formatMoney, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
 import type { Candidate, DbItem, Source } from '../lib/recommend'
 
-defineProps<{
+const props = defineProps<{
   c: Candidate
   sources: Source[]
   activeQuests: ReadonlySet<number>
   /** [prix en cuivre, nombre de maisons] (voir api/prices.ts). */
   price?: [number, number]
   priceNote?: string
+  /** Camp du perso : la faction requise peut en dépendre (récompenses du Goulet des Chanteguerres). */
+  side: 'A' | 'H'
 }>()
 
 const QUEST_KEY = { dungeon: 'src.questDungeon', raid: 'src.questRaid' } as const
@@ -30,8 +32,8 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
 <template>
   <li>
     <span class="gain">+{{ c.gain.toFixed(1) }}</span>
-    <a :href="wowheadItemUrl(c.item.id)" target="_blank" rel="noopener" :class="['q', c.item.q.toLowerCase()]">{{
-      itemName(c.item.id, c.item.n)
+    <a :href="wowheadItemUrl(c.item.id, c.item.sfx)" target="_blank" rel="noopener" :class="['q', c.item.q.toLowerCase()]">{{
+      c.item.sfx ? suffixedName(c.item.id, c.item.sfx, c.item.n) : itemName(c.item.id, c.item.n)
     }}</a>
     <span class="muted">
       · <span :title="t(c.item.ale ? 'cand.levelEstimated' : 'cand.levelRequired')">{{ t('cand.level', { level: levelText(c.item) }) }}</span>
@@ -55,9 +57,12 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
           <strong v-if="activeQuests.has(s.id)" class="badge">{{ t('src.inProgress') }}</strong>
         </span>
       </template>
-      <span v-if="c.item.rep">{{ t('src.rep', { faction: factionName(c.item.rep[0]), standing: standing(c.item.rep[1]) }) }}</span>
+      <span v-if="c.item.rep">{{
+        t('src.rep', { faction: factionName((props.side === 'H' && c.item.rep[2]) || c.item.rep[0]), standing: standing(c.item.rep[1]) })
+      }}</span>
       <template v-if="sources.length === 0 && !c.item.rep">
-        <span v-if="!c.item.bop">{{ t('src.boe') }}</span>
+        <span v-if="c.item.sfx" :title="t('src.randomNote')">{{ t('src.random') }}</span>
+        <span v-else-if="!c.item.bop">{{ t('src.boe') }}</span>
         <span v-else class="muted">{{ t('src.unknown') }}</span>
       </template>
       <span v-if="price" :title="priceNote">{{ t('src.ah', { price: formatMoney(price[0]) }) }}</span>

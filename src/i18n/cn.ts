@@ -81,7 +81,7 @@ export const cn: Messages = {
   'hint.sort': '提升幅度：提升最大的部位排在前面。部位：按角色面板顺序（头部、颈部、肩部…）。',
   'hint.anticipate': '同时推荐最多比你高5级的物品，便于提前准备。每件物品旁都会显示需要等级。',
   'hint.origins':
-    '只要勾选了物品的任一来源，就会推荐该物品。“装备后绑定的掉落”：没有其他已知来源的可交易物品，通常来自怪物或宝箱，常在拍卖行出售。取消勾选“声望”会移除所有需要声望的物品，无论其来源。拾取后绑定的掉落（地下城首领等）不在数据中，归入“未知来源”。',
+    '只要勾选了物品的任一来源，就会推荐该物品。“装备后绑定的掉落”：没有其他已知来源的可交易物品，通常来自怪物或宝箱，常在拍卖行出售。取消勾选“声望”会移除所有需要声望的物品，无论其来源。拾取后绑定的掉落（地下城首领等）不在数据中，归入“未知来源”。随机属性物品（“巨鲸之”“野熊之”等）只有在拍卖行有售时才会推荐（不含武器）。',
   'hint.armorOnly': '你的职业只能穿{best}：此选项无效。',
   'hint.armor':
     '勾选：头部、肩部、胸部、手腕、手、腰部、腿部和脚只推荐{best}，即你的职业在{level}级时能穿的最重护甲类型。不勾选：也推荐{lighter}（护甲值较低，但有时属性更好）。背部、颈部、手指和饰品不受影响。',
@@ -105,6 +105,9 @@ export const cn: Messages = {
   'src.rep': '声望：{faction}（{standing}）',
   'src.boe': '装备后绑定的掉落',
   'src.unknown': '未知来源，请查看Wowhead',
+  'src.random': "随机属性的掉落",
+  'src.randomNote':
+    "属性根据WoW Forever客户端数据表计算。基础物品的品质和等级：客户端有则取自客户端，否则取自forever-db（fatedfr），因为Forever API没有这些物品。",
   'src.ah': '拍卖行：{price}',
   'price.note':
     '最低价，取该游戏模式下{houses}个{faction}拍卖行的中位数（API未说明你的角色使用哪一个）。数据采集于{when}。',
@@ -121,6 +124,6 @@ export const cn: Messages = {
   'money.c': '铜',
 
   'reco.footer':
-    '评分：按专精加权的属性总和（{polestar}权重，GPL-3.0）。提升幅度为与已装备物品的差值。“~”：估算等级，API未提供需要等级。物品：Blizzard API，WoW Forever（{date}）；任务：forever-db（Polestar）；商人：forever-db（fatedfr）。不显示拾取后绑定的掉落，也不推荐随机后缀物品（“of the Owl”）。',
+    '评分：按专精加权的属性总和（{polestar}权重，GPL-3.0）。提升幅度为与已装备物品的差值。“~”：估算等级，API未提供需要等级。物品：Blizzard API，WoW Forever（{date}）；任务：forever-db（Polestar）；商人：forever-db（fatedfr）。不显示拾取后绑定的掉落。随机属性物品（“巨鲸之”）：只推荐拍卖行在售的，不含武器；属性来自WoW Forever客户端，基础物品的品质和等级来自forever-db（fatedfr）。',
   'reco.footerNpc': 'NPC名称保持英文：Forever API不提供其他语言的名称。',
 }

@@ -1,6 +1,7 @@
 // GET /api/prices?region=eu&ruleset=1&faction=ALLIANCE
 // Prix indicatifs à l'hôtel des ventes : pour chaque objet, la médiane des prix unitaires les plus bas relevés dans
-// les maisons de vente de la faction. Un ruleset Forever (PvP, Normal…) a plusieurs maisons par faction, sans enchère
+// les maisons de vente de la faction. Objets à stats aléatoires : clé « objet:suffixe » (liste de bonus du client),
+// l'app ne propose que ceux-là (voir src/lib/random.ts). Un ruleset Forever (PvP, Normal…) a plusieurs maisons par faction, sans enchère
 // commune (groupes de royaumes, a priori) ; l'API ne dit pas laquelle sert un perso, d'où la médiane.
 // Lourd (plusieurs dumps de ~13 Mo) : réponse mise en cache 6 h sur le CDN, et servie périmée pendant la mise à jour.
 
@@ -31,19 +32,20 @@ export async function GET(request: Request): Promise<Response> {
     const houses = (index.auctions ?? []).filter((h) => h.name.startsWith(faction))
     if (houses.length === 0) return json(404, { error: 'aucune maison de vente pour cette faction' }, 3600)
 
-    // Prix unitaire le plus bas par objet, dans chaque maison. Objets à suffixe (bonus_lists) ignorés :
-    // leurs stats dépendent du suffixe, on ne sait pas les relier à un objet de la base.
-    const mins: Map<number, number>[] = []
+    // Prix unitaire le plus bas par objet (ou par objet et suffixe), dans chaque maison.
+    const mins: Map<number | string, number>[] = []
     for (let i = 0; i < houses.length; i += CONCURRENCY) {
       const batch = await Promise.all(
         houses.slice(i, i + CONCURRENCY).map(async (h) => {
           const dump = (await get(`/data/wow/ruleset/${ruleset}/auctions/${h.id}`)) as { auctions?: Auction[] }
-          const min = new Map<number, number>()
+          const min = new Map<number | string, number>()
           for (const a of dump.auctions ?? []) {
-            if (!a.buyout || a.item.bonus_lists?.length) continue
+            const bonus = a.item.bonus_lists ?? []
+            if (!a.buyout || bonus.length > 1) continue
+            const key = bonus.length ? `${a.item.id}:${bonus[0]}` : a.item.id
             const unit = Math.round(a.buyout / (a.quantity || 1))
-            const prev = min.get(a.item.id)
-            if (prev === undefined || unit < prev) min.set(a.item.id, unit)
+            const prev = min.get(key)
+            if (prev === undefined || unit < prev) min.set(key, unit)
           }
           return min
         }),
@@ -52,9 +54,9 @@ export async function GET(request: Request): Promise<Response> {
     }
 
     // Médiane (basse) des minimums, et nombre de maisons où l'objet est en vente.
-    const all = new Map<number, number[]>()
+    const all = new Map<number | string, number[]>()
     for (const min of mins) for (const [id, p] of min) all.set(id, [...(all.get(id) ?? []), p])
-    const prices: Record<number, [copper: number, houses: number]> = {}
+    const prices: Record<string, [copper: number, houses: number]> = {}
     for (const [id, list] of all) {
       list.sort((a, b) => a - b)
       prices[id] = [list[(list.length - 1) >> 1], list.length]

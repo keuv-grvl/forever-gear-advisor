@@ -1,4 +1,5 @@
-// Génère public/data/items.json et public/data/sources.json. Données WoW Forever uniquement.
+// Génère public/data/items.json, sources.json, random.json et i18n/. Données WoW Forever uniquement (exception : fiches
+// de base des objets à stats aléatoires, voir scripts/random-items.ts).
 // Usage : npm run data:items   (lit .env.blizzard.local)
 //
 // - Objets : API Blizzard, namespace static-forever-eu (recherche par classe d'objet puis fiche de chaque objet).
@@ -9,6 +10,7 @@
 // - Vendeurs : base forever-db de fatedfr (GPL-3.0, release « latest »), PNJ attestés par une source Forever.
 // - Quêtes propres à Forever absentes de Polestar : même base, seulement les quêtes qu'aucune base Classic ne connaît.
 // - Pas de drops : leurs données mêlent des bases Classic (décision : Forever uniquement).
+// - Objets à stats aléatoires (public/data/random.json) : voir scripts/random-items.ts.
 //
 // Les réponses de l'API sont gardées dans .cache/blizzard/ : une relance ne refait que les appels manquants
 // ou plus vieux que CACHE_MAX_AGE_DAYS. En fin de génération réussie, tout fichier non utilisé est supprimé :
@@ -20,6 +22,8 @@ import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
 import { gunzipSync } from 'node:zlib'
+import { buildRandomItems, checkObserved, type FatedfrItems } from './random-items.ts'
+import { byId, clientBuild, clientTable, num } from './wago.ts'
 
 const REGION = 'eu'
 const LOCALE = 'en_US'
@@ -259,7 +263,8 @@ export interface OutItem {
   fac?: string // faction requise
   u?: 1 // unique
   bop?: 1 // lié quand ramassé
-  rep?: [faction: string, standing: number] // réputation requise (0 Détesté … 5 Honoré … 7 Exalté)
+  rep?: [faction: string, standing: number, hordeFaction?: string] // réputation requise (0 Détesté … 5 Honoré … 7 Exalté) ;
+  // 3e valeur : faction côté Horde quand elle diffère (récompenses vendues par les deux intendants du Goulet)
   src: 'api' | 'seen' // fiche API ou objet observé sur un perso
 }
 
@@ -338,11 +343,12 @@ interface Seeds {
   guilds?: string[]
 }
 
-async function harvestEquipment(known: Set<number>): Promise<OutItem[]> {
+/** Objets portés absents de l'API, et objets à suffixe portés (pour contrôler le calcul de leurs stats). */
+async function harvestEquipment(known: Set<number>): Promise<{ items: OutItem[]; suffixed: ApiItemPreview[] }> {
   const seedFile = 'scripts/seeds.local.json'
   if (!existsSync(seedFile)) {
     console.log(`  (pas de ${seedFile} : aucun objet observé ajouté)`)
-    return []
+    return { items: [], suffixed: [] }
   }
   const seeds = JSON.parse(await readFile(seedFile, 'utf8')) as Seeds
   const names = new Set(seeds.characters ?? [])
@@ -360,6 +366,7 @@ async function harvestEquipment(known: Set<number>): Promise<OutItem[]> {
   console.log(`  ${names.size} persos à lire`)
 
   const seen = new Map<number, OutItem>()
+  const suffixed: ApiItemPreview[] = []
   await pool(
     [...names],
     async (name) => {
@@ -368,15 +375,17 @@ async function harvestEquipment(known: Set<number>): Promise<OutItem[]> {
           if (!it.bonus_list?.length) collectItemNames(it) // nom à suffixe (« of the Whale ») : pas celui de l'objet de base
       })
       for (const it of eq?.equipped_items ?? []) {
-        // Objets à suffixe aléatoire (« of the Whale ») : stats propres à l'exemplaire, on ne les généralise pas.
-        if (known.has(it.item.id) || seen.has(it.item.id) || it.bonus_list?.length) continue
+        // Objets à suffixe aléatoire (« of the Whale ») : stats propres à l'exemplaire, traités à part (random-items.ts).
+        if (it.bonus_list?.length) suffixed.push(it)
+        // Déjà vu : on garde la première fiche qui a un niveau d'objet (certains profils n'en donnent pas).
+        if (known.has(it.item.id) || seen.get(it.item.id)?.il || it.bonus_list?.length) continue
         if (EXCLUDED_SLOTS.has(it.inventory_type.type)) continue
         seen.set(it.item.id, toOutItem(it, { il: it.level?.value, rl: it.requirements?.level?.value, src: 'seen' }))
       }
     },
     'persos',
   )
-  return [...seen.values()]
+  return { items: [...seen.values()], suffixed }
 }
 
 // ---------- 3. Craft ----------
@@ -532,7 +541,7 @@ interface VendorSource {
   side?: string // faction amicale : A, H ou AH
 }
 
-interface FatedfrDb {
+interface FatedfrDb extends FatedfrItems {
   meta: { build: string; hash: string }
   vend: Record<string, number[]>
   rew: Record<string, number[]>
@@ -629,7 +638,8 @@ for (const it of apiItems) {
 console.log(`  ${items.size} fiches`)
 
 console.log('2. Objets observés sur des persos')
-for (const it of await harvestEquipment(new Set(items.keys()))) items.set(it.id, it)
+const harvested = await harvestEquipment(new Set(items.keys()))
+for (const it of harvested.items) items.set(it.id, it)
 console.log(`  total ${items.size} objets`)
 
 const itemIds = new Set(items.keys())
@@ -652,6 +662,60 @@ const sources: Record<number, (CraftSource | QuestSource | VendorSource)[]> = {}
 for (const id of [...itemIds].sort((a, b) => a - b)) {
   const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(foreverQuests.get(id) ?? []), ...(vendors.get(id) ?? [])]
   if (list.length) sources[id] = list
+}
+
+// Réputation requise absente de l'API. Le client Forever (ItemSparse) a le rang requis (MinReputation) ; il donne la
+// faction (MinFactionID) pour les 243 objets où l'API l'a aussi, mais pas pour 108 récompenses des intendants du
+// Goulet des Chanteguerres (MinFactionID 0, ex. Lorekeeper's Staff : révéré). Faction de ces objets : celle de
+// l'intendant qui les vend (Wowhead Forever indique la même : « réputation révérée auprès des sentinelles d'Aile-argent »).
+const VENDOR_FACTIONS: Record<number, number> = {
+  14753: 890, // Illiyana Moonblaze, Silverwing Supply Officer → Silverwing Sentinels
+  14754: 889, // Kelm Hargunth, Warsong Supply Officer → Warsong Outriders
+}
+{
+  const sparse = byId(await clientTable(await clientBuild(), 'ItemSparse'))
+  const factionNames = new Map<number, string>()
+  const factionName = async (id: number) => {
+    if (!factionNames.has(id)) {
+      const f = await api<{ name?: string }>('static', `/data/wow/reputation-faction/${id}`, '', (raw) => {
+        const n = (raw as { name?: unknown }).name
+        if (isLocalized(n)) addName('factions', n.en_US, n)
+      })
+      factionNames.set(id, f?.name ?? '')
+    }
+    return factionNames.get(id) ?? ''
+  }
+  let added = 0
+  let differ = 0
+  const unknown: number[] = []
+  for (const [id, it] of items) {
+    const row = sparse.get(id)
+    const standing = num(row, 'MinReputation')
+    if (it.rep) {
+      if (row && num(row, 'MinFactionID') && standing !== it.rep[1]) differ++
+      continue
+    }
+    if (!row || standing <= 0) continue
+    // Faction du client, sinon celle des intendants, par camp : un objet vendu des deux côtés (Berserker Bracers)
+    // demande les Sentinelles d'Aile-argent côté Alliance et les Voltigeurs Chanteguerre côté Horde.
+    let [alliance, horde] = [num(row, 'MinFactionID'), 0]
+    if (!alliance) {
+      const side = (s: 'A' | 'H') =>
+        new Set((sources[id] ?? []).flatMap((x) => (x.t === 'vendor' && x.side === s && VENDOR_FACTIONS[x.npc] ? [VENDOR_FACTIONS[x.npc]] : [])))
+      const [a, h] = [side('A'), side('H')]
+      if (a.size <= 1 && h.size <= 1) [alliance, horde] = [[...a][0] ?? [...h][0] ?? 0, a.size && h.size ? [...h][0] : 0]
+    }
+    const name = alliance ? await factionName(alliance) : ''
+    const hordeName = horde && horde !== alliance ? await factionName(horde) : ''
+    if (!name || (horde && !hordeName && horde !== alliance)) {
+      unknown.push(id)
+      continue
+    }
+    it.rep = hordeName ? [name, standing, hordeName] : [name, standing]
+    added++
+  }
+  console.log(`  réputation requise ajoutée depuis le client Forever : ${added} objets (rang différent de l'API : ${differ})`)
+  if (unknown.length) console.log(`  rang requis sans faction connue, ignoré : ${unknown.join(', ')}`)
 }
 
 // Objets non disponibles. AllTheThings référence ce qu'on peut obtenir : les 69 objets propres à Forever portés par
@@ -708,6 +772,14 @@ await pool(
   'quêtes',
 )
 
+console.log('7. Objets à stats aléatoires (client Forever via wago.tools, fiches manquantes : fatedfr)')
+const subclassNames = new Map([...items.values()].map((it) => [`${it.cls}:${it.sub}`, it.subn]))
+const random = await buildRandomItems(fatedfr, subclassNames, JUNK_NAME)
+const check = checkObserved(random, harvested.suffixed)
+console.log(`  contrôle sur les objets à suffixe portés : ${check.ok}/${check.checked} conformes`)
+for (const d of check.diffs) console.log(`    ${d}`)
+if (check.checked > 0 && check.ok < check.checked) throw new Error('stats calculées différentes de celles des objets portés')
+
 const generated = new Date().toISOString().slice(0, 10)
 await writeFile(
   'public/data/items.json',
@@ -730,6 +802,18 @@ await writeFile(
     sources,
   }) + '\n',
 )
+await writeFile(
+  'public/data/random.json',
+  JSON.stringify({
+    generated,
+    source: {
+      suffixes: `tables du client WoW Forever ${random.build} (exports wago.tools), © Blizzard Entertainment`,
+      items: `client WoW Forever ${random.build} si la fiche y est, sinon forever-db de fatedfr (build ${fatedfr.meta.build}, GPL-3.0) pour la qualité, les niveaux et les noms`,
+    },
+    items: random.items,
+    suffixes: random.suffixes,
+  }) + '\n',
+)
 // Traductions : seulement les objets gardés (et les réactifs de leurs crafts) et les quêtes utilisées.
 const namedItems = new Set(items.keys())
 for (const list of Object.values(sources)) for (const s of list) if (s.t === 'craft') for (const [id] of s.reagents) namedItems.add(id)
@@ -742,8 +826,10 @@ for (const [lang, n] of Object.entries(gameNames)) {
     JSON.stringify({
       generated,
       locale: LANG_LOCALES[lang],
-      source: 'API Blizzard WoW Forever, © Blizzard Entertainment',
-      items: pick(n.items, namedItems),
+      source:
+        'API Blizzard WoW Forever, © Blizzard Entertainment ; objets à stats aléatoires : client WoW Forever (suffixes) et forever-db de fatedfr (objets de base, GPL-3.0)',
+      items: { ...pick(n.items, namedItems), ...random.names[lang]?.items },
+      suffixes: random.names[lang]?.suffixes ?? {},
       quests: pick(n.quests, questIds),
       subclasses: n.subclasses,
       professions: n.professions,

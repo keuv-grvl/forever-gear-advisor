@@ -84,7 +84,7 @@ export const de: Messages = {
   'hint.anticipate':
     'Schlägt auch Gegenstände bis zu 5 Stufen über deiner vor, damit du vorausplanen kannst. Die benötigte Stufe steht neben jedem Gegenstand.',
   'hint.origins':
-    'Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus erhältlich. Wenn du „Ruf“ abwählst, fallen alle Gegenstände weg, die einen Ruf erfordern, egal aus welcher Quelle. Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“.',
+    'Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus erhältlich. Wenn du „Ruf“ abwählst, fallen alle Gegenstände weg, die einen Ruf erfordern, egal aus welcher Quelle. Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“. Gegenstände mit Zufallswerten („des Wals“, „des Bären“…) werden nur vorgeschlagen, wenn sie im Auktionshaus angeboten werden (ohne Waffen).',
   'hint.armorOnly': 'Deine Klasse trägt nur {best}: Diese Option ändert nichts.',
   'hint.armor':
     'Aktiviert: für Kopf, Schultern, Brust, Handgelenke, Hände, Taille, Beine und Füße nur Rüstungstyp „{best}“, der schwerste Typ, den deine Klasse auf Stufe {level} trägt. Deaktiviert: auch {lighter} (weniger Rüstung, manchmal bessere Werte). Rücken, Hals, Finger und Schmuck sind nicht betroffen.',
@@ -108,6 +108,9 @@ export const de: Messages = {
   'src.rep': 'Ruf: {faction} ({standing})',
   'src.boe': 'Beute (beim Anlegen gebunden)',
   'src.unknown': 'unbekannte Quelle, siehe Wowhead',
+  'src.random': "Beute mit Zufallswerten",
+  'src.randomNote':
+    "Werte berechnet aus den Tabellen des WoW-Forever-Clients. Qualität und Stufen des Grundgegenstands: aus dem Client, wenn er sie hat, sonst aus forever-db (fatedfr), da die Forever-API diese Gegenstände nicht kennt.",
   'src.ah': 'AH: {price}',
   'price.note':
     'Niedrigster Preis, Median über die {houses} Auktionshäuser ({faction}) dieses Spielmodus (die API verrät nicht, welches dein Charakter nutzt). Stand: {when}.',
@@ -124,6 +127,6 @@ export const de: Messages = {
   'money.c': 'k',
 
   'reco.footer':
-    'Score: Summe der Werte, gewichtet für die Spezialisierung (Gewichtung von {polestar}, GPL-3.0). Der Zugewinn ist die Differenz zum angelegten Gegenstand. „~“: geschätzte Stufe, die API liefert keine benötigte Stufe. Gegenstände: Blizzard-API, WoW Forever ({date}); Quests: forever-db (Polestar); Händler: forever-db (fatedfr). Beim Aufheben gebundene Drops werden nicht angezeigt, und Gegenstände mit Zufallssuffix („of the Owl“) werden nicht vorgeschlagen.',
+    'Score: Summe der Werte, gewichtet für die Spezialisierung (Gewichtung von {polestar}, GPL-3.0). Der Zugewinn ist die Differenz zum angelegten Gegenstand. „~“: geschätzte Stufe, die API liefert keine benötigte Stufe. Gegenstände: Blizzard-API, WoW Forever ({date}); Quests: forever-db (Polestar); Händler: forever-db (fatedfr). Beim Aufheben gebundene Drops werden nicht angezeigt. Gegenstände mit Zufallswerten („des Wals“): nur die im Auktionshaus angebotenen, ohne Waffen; Werte aus dem WoW-Forever-Client, Qualität und Stufen des Grundgegenstands aus forever-db (fatedfr).',
   'reco.footerNpc': 'NPC-Namen bleiben auf Englisch: Die Forever-API liefert sie nicht in anderen Sprachen.',
 }
