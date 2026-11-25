@@ -400,3 +400,59 @@ details.more .candidates {
 .rep-todo {
   color: var(--warn);
 }
+
+/* Champ du nom et ses suggestions (src/components/NameInput.vue). */
+.name-field {
+  position: relative;
+  flex: 1 1 16rem;
+  display: flex;
+}
+.name-field input {
+  flex: 1;
+  min-width: 0;
+}
+.suggest {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 20rem;
+  overflow-y: auto;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  padding: 0.25rem 0;
+}
+.suggest-group {
+  padding: 0.35rem 0.6rem 0.15rem;
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.suggest-option {
+  padding: 0.3rem 0.6rem 0.3rem 1rem;
+  cursor: pointer;
+}
+.suggest-option:hover,
+.suggest-option.active {
+  background: var(--hover);
+}
+.suggest-clear {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  border: 0;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  padding: 0.35rem 0.6rem;
+  text-align: left;
+  font-size: 0.8em;
+  color: var(--muted);
+  background: none;
+}
+.suggest-clear:hover {
+  color: var(--fg);
+}

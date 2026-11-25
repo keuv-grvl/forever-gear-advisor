@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onErrorCaptured, onMounted, ref, watch } from 'vue'
+import { onErrorCaptured, onMounted, ref, watch } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
 import GearTable from './components/GearTable.vue'
 import { lang, langInfo, LANGS, t } from './i18n'
 import { loadGameData, type GameData } from './lib/data'
-import { remember, suggestions } from './lib/suggest'
+import NameInput from './components/NameInput.vue'
+import { remember } from './lib/suggest'
 import {
   ApiError,
   displayName,
@@ -23,12 +24,6 @@ const error = ref('')
 const data = ref<CharacterData | null>(null)
 const game = ref<GameData | null>(null)
 const gameError = ref('')
-// Autocomplétion : relue après chaque recherche réussie (localStorage, aucune requête).
-const suggestTick = ref(0)
-const nameSuggestions = computed(() => {
-  void suggestTick.value // dépendance : relire après chaque recherche
-  return suggestions(region.value)
-})
 
 // Perso affiché, pour le recharger dans une autre langue.
 let current: { region: Region; name: string } | null = null
@@ -66,8 +61,7 @@ async function load(fromHistory = false) {
     current = { region: region.value, name }
     nameInput.value = displayName(d.profile)
     document.title = `${nameInput.value} · Forever Gear Advisor`
-    remember(region.value, nameInput.value, d.profile.guild?.slug, d.guildMembers)
-    suggestTick.value++
+    remember(region.value, nameInput.value, d.profile.guild, d.guildMembers)
   } catch (err) {
     data.value = null
     if (err instanceof ApiError && err.status === 404) {
@@ -131,17 +125,13 @@ window.addEventListener('popstate', () => openFromUrl(true))
       <select v-model="region" :aria-label="t('form.region')">
         <option v-for="r in REGIONS" :key="r" :value="r">{{ r.toUpperCase() }}</option>
       </select>
-      <input
+      <NameInput
         v-model="nameInput"
+        :region="region"
         :placeholder="t('form.placeholder')"
-        :aria-label="t('form.character')"
-        list="character-suggestions"
-        autocomplete="off"
-        autofocus
+        :label="t('form.character')"
+        @pick="load()"
       />
-      <datalist id="character-suggestions">
-        <option v-for="n in nameSuggestions" :key="n" :value="n" />
-      </datalist>
       <button :disabled="loading">{{ loading ? t('form.loading') : t('form.load') }}</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>
