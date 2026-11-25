@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { detectSpec, wowheadItemUrl, wowheadQuestUrl, type CharacterData } from '../lib/blizzard'
+import { detectSpec, wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl, type CharacterData } from '../lib/blizzard'
 import { SLOT_LABELS, type GameData } from '../lib/data'
-import { recommend, type DbItem, type Source } from '../lib/recommend'
+import { recommend, sideOf, sourcesFor, type DbItem, type Source } from '../lib/recommend'
 import { findSpec, weightsAt } from '../lib/scoring'
 
 const props = defineProps<{ data: CharacterData; game: GameData }>()
@@ -37,16 +37,15 @@ const advice = computed(() => {
     anticipate: anticipate.value ? 5 : 0,
     perSlot: 3,
     mainArmorOnly: mainArmorOnly.value,
+    sources: game.value.sources,
   })
 })
 
-const SIDE = { ALLIANCE: 1, HORDE: 2 } as Record<string, number>
-
 function sourcesOf(item: DbItem): Source[] {
-  const mySide = SIDE[profile.value.faction.type]
-  // Quêtes de l'autre faction écartées (side 0 = les deux).
-  return (game.value?.sources[item.id] ?? []).filter((s) => s.t !== 'quest' || !s.side || s.side === mySide)
+  return sourcesFor(game.value?.sources[item.id], sideOf(profile.value.faction.type))
 }
+
+const STANDINGS = ['Détesté', 'Hostile', 'Inamical', 'Neutre', 'Amical', 'Honoré', 'Révéré', 'Exalté']
 
 function reagentsText(s: Extract<Source, { t: 'craft' }>): string {
   return s.reagents.map(([, name, qty]) => `${qty} × ${name}`).join(', ')
@@ -106,13 +105,19 @@ function levelText(item: DbItem): string {
                     <div class="sources">
                       <template v-for="(s, i) in sourcesOf(c.item)" :key="i">
                         <span v-if="s.t === 'craft'" :title="reagentsText(s)">Craft : {{ s.prof }}</span>
+                        <span v-else-if="s.t === 'vendor'">
+                          Vendeur :
+                          <a :href="wowheadNpcUrl(s.npc)" target="_blank" rel="noopener">{{ s.name }}</a>
+                          <template v-if="s.sub"> ({{ s.sub }})</template>
+                        </span>
                         <span v-else>
                           Quête :
                           <a :href="wowheadQuestUrl(s.id)" target="_blank" rel="noopener">{{ s.title ?? `#${s.id}` }}</a>
                           <template v-if="s.min ?? s.lvl"> (niv {{ s.min ?? s.lvl }})</template>
                         </span>
                       </template>
-                      <span v-if="sourcesOf(c.item).length === 0" class="muted">source inconnue, voir Wowhead</span>
+                      <span v-if="c.item.rep">Réputation : {{ c.item.rep[0] }} ({{ STANDINGS[c.item.rep[1]] ?? c.item.rep[1] }})</span>
+                      <span v-if="sourcesOf(c.item).length === 0 && !c.item.rep" class="muted">source inconnue, voir Wowhead</span>
                     </div>
                   </li>
                 </ul>
@@ -126,7 +131,8 @@ function levelText(item: DbItem): string {
         Score : somme des stats pondérées pour la spé (poids
         <a :href="game.weights.source.url" target="_blank" rel="noopener">Polestar</a>, GPL-3.0). Le gain est l'écart avec l'objet
         porté. « ~ » : niveau estimé, l'API ne donne pas de niveau requis. Objets : API Blizzard WoW Forever ({{ game.generated }}) ;
-        quêtes : forever-db (Polestar). Les objets à suffixe aléatoire (« of the Owl ») et les drops ne sont pas proposés.
+        quêtes : forever-db (Polestar) ; vendeurs : forever-db (fatedfr). Les drops ne sont pas indiqués, et les objets à suffixe aléatoire
+        (« of the Owl ») ne sont pas proposés.
       </p>
     </template>
   </section>

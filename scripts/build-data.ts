@@ -6,7 +6,8 @@
 //   avec l'équipement réellement porté par les persos listés dans scripts/seeds.local.json (non versionné).
 // - Craft : API Blizzard (métiers → paliers → recettes).
 // - Quêtes : forever-db de Polestar (GPL-3.0), release figée ci-dessous.
-// - Pas de drops ni de vendeurs : leurs données mêlent des bases Classic (décision : Forever uniquement).
+// - Vendeurs : base forever-db de fatedfr (GPL-3.0, release « latest »), PNJ attestés par une source Forever.
+// - Pas de drops : leurs données mêlent des bases Classic (décision : Forever uniquement).
 //
 // Les réponses de l'API sont gardées dans .cache/blizzard/ : une relance ne refait que les appels manquants
 // ou plus vieux que CACHE_MAX_AGE_DAYS. En fin de génération réussie, tout fichier non utilisé est supprimé :
@@ -17,6 +18,7 @@ import { createHash } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import { mkdir, readdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { promisify } from 'node:util'
+import { gunzipSync } from 'node:zlib'
 
 const REGION = 'eu'
 const LOCALE = 'en_US'
@@ -25,6 +27,11 @@ const CACHE_MAX_AGE_DAYS = 7 // au-delà, la réponse est redemandée (les patch
 const CONCURRENCY = 16
 
 const usedCacheFiles = new Set<string>()
+
+// Base de fatedfr : la release « latest » est refaite deux fois par jour ; on la retélécharge après CACHE_MAX_AGE_DAYS.
+const FATEDFR_DB_URL = 'https://github.com/foreverfraddons/forever-db/releases/download/latest/forever.json.gz'
+// Indices (bit k de `src`) des sources Forever dans meta.sourceList, vérifiés au chargement.
+const FATEDFR_FOREVER_SOURCES = ['questie', 'client', 'att', 'legacy', 'spf']
 
 const FOREVER_DB = {
   version: '2026.11.2',
@@ -129,6 +136,7 @@ interface ApiItemPreview {
     level?: { value: number }
     playable_classes?: { links: Ref[] }
     faction?: { value: Typed }
+    reputation?: { faction: Ref; min_reputation_level: number }
   }
   level?: { value: number }
   bonus_list?: number[]
@@ -168,6 +176,7 @@ export interface OutItem {
   fac?: string // faction requise
   u?: 1 // unique
   bop?: 1 // lié quand ramassé
+  rep?: [faction: string, standing: number] // réputation requise (0 Détesté … 5 Honoré … 7 Exalté)
   src: 'api' | 'seen' // fiche API ou objet observé sur un perso
 }
 
@@ -204,6 +213,8 @@ function toOutItem(p: ApiItemPreview, extra: { il?: number; rl?: number; src: Ou
   if (p.requirements?.faction) out.fac = p.requirements.faction.value.type
   if (p.unique_equipped) out.u = 1
   if (p.binding?.type === 'ON_ACQUIRE') out.bop = 1
+  const r = p.requirements?.reputation
+  if (r) out.rep = [r.faction.name, r.min_reputation_level]
   return out
 }
 
@@ -394,6 +405,62 @@ async function buildQuestSources(itemIds: Set<number>): Promise<Map<number, Ques
   return out
 }
 
+// ---------- 5. Vendeurs (forever-db de fatedfr) ----------
+
+interface VendorSource {
+  t: 'vendor'
+  npc: number
+  name: string
+  sub?: string // « Warsong Supply Officer »
+  side?: string // faction amicale : A, H ou AH
+}
+
+interface FatedfrDb {
+  meta: { build: string; hash: string; sourceList: { name: string }[] }
+  vend: Record<string, number[]>
+  npc: Record<string, [name: string, sub: string | null, ...rest: unknown[]]>
+  nfac: Record<string, string>
+  src: { npc: Record<string, number> }
+}
+
+async function buildVendorSources(itemIds: Set<number>): Promise<{ vendors: Map<number, VendorSource[]>; build: string; hash: string }> {
+  const dir = '.cache/fatedfr'
+  const file = `${dir}/forever.json.gz`
+  await mkdir(dir, { recursive: true })
+  if (!existsSync(file) || Date.now() - (await stat(file)).mtimeMs > CACHE_MAX_AGE_DAYS * 86_400_000) {
+    const res = await fetch(FATEDFR_DB_URL)
+    if (!res.ok) throw new Error(`forever-db (fatedfr) : HTTP ${res.status}`)
+    await writeFile(file, Buffer.from(await res.arrayBuffer()))
+  }
+  const db = JSON.parse(gunzipSync(await readFile(file)).toString('utf8')) as FatedfrDb
+  const names = db.meta.sourceList.map((x) => x.name)
+  const foreverMask = FATEDFR_FOREVER_SOURCES.reduce((m, n) => {
+    const bit = names.indexOf(n)
+    if (bit < 0) throw new Error(`forever-db (fatedfr) : source « ${n} » absente de meta.sourceList, format changé ?`)
+    return m | (1 << bit)
+  }, 0)
+
+  const vendors = new Map<number, VendorSource[]>()
+  for (const [itemId, npcIds] of Object.entries(db.vend)) {
+    const id = Number(itemId)
+    if (!itemIds.has(id)) continue
+    const list: VendorSource[] = []
+    for (const npc of npcIds) {
+      // PNJ attesté par une source Forever (pas seulement par une base Classic).
+      if (!((db.src.npc[npc] ?? 0) & foreverMask)) continue
+      const row = db.npc[npc]
+      if (!row) continue
+      const v: VendorSource = { t: 'vendor', npc, name: row[0] }
+      if (row[1]) v.sub = row[1]
+      if (db.nfac[npc]) v.side = db.nfac[npc]
+      list.push(v)
+    }
+    // Quelques vendeurs suffisent ; ceux des deux factions d'abord.
+    if (list.length) vendors.set(id, list.sort((a, b) => (b.side?.length ?? 0) - (a.side?.length ?? 0)).slice(0, 4))
+  }
+  return { vendors, build: db.meta.build, hash: db.meta.hash }
+}
+
 // ---------- Main ----------
 
 await mkdir(CACHE, { recursive: true })
@@ -424,9 +491,13 @@ console.log(`4. Quêtes (forever-db ${FOREVER_DB.version})`)
 const fdb = await buildQuestSources(itemIds)
 console.log(`  ${fdb.size} objets donnés par une quête`)
 
-const sources: Record<number, (CraftSource | QuestSource)[]> = {}
+console.log('5. Vendeurs (forever-db de fatedfr)')
+const vend = await buildVendorSources(itemIds)
+console.log(`  ${vend.vendors.size} objets vendus (base du ${vend.build})`)
+
+const sources: Record<number, (CraftSource | QuestSource | VendorSource)[]> = {}
 for (const id of [...itemIds].sort((a, b) => a - b)) {
-  const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? [])]
+  const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(vend.vendors.get(id) ?? [])]
   if (list.length) sources[id] = list
 }
 
@@ -470,6 +541,7 @@ await writeFile(
     source: {
       craft: 'API Blizzard WoW Forever (recettes)',
       quest: `forever-db ${FOREVER_DB.version} (Polestar, GPL-3.0)`,
+      vendor: `forever-db de fatedfr, build ${vend.build} (hash ${vend.hash}), GPL-3.0`,
     },
     sources,
   }) + '\n',

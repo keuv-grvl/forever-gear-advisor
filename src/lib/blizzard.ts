@@ -120,3 +120,7 @@ export function wowheadItemUrl(itemId: number): string {
 export function wowheadQuestUrl(questId: number): string {
   return `https://www.wowhead.com/forever/quest=${questId}`
 }
+
+export function wowheadNpcUrl(npcId: number): string {
+  return `https://www.wowhead.com/forever/npc=${npcId}`
+}

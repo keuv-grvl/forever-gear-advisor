@@ -7,7 +7,7 @@
 
 Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), puis indique **quels objets améliorer** et **où les obtenir** (quête, craft), quel que soit son niveau. Pas de design poussé : l'utilité d'abord.
 
-**Règle n°1 : données WoW Forever uniquement.** Jamais Classic Era, Classic, retail, cMaNGOS/VMaNGOS, ni repli « vanilla » : Forever a rééquilibré beaucoup d'objets (Boulder Pads, Belt of Arugal… n'ont pas les mêmes stats qu'en Era). Une donnée absente en Forever s'affiche comme inconnue. **Pas de drops** (décision du 2026-11-25) : leurs données ouvertes mêlent des bases Classic.
+**Règle n°1 : données WoW Forever uniquement.** Jamais Classic Era, Classic, retail, cMaNGOS/VMaNGOS, ni repli « vanilla » : Forever a rééquilibré beaucoup d'objets (Boulder Pads, Belt of Arugal… n'ont pas les mêmes stats qu'en Era). Une donnée absente en Forever s'affiche comme inconnue. **Pas de drops** (décision du 2026-11-25) : leurs données ouvertes mêlent des bases Classic. **Vendeurs autorisés** (assouplissement du même jour, à la demande de l'utilisateur) : base de fatedfr, PNJ attestés par une source Forever seulement.
 
 ## Stack et déploiement
 
@@ -68,7 +68,8 @@ Code sous MIT (`LICENSE`). Données de `public/data/` sous GPL-3.0 (`public/data
 ## Sources de données externes (audit du 2026-11-25)
 
 - **Polestar** (`fitzforge/polestar`, GPL-3.0) : utilisé pour les **poids** (`docs/gear-weights.md`) et les **quêtes** via sa base `forever-db/` (releases `data-v*`, tables `quest`, `quest_reward` ; données Forever de QuestieDB). Sa table `item` n'a que les noms (pas de stats). Son `item_source` (drops) n'est pas utilisé (pas de drops) ; le loot des boss qu'il tire d'AtlasLoot reste local chez eux, non redistribué.
-- **forever-db de fatedfr** (`foreverfraddons/forever-db`, addon CurseForge « forever-db », GPL-3.0, mis à jour 2×/jour) : très complet (drops de boss avec taux, vendeurs, quêtes, 32 279 objets du client Forever sans stats), 72/81 objets portés avec une source. **Non utilisé** : ses liens de drop et vendeurs mêlent VMaNGOS/cMaNGOS/pfQuest sans provenance par entrée. Le champ `src` (bit k = k-ième source de `meta.sourceList`) n'existe que pour les entités (item, npc, obj, quest). À reconsidérer si la règle « pas de drops » change.
+- **forever-db de fatedfr** (`foreverfraddons/forever-db`, addon CurseForge « forever-db », GPL-3.0, release `latest` refaite 2×/jour) : très complet (drops de boss avec taux, vendeurs, quêtes, 32 279 objets du client Forever sans stats), 72/81 objets portés avec une source. **Utilisé pour les vendeurs seulement** (`vend` + `nfac` : faction amicale A/H/AH) : un objet dont tous les vendeurs sont de l'autre faction n'est plus proposé (Advisor's Gnarled Staff = Horde, Lorekeeper's Staff = Alliance, mêmes stats ; le client Forever ne les restreint pas, seul le vendeur le fait). Drops non utilisés : ses liens mêlent VMaNGOS/cMaNGOS/pfQuest sans provenance par entrée. Le champ `src` (bit k = k-ième source de `meta.sourceList`) n'existe que pour les entités (item, npc, obj, quest) : on garde les vendeurs dont le PNJ a un bit Forever (questie, client, att, legacy, spf).
+- L'API Forever donne la **réputation requise** (`requirements.reputation` : faction, niveau 0-7), ex. Highlander's Leather Girdle → The League of Arathor, Honoré. Stockée dans `items.json` (`rep`) et affichée.
 - **Écartés** : namespace Classic Era (`static-classic1x`, stats fausses pour Forever), cMaNGOS/VMaNGOS, wago.tools (règle Forever uniquement), Wowhead (pas de scraping).
 
 Toujours afficher la provenance d'une info de source, et garder le lien Wowhead comme référence.
@@ -100,7 +101,7 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 **Phase 5, sources**
 
-- [x] Craft (métier, réactifs en infobulle) et quêtes (lien Wowhead, niveau, faction filtrée).
+- [x] Craft (métier, réactifs en infobulle), quêtes (lien Wowhead, niveau, faction filtrée), vendeurs (lien Wowhead du PNJ, faction filtrée), réputation requise. 3 818 objets sur 6 479 ont une source.
 - [ ] Prix HV (`/data/wow/ruleset/{id}/auctions/…`, namespace dynamic) pour les objets craftés ou vendus.
 - [ ] Indiquer si le perso a le métier (`/professions`) et le niveau de compétence de la recette (absent de l'API).
 - [ ] Plus d'objets observés : élargir `seeds.local.json` (autres guildes) pour couvrir les objets absents de l'API statique.
