@@ -31,7 +31,7 @@ export interface DbItem {
 
 export type Source =
   | { t: 'craft'; prof: string; recipe: string; reagents: [number, string, number][]; qty?: number }
-  | { t: 'quest'; id: number; title?: string; lvl?: number; min?: number; side?: number; choice?: 1 }
+  | { t: 'quest'; id: number; title?: string; lvl?: number; min?: number; side?: number; cls?: number; choice?: 1 }
   | { t: 'vendor'; npc: number; name: string; sub?: string; side?: string }
 
 /** Côté du perso : A (Alliance) ou H (Horde). */
@@ -39,11 +39,12 @@ export function sideOf(faction: string): 'A' | 'H' {
   return faction === 'HORDE' ? 'H' : 'A'
 }
 
-/** Sources accessibles au perso : quêtes et vendeurs de l'autre faction écartés. */
-export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H'): Source[] {
+/** Sources accessibles au perso : quêtes d'une autre faction ou classe, vendeurs de l'autre faction écartés. */
+export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', classId: number): Source[] {
   const questSide = side === 'A' ? 1 : 2
+  const classBit = 1 << (classId - 1)
   return (sources ?? []).filter((s) => {
-    if (s.t === 'quest') return !s.side || s.side === questSide
+    if (s.t === 'quest') return (!s.side || s.side === questSide) && (!s.cls || (s.cls & classBit) !== 0)
     if (s.t === 'vendor') return !s.side || s.side.includes(side)
     return true
   })
@@ -112,10 +113,10 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const mainArmor = bestArmorType(o.classId, maxLevel)
   const side = sideOf(o.faction)
   // Objet dont toutes les sources connues sont réservées à l'autre faction (ex. Advisor's Gnarled Staff,
-  // vendu seulement par l'intendant Chanteguerre) : inaccessible. Sans source connue, on le garde.
+  // vendu seulement par l'intendant Chanteguerre) ou à une autre classe : inaccessible. Sans source connue, on le garde.
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
-    return !all?.length || sourcesFor(all, side).length > 0
+    return !all?.length || sourcesFor(all, side, o.classId).length > 0
   }
   const usable = db.filter(
     (it) =>

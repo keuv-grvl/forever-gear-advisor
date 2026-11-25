@@ -7,6 +7,7 @@
 // - Craft : API Blizzard (métiers → paliers → recettes).
 // - Quêtes : forever-db de Polestar (GPL-3.0), release figée ci-dessous.
 // - Vendeurs : base forever-db de fatedfr (GPL-3.0, release « latest »), PNJ attestés par une source Forever.
+// - Quêtes propres à Forever absentes de Polestar : même base, seulement les quêtes qu'aucune base Classic ne connaît.
 // - Pas de drops : leurs données mêlent des bases Classic (décision : Forever uniquement).
 //
 // Les réponses de l'API sont gardées dans .cache/blizzard/ : une relance ne refait que les appels manquants
@@ -30,8 +31,12 @@ const usedCacheFiles = new Set<string>()
 
 // Base de fatedfr : la release « latest » est refaite deux fois par jour ; on la retélécharge après CACHE_MAX_AGE_DAYS.
 const FATEDFR_DB_URL = 'https://github.com/foreverfraddons/forever-db/releases/download/latest/forever.json.gz'
-// Indices (bit k de `src`) des sources Forever dans meta.sourceList, vérifiés au chargement.
-const FATEDFR_FOREVER_SOURCES = ['questie', 'client', 'att', 'legacy', 'spf']
+// Bit k de `src` = k-ième source passée à tools/merge.py, dans l'ordre du workflow de fatedfr
+// (.github/workflows/build.yml) et PAS dans l'ordre de meta.sourceList. Vérifié au chargement.
+const FATEDFR_SRC_BITS = ['client', 'questie', 'att', 'vmangos', 'cmangos', 'pfquest', 'legacy', 'spf', 'terrain']
+const bitMask = (names: string[]) => names.reduce((m, n) => m | (1 << FATEDFR_SRC_BITS.indexOf(n)), 0)
+const FATEDFR_FOREVER = bitMask(['client', 'questie', 'att', 'legacy', 'spf'])
+const FATEDFR_CLASSIC = bitMask(['vmangos', 'cmangos', 'pfquest'])
 
 const FOREVER_DB = {
   version: '2026.11.2',
@@ -353,6 +358,7 @@ interface QuestSource {
   lvl?: number
   min?: number
   side?: number // 0 les deux, 1 Alliance, 2 Horde
+  cls?: number // classes autorisées, masque (bit id-1) ; absent = toutes
   choice?: 1 // objet au choix parmi plusieurs
 }
 
@@ -363,7 +369,27 @@ async function readJsonl<T>(file: string): Promise<T[]> {
     .map((l) => JSON.parse(l) as T)
 }
 
-async function buildQuestSources(itemIds: Set<number>): Promise<Map<number, QuestSource[]>> {
+interface QuestInfo {
+  id: number
+  title?: string
+  level?: number
+  min_level?: number
+  side?: number
+  classes?: number
+}
+
+/** Source « quête » à partir de la table quest de forever-db (Polestar). */
+function questSource(id: number, q: QuestInfo | undefined): QuestSource {
+  const s: QuestSource = { t: 'quest', id }
+  if (q?.title) s.title = q.title
+  if (q?.level) s.lvl = q.level
+  if (q?.min_level) s.min = q.min_level
+  if (q?.side) s.side = q.side
+  if (q?.classes) s.cls = q.classes
+  return s
+}
+
+async function buildQuestSources(itemIds: Set<number>): Promise<{ sources: Map<number, QuestSource[]>; quests: Map<number, QuestInfo> }> {
   const dir = '.cache/forever-db'
   const zip = `${dir}/forever-db-${FOREVER_DB.version}.zip`
   await mkdir(dir, { recursive: true })
@@ -385,24 +411,17 @@ async function buildQuestSources(itemIds: Set<number>): Promise<Map<number, Ques
   }
   const t = (name: string) => `${data}/forever-db/data/${name}.jsonl`
 
-  const quests = new Map(
-    (await readJsonl<{ id: number; title?: string; level?: number; min_level?: number; side?: number }>(t('quest'))).map((q) => [q.id, q]),
-  )
+  const quests = new Map((await readJsonl<QuestInfo>(t('quest'))).map((q) => [q.id, q]))
   const out = new Map<number, QuestSource[]>()
   const add = (item: number, s: QuestSource) => out.set(item, [...(out.get(item) ?? []), s])
 
   for (const r of await readJsonl<{ quest: number; kind: string; id: number }>(t('quest_reward'))) {
     if ((r.kind !== 'item' && r.kind !== 'choice') || !itemIds.has(r.id)) continue
-    const q = quests.get(r.quest)
-    const s: QuestSource = { t: 'quest', id: r.quest }
-    if (q?.title) s.title = q.title
-    if (q?.level) s.lvl = q.level
-    if (q?.min_level) s.min = q.min_level
-    if (q?.side !== undefined) s.side = q.side
+    const s = questSource(r.quest, quests.get(r.quest))
     if (r.kind === 'choice') s.choice = 1
     add(r.id, s)
   }
-  return out
+  return { sources: out, quests }
 }
 
 // ---------- 5. Vendeurs (forever-db de fatedfr) ----------
@@ -416,14 +435,16 @@ interface VendorSource {
 }
 
 interface FatedfrDb {
-  meta: { build: string; hash: string; sourceList: { name: string }[] }
+  meta: { build: string; hash: string }
   vend: Record<string, number[]>
+  rew: Record<string, number[]>
   npc: Record<string, [name: string, sub: string | null, ...rest: unknown[]]>
+  quest: Record<string, [title: string, level: number | null, minLevel: number | null]>
   nfac: Record<string, string>
-  src: { npc: Record<string, number> }
+  src: { npc: Record<string, number>; item: Record<string, number>; quest: Record<string, number> }
 }
 
-async function buildVendorSources(itemIds: Set<number>): Promise<{ vendors: Map<number, VendorSource[]>; build: string; hash: string }> {
+async function loadFatedfr(): Promise<FatedfrDb> {
   const dir = '.cache/fatedfr'
   const file = `${dir}/forever.json.gz`
   await mkdir(dir, { recursive: true })
@@ -433,13 +454,13 @@ async function buildVendorSources(itemIds: Set<number>): Promise<{ vendors: Map<
     await writeFile(file, Buffer.from(await res.arrayBuffer()))
   }
   const db = JSON.parse(gunzipSync(await readFile(file)).toString('utf8')) as FatedfrDb
-  const names = db.meta.sourceList.map((x) => x.name)
-  const foreverMask = FATEDFR_FOREVER_SOURCES.reduce((m, n) => {
-    const bit = names.indexOf(n)
-    if (bit < 0) throw new Error(`forever-db (fatedfr) : source « ${n} » absente de meta.sourceList, format changé ?`)
-    return m | (1 << bit)
-  }, 0)
+  // Contrôle de l'ordre des bits : un objet d'id Forever (>= 250000) n'existe dans aucune base Classic.
+  const wrong = Object.entries(db.src.item).filter(([id, mask]) => Number(id) >= 250000 && mask & FATEDFR_CLASSIC).length
+  if (wrong > 0) throw new Error(`forever-db (fatedfr) : ${wrong} objets Forever marqués Classic, l'ordre des bits de src a changé`)
+  return db
+}
 
+function buildVendorSources(db: FatedfrDb, itemIds: Set<number>): Map<number, VendorSource[]> {
   const vendors = new Map<number, VendorSource[]>()
   for (const [itemId, npcIds] of Object.entries(db.vend)) {
     const id = Number(itemId)
@@ -447,7 +468,7 @@ async function buildVendorSources(itemIds: Set<number>): Promise<{ vendors: Map<
     const list: VendorSource[] = []
     for (const npc of npcIds) {
       // PNJ attesté par une source Forever (pas seulement par une base Classic).
-      if (!((db.src.npc[npc] ?? 0) & foreverMask)) continue
+      if (!((db.src.npc[npc] ?? 0) & FATEDFR_FOREVER)) continue
       const row = db.npc[npc]
       if (!row) continue
       const v: VendorSource = { t: 'vendor', npc, name: row[0] }
@@ -458,7 +479,34 @@ async function buildVendorSources(itemIds: Set<number>): Promise<{ vendors: Map<
     // Quelques vendeurs suffisent ; ceux des deux factions d'abord.
     if (list.length) vendors.set(id, list.sort((a, b) => (b.side?.length ?? 0) - (a.side?.length ?? 0)).slice(0, 4))
   }
-  return { vendors, build: db.meta.build, hash: db.meta.hash }
+  return vendors
+}
+
+/**
+ * Récompenses de quêtes propres à Forever, absentes de la base de Polestar (ex. Khan Jehn 93128 → Abandoned Ferocity).
+ * Seulement les quêtes qu'aucune base Classic ne connaît : le lien quête → objet vient alors forcément d'une source Forever.
+ */
+function buildForeverQuestRewards(
+  db: FatedfrDb,
+  itemIds: Set<number>,
+  known: Map<number, QuestSource[]>,
+  quests: Map<number, QuestInfo>,
+): Map<number, QuestSource[]> {
+  const out = new Map<number, QuestSource[]>()
+  for (const [itemId, questIds] of Object.entries(db.rew)) {
+    const id = Number(itemId)
+    if (!itemIds.has(id)) continue
+    for (const q of questIds) {
+      const mask = db.src.quest[q] ?? 0
+      if (!(mask & FATEDFR_FOREVER) || mask & FATEDFR_CLASSIC) continue
+      if (known.get(id)?.some((s) => s.id === q)) continue
+      // Faction et classes : connues par la table quest de Polestar ; sinon titre et niveaux de fatedfr.
+      const row = db.quest[q]
+      const s = questSource(q, quests.get(q) ?? { id: q, title: row?.[0], level: row?.[1] ?? undefined, min_level: row?.[2] ?? undefined })
+      out.set(id, [...(out.get(id) ?? []), s])
+    }
+  }
+  return out
 }
 
 // ---------- Main ----------
@@ -488,16 +536,19 @@ const crafts = await buildCrafts(itemIds)
 console.log(`  ${crafts.size} objets fabriquables`)
 
 console.log(`4. Quêtes (forever-db ${FOREVER_DB.version})`)
-const fdb = await buildQuestSources(itemIds)
+const { sources: fdb, quests: questTable } = await buildQuestSources(itemIds)
 console.log(`  ${fdb.size} objets donnés par une quête`)
 
-console.log('5. Vendeurs (forever-db de fatedfr)')
-const vend = await buildVendorSources(itemIds)
-console.log(`  ${vend.vendors.size} objets vendus (base du ${vend.build})`)
+console.log('5. Vendeurs et quêtes Forever (forever-db de fatedfr)')
+const fatedfr = await loadFatedfr()
+const vendors = buildVendorSources(fatedfr, itemIds)
+console.log(`  ${vendors.size} objets vendus (base du ${fatedfr.meta.build})`)
+const foreverQuests = buildForeverQuestRewards(fatedfr, itemIds, fdb, questTable)
+console.log(`  ${foreverQuests.size} objets donnés par une quête Forever absente de Polestar`)
 
 const sources: Record<number, (CraftSource | QuestSource | VendorSource)[]> = {}
 for (const id of [...itemIds].sort((a, b) => a - b)) {
-  const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(vend.vendors.get(id) ?? [])]
+  const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(foreverQuests.get(id) ?? []), ...(vendors.get(id) ?? [])]
   if (list.length) sources[id] = list
 }
 
@@ -510,7 +561,9 @@ for (const it of items.values()) {
     it.al = it.rl
     continue
   }
-  const questLevels = (fdb.get(it.id) ?? []).map((q) => q.min ?? q.lvl).filter((l): l is number => !!l)
+  const questLevels = [...(fdb.get(it.id) ?? []), ...(foreverQuests.get(it.id) ?? [])]
+    .map((q) => q.min ?? q.lvl)
+    .filter((l): l is number => !!l)
   if (questLevels.length) it.al = Math.min(...questLevels)
   else if (it.il) {
     it.al = Math.max(1, it.il - 5)
@@ -541,7 +594,7 @@ await writeFile(
     source: {
       craft: 'API Blizzard WoW Forever (recettes)',
       quest: `forever-db ${FOREVER_DB.version} (Polestar, GPL-3.0)`,
-      vendor: `forever-db de fatedfr, build ${vend.build} (hash ${vend.hash}), GPL-3.0`,
+      vendor_and_forever_quests: `forever-db de fatedfr, build ${fatedfr.meta.build} (hash ${fatedfr.meta.hash}), GPL-3.0`,
     },
     sources,
   }) + '\n',

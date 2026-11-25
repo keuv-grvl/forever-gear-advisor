@@ -42,7 +42,7 @@ const advice = computed(() => {
 })
 
 function sourcesOf(item: DbItem): Source[] {
-  return sourcesFor(game.value?.sources[item.id], sideOf(profile.value.faction.type))
+  return sourcesFor(game.value?.sources[item.id], sideOf(profile.value.faction.type), profile.value.character_class.id)
 }
 
 const STANDINGS = ['Détesté', 'Hostile', 'Inamical', 'Neutre', 'Amical', 'Honoré', 'Révéré', 'Exalté']
