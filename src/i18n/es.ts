@@ -143,4 +143,5 @@ export const es: Messages = {
   'reco.footer':
     'Puntuación: suma de las estadísticas ponderadas para la especialización (pesos de {polestar}, GPL-3.0). La ganancia es la diferencia con el objeto equipado. «~»: nivel estimado, la API no indica el nivel requerido. Objetos: API de Blizzard, WoW Forever ({date}); misiones: forever-db (Polestar); vendedores: forever-db (fatedfr). No se muestran los objetos que se ligan al recogerlos. Objetos con estadísticas aleatorias («de la ballena»): solo los que están a la venta en la casa de subastas, sin armas; estadísticas del cliente de WoW Forever, calidad y niveles del objeto base de forever-db (fatedfr).',
   'reco.footerNpc': 'Los nombres de los PNJ se quedan en inglés: la API de Forever no los da en otros idiomas.',
+  'footer.madeBy': "Sitio hecho por {author}, jugador de WoW Forever. Sin afiliación con Blizzard Entertainment.",
 }

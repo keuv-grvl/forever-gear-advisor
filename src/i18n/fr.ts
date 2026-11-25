@@ -141,4 +141,5 @@ export const fr: Messages = {
   'reco.footer':
     "Score : somme des stats pondérées pour la spé (poids {polestar}, GPL-3.0). Le gain est l'écart avec l'objet porté. « ~ » : niveau estimé, l'API ne donne pas de niveau requis. Objets : API Blizzard WoW Forever ({date}) ; quêtes : forever-db (Polestar) ; vendeurs : forever-db (fatedfr). Les drops liés quand ramassés ne sont pas indiqués. Objets à stats aléatoires (« de la baleine ») : seulement ceux en vente à l'HV, hors armes ; stats calculées avec le client WoW Forever, qualité et niveaux de l'objet de base : forever-db (fatedfr).",
   'reco.footerNpc': "Les noms de PNJ restent en anglais : l'API Forever ne les donne pas dans d'autres langues.",
+  'footer.madeBy': "Site fait par {author}, joueur de WoW Forever. Non affilié à Blizzard Entertainment.",
 }

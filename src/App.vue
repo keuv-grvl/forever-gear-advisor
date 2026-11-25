@@ -147,5 +147,6 @@ window.addEventListener('popstate', () => openFromUrl(true))
         <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>{{ t('loading.gameData') }}
       </p>
     </div>
+    <footer class="site-footer muted small">{{ t('footer.madeBy', { author: 'keuv-grvl' }) }}</footer>
   </main>
 </template>

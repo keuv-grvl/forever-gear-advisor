@@ -513,3 +513,11 @@ details.more .candidates {
 .rep-todo a {
   color: inherit;
 }
+
+/* Pied de page du site (src/App.vue). */
+.site-footer {
+  margin-top: 2.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}

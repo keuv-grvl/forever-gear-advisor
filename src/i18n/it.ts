@@ -143,4 +143,5 @@ export const it: Messages = {
   'reco.footer':
     "Punteggio: somma delle statistiche ponderate per la specializzazione (pesi {polestar}, GPL-3.0). Il guadagno è la differenza con l'oggetto equipaggiato. «~»: livello stimato, l'API non fornisce il livello richiesto. Oggetti: API Blizzard, WoW Forever ({date}); missioni: forever-db (Polestar); mercanti: forever-db (fatedfr). I drop vincolati alla raccolta non sono indicati. Oggetti con statistiche casuali («of the Whale»): solo quelli in vendita alla casa d'aste, armi escluse; statistiche dal client di WoW Forever, qualità e livelli dell'oggetto base da forever-db (fatedfr).",
   'reco.footerNpc': "I nomi dei PNG restano in inglese: l'API di Forever non li fornisce in altre lingue.",
+  'footer.madeBy': "Sito realizzato da {author}, giocatore di WoW Forever. Non affiliato a Blizzard Entertainment.",
 }

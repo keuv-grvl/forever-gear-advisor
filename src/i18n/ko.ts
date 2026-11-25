@@ -141,4 +141,5 @@ export const ko: Messages = {
   'reco.footer':
     '점수: 전문화에 맞춰 가중치를 적용한 능력치의 합({polestar} 가중치, GPL-3.0). 향상폭은 착용 중인 아이템과의 차이입니다. “~”: 추정 레벨, API에서 요구 레벨을 제공하지 않음. 아이템: Blizzard API, WoW Forever({date}); 퀘스트: forever-db(Polestar); 상인: forever-db(fatedfr). 획득 시 귀속 전리품은 표시되지 않습니다. 무작위 능력치 아이템(“고래의”): 경매장에 등록된 것만, 무기 제외. 능력치는 WoW Forever 클라이언트, 기본 아이템의 품질과 레벨은 forever-db(fatedfr) 기준입니다.',
   'reco.footerNpc': 'NPC 이름은 영어로 표시됩니다. Forever API가 다른 언어로 제공하지 않기 때문입니다.',
+  'footer.madeBy': "WoW Forever 플레이어 {author}가 만든 사이트입니다. Blizzard Entertainment와 관련이 없습니다.",
 }

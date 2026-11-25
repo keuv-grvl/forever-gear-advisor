@@ -140,4 +140,5 @@ export const cn: Messages = {
   'reco.footer':
     '评分：按专精加权的属性总和（{polestar}权重，GPL-3.0）。提升幅度为与已装备物品的差值。“~”：估算等级，API未提供需要等级。物品：Blizzard API，WoW Forever（{date}）；任务：forever-db（Polestar）；商人：forever-db（fatedfr）。不显示拾取后绑定的掉落。随机属性物品（“巨鲸之”）：只推荐拍卖行在售的，不含武器；属性来自WoW Forever客户端，基础物品的品质和等级来自forever-db（fatedfr）。',
   'reco.footerNpc': 'NPC名称保持英文：Forever API不提供其他语言的名称。',
+  'footer.madeBy': "本站由WoW Forever玩家{author}制作，与Blizzard Entertainment无关。",
 }

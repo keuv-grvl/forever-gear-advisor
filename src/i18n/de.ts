@@ -143,4 +143,5 @@ export const de: Messages = {
   'reco.footer':
     'Score: Summe der Werte, gewichtet für die Spezialisierung (Gewichtung von {polestar}, GPL-3.0). Der Zugewinn ist die Differenz zum angelegten Gegenstand. „~“: geschätzte Stufe, die API liefert keine benötigte Stufe. Gegenstände: Blizzard-API, WoW Forever ({date}); Quests: forever-db (Polestar); Händler: forever-db (fatedfr). Beim Aufheben gebundene Drops werden nicht angezeigt. Gegenstände mit Zufallswerten („des Wals“): nur die im Auktionshaus angebotenen, ohne Waffen; Werte aus dem WoW-Forever-Client, Qualität und Stufen des Grundgegenstands aus forever-db (fatedfr).',
   'reco.footerNpc': 'NPC-Namen bleiben auf Englisch: Die Forever-API liefert sie nicht in anderen Sprachen.',
+  'footer.madeBy': "Website von {author}, einem WoW-Forever-Spieler. Nicht mit Blizzard Entertainment verbunden.",
 }

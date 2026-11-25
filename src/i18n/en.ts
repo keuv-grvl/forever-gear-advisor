@@ -151,6 +151,7 @@ export const en = {
   'reco.footer':
     'Score: sum of the stats weighted for the spec ({polestar} weights, GPL-3.0). The gain is the difference with the equipped item. “~”: estimated level, the API gives no required level. Items: Blizzard API, WoW Forever ({date}); quests: forever-db (Polestar); vendors: forever-db (fatedfr). Bind on Pickup drops are not shown. Random-stat items (“of the Whale”): only those for sale at the Auction House, weapons excluded; stats from the WoW Forever client, base item quality and levels from forever-db (fatedfr).',
   'reco.footerNpc': '',
+  'footer.madeBy': "Site made by {author}, a WoW Forever player. Not affiliated with Blizzard Entertainment.",
 }
 
 export type Messages = typeof en

@@ -143,4 +143,5 @@ export const pt: Messages = {
   'reco.footer':
     'Pontuação: soma dos atributos ponderados para a especialização (pesos do {polestar}, GPL-3.0). O ganho é a diferença em relação ao item equipado. “~”: nível estimado, a API não informa o nível necessário. Itens: API da Blizzard, WoW Forever ({date}); missões: forever-db (Polestar); vendedores: forever-db (fatedfr). Os drops vinculados quando coletados não são mostrados. Itens com atributos aleatórios (“da Baleia”): só os que estão à venda na Casa de Leilões, sem armas; atributos do cliente de WoW Forever, qualidade e níveis do item base do forever-db (fatedfr).',
   'reco.footerNpc': 'Os nomes de NPCs ficam em inglês: a API do Forever não os fornece em outros idiomas.',
+  'footer.madeBy': "Site feito por {author}, jogador de WoW Forever. Sem afiliação com a Blizzard Entertainment.",
 }
