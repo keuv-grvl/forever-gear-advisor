@@ -70,7 +70,7 @@ export const tw: Messages = {
   'gear.bestHint':
     "依上方設定找到的最佳選項評分，括號內為提升幅度；進度條顯示目前裝備已達到的比例。點擊一列即可查看該部位的選項。",
   'gear.toggle': "{slot}的選項",
-  'gear.total': "總評分：{score} / 最高 {best}（{pct}%）",
+  'gear.total': "總覽：{score} / {best}",
   'gear.totalHint':
     "各部位評分之和，與依上方設定（專精、護甲、等級、來源）可達到的最高評分之和對比。武器只計算一次最佳組合（雙手武器，或主手 + 副手）。",
 

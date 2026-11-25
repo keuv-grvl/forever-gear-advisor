@@ -70,7 +70,7 @@ export const es: Messages = {
   'gear.bestHint':
     "Puntuación de la mejor opción encontrada con los ajustes de arriba, ganancia entre paréntesis; la barra muestra cuánto alcanza ya el objeto equipado. Haz clic en una fila para ver las opciones de esa ranura.",
   'gear.toggle': "Opciones para {slot}",
-  'gear.total': "Puntuación total: {score} de {best} posibles ({pct} %)",
+  'gear.total': "Resumen: {score} / {best}",
   'gear.totalHint':
     "Suma de las puntuaciones de las ranuras, frente a la suma de las mejores puntuaciones posibles con los ajustes de arriba (especialización, armadura, nivel, orígenes). Para las armas, la mejor combinación (a dos manos, o mano derecha + mano izquierda) se cuenta una sola vez.",
 

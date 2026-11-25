@@ -70,7 +70,7 @@ export const fr: Messages = {
   'gear.bestHint':
     "Score de la meilleure option trouvée avec les réglages ci-dessus, gain entre parenthèses ; la barre montre la part déjà atteinte par l'objet porté. Clique sur une ligne pour voir les options de cet emplacement.",
   'gear.toggle': "Options pour {slot}",
-  'gear.total': "Score total : {score} sur {best} possibles ({pct} %)",
+  'gear.total': "Vue d'ensemble : {score} / {best}",
   'gear.totalHint':
     "Somme des scores des emplacements, comparée à la somme des meilleurs scores possibles avec les réglages ci-dessus (spé, armure, niveau, origines). Pour les armes, la meilleure combinaison (deux mains, ou main droite + main gauche) n'est comptée qu'une fois.",
 

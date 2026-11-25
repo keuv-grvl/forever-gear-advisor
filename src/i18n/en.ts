@@ -77,7 +77,7 @@ export const en = {
   'gear.bestHint':
     "Score of the best option found with the settings above, gain in parentheses; the bar shows how much of it your current item reaches. Click a row to see the options for that slot.",
   'gear.toggle': "Options for {slot}",
-  'gear.total': "Total score: {score} out of {best} possible ({pct}%)",
+  'gear.total': "Overview: {score} / {best}",
   'gear.totalHint':
     "Sum of the slot scores, against the sum of the best possible scores with the settings above (spec, armor, level, origins). For weapons, the best combination (two-hander, or main hand + off hand) is counted once.",
 

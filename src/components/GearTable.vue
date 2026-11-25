@@ -251,8 +251,8 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
     <p v-if="origins.length === 0" class="error">{{ t('reco.pickOrigin') }}</p>
 
     <p class="gear-total">
-      <span>
-        {{ t('gear.total', { score: formatNumber(totals.score), best: formatNumber(totals.best), pct: totals.pct }) }}<Hint
+      <span class="label">
+        {{ t('gear.total', { score: formatNumber(totals.score, 0), best: formatNumber(totals.best, 0) }) }}<Hint
           :text="t('gear.totalHint')"
         />
       </span>

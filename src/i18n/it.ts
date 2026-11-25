@@ -70,7 +70,7 @@ export const it: Messages = {
   'gear.bestHint':
     "Punteggio della migliore opzione trovata con le impostazioni sopra, guadagno tra parentesi; la barra mostra quanto ne raggiunge l'oggetto equipaggiato. Clicca su una riga per vedere le opzioni di quello slot.",
   'gear.toggle': "Opzioni per {slot}",
-  'gear.total': "Punteggio totale: {score} su {best} possibili ({pct}%)",
+  'gear.total': "Panoramica: {score} / {best}",
   'gear.totalHint':
     "Somma dei punteggi degli slot, rispetto alla somma dei migliori punteggi possibili con le impostazioni sopra (specializzazione, armatura, livello, origini). Per le armi, la combinazione migliore (a due mani, oppure mano destra + mano sinistra) è contata una sola volta.",
 

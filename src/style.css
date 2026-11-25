@@ -350,19 +350,22 @@ details.more .candidates {
   margin-left: auto;
   width: 6rem;
 }
-/* Récap au-dessus du tableau : score total et barre de progression. */
+/* Récap au-dessus du tableau : texte à gauche, barre de progression sur toute la largeur restante. */
 .gear-total {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.4rem 1rem;
+  gap: 0.4rem 1.5rem;
   margin: 0 0 0.75rem;
   font-weight: 600;
 }
+.gear-total .label {
+  white-space: nowrap;
+}
 .gear-total .bar {
-  width: 12rem;
-  height: 6px;
-  border-radius: 3px;
+  flex: 1 1 10rem;
+  height: 8px;
+  border-radius: 4px;
 }
 .gear tr.options-row > td {
   background: var(--hover);
