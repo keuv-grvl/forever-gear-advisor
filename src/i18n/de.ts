@@ -70,6 +70,9 @@ export const de: Messages = {
   'gear.bestHint':
     "Score der besten Option mit den obigen Einstellungen, Zugewinn in Klammern; der Balken zeigt, wie viel davon dein aktueller Gegenstand erreicht. Klicke auf eine Zeile, um die Optionen für diesen Platz zu sehen.",
   'gear.toggle': "Optionen für {slot}",
+  'gear.total': "Gesamtscore: {score} von {best} möglichen ({pct} %)",
+  'gear.totalHint':
+    "Summe der Scores aller Plätze, verglichen mit der Summe der bestmöglichen Scores mit den obigen Einstellungen (Spezialisierung, Rüstung, Stufe, Herkunft). Bei Waffen zählt die beste Kombination (Zweihänder oder Waffenhand + Schildhand) nur einmal.",
 
   'hint.spec':
     'Werte sind nicht für jede Spezialisierung gleich viel wert (Gewichtung von Polestar). Standard: die Spezialisierung, in die du die meisten Talentpunkte gesteckt hast.',

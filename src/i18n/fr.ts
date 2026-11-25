@@ -70,6 +70,9 @@ export const fr: Messages = {
   'gear.bestHint':
     "Score de la meilleure option trouvée avec les réglages ci-dessus, gain entre parenthèses ; la barre montre la part déjà atteinte par l'objet porté. Clique sur une ligne pour voir les options de cet emplacement.",
   'gear.toggle': "Options pour {slot}",
+  'gear.total': "Score total : {score} sur {best} possibles ({pct} %)",
+  'gear.totalHint':
+    "Somme des scores des emplacements, comparée à la somme des meilleurs scores possibles avec les réglages ci-dessus (spé, armure, niveau, origines). Pour les armes, la meilleure combinaison (deux mains, ou main droite + main gauche) n'est comptée qu'une fois.",
 
   'hint.spec': "Les stats n'ont pas la même valeur selon la spé (poids Polestar). Par défaut : la spé où tu as mis le plus de points de talent.",
   'hint.sort': "Gain : les emplacements où l'amélioration est la plus forte d'abord. Emplacement : l'ordre de la fiche personnage (tête, cou, épaules…).",

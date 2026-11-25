@@ -153,6 +153,29 @@ const rows = computed<Row[]>(() => {
   return sortBy.value === 'gain' ? list.sort((x, y) => y.gain - x.gain || SLOT_ORDER.indexOf(x.slot) - SLOT_ORDER.indexOf(y.slot)) : list
 })
 
+/**
+ * Récap : somme des scores portés et somme des meilleurs scores possibles. Armes : avec main droite + main gauche,
+ * la meilleure option de main droite peut être une arme à deux mains, qui remplace les deux ; on compte la meilleure
+ * combinaison une fois (2M seule, ou main droite + main gauche) au lieu d'additionner les gains des deux lignes.
+ */
+const totals = computed(() => {
+  let score = 0
+  let best = 0
+  for (const r of rows.value) {
+    if (r.score === undefined) continue
+    score += r.score
+    best += r.best ?? r.score
+  }
+  const mh = rows.value.find((r) => r.slot === 'MAIN_HAND')
+  const oh = rows.value.find((r) => r.slot === 'OFF_HAND')
+  if (mh?.advice && oh?.advice) {
+    const gains = (twoHand: boolean) =>
+      Math.max(0, ...mh.advice!.candidates.filter((c) => (c.item.slot === 'TWOHWEAPON') === twoHand).map((c) => c.gain))
+    best += Math.max(gains(true), gains(false) + oh.gain) - (mh.gain + oh.gain)
+  }
+  return { score, best, pct: best > 0 ? Math.min(100, Math.round((score / best) * 100)) : 100 }
+})
+
 const expandable = (r: Row) => (r.advice?.candidates.length ?? 0) > 0
 function toggle(slot: string) {
   const next = new Set(open.value)
@@ -226,6 +249,15 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
       <label v-for="o in ORIGINS" :key="o"><input v-model="origins" type="checkbox" :value="o" /> {{ t(`origin.${o}`) }}</label>
     </fieldset>
     <p v-if="origins.length === 0" class="error">{{ t('reco.pickOrigin') }}</p>
+
+    <p class="gear-total">
+      <span>
+        {{ t('gear.total', { score: formatNumber(totals.score), best: formatNumber(totals.best), pct: totals.pct }) }}<Hint
+          :text="t('gear.totalHint')"
+        />
+      </span>
+      <span class="bar" :title="`${totals.pct} %`"><span :style="{ width: `${totals.pct}%` }"></span></span>
+    </p>
 
     <div class="table-wrap">
       <table class="gear">

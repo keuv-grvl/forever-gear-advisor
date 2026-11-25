@@ -333,20 +333,36 @@ details.more .candidates {
   color: var(--q-uncommon);
   font-weight: 600;
 }
-.gear .bar {
+.bar {
   display: block;
   height: 4px;
-  margin-top: 0.3rem;
-  margin-left: auto;
-  width: 6rem;
   border-radius: 2px;
   background: var(--bar);
   overflow: hidden;
 }
-.gear .bar > span {
+.bar > span {
   display: block;
   height: 100%;
   background: var(--q-uncommon);
+}
+.gear .bar {
+  margin-top: 0.3rem;
+  margin-left: auto;
+  width: 6rem;
+}
+/* Récap au-dessus du tableau : score total et barre de progression. */
+.gear-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  margin: 0 0 0.75rem;
+  font-weight: 600;
+}
+.gear-total .bar {
+  width: 12rem;
+  height: 6px;
+  border-radius: 3px;
 }
 .gear tr.options-row > td {
   background: var(--hover);
