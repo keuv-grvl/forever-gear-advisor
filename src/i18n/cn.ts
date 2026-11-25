@@ -95,6 +95,7 @@ export const cn: Messages = {
   'cand.levelRequired': '需要等级',
   'cand.levelEstimated': '估算等级：API未提供需要等级',
   'cand.with': '搭配',
+  'cand.effectNotScored': "未计入评分",
   'src.craft': '制造：{prof}',
   'src.craftKnown': "已学会配方",
   'src.craftToLearn': "需学习配方",

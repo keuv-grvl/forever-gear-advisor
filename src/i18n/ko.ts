@@ -96,6 +96,7 @@ export const ko: Messages = {
   'cand.levelRequired': '요구 레벨',
   'cand.levelEstimated': '추정 레벨: API에서 요구 레벨을 제공하지 않음',
   'cand.with': '함께 착용:',
+  'cand.effectNotScored': "점수에 반영되지 않음",
   'src.craft': '제작: {prof}',
   'src.craftKnown': "알고 있는 제조법",
   'src.craftToLearn': "배워야 할 제조법",

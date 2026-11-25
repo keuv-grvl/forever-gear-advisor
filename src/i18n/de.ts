@@ -98,6 +98,7 @@ export const de: Messages = {
   'cand.levelRequired': 'Benötigte Stufe',
   'cand.levelEstimated': 'Geschätzte Stufe: Die API liefert keine benötigte Stufe',
   'cand.with': 'mit',
+  'cand.effectNotScored': "nicht im Score berücksichtigt",
   'src.craft': 'Herstellung: {prof}',
   'src.craftKnown': "Rezept bekannt",
   'src.craftToLearn': "Rezept noch zu erlernen",

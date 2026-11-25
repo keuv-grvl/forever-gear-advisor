@@ -142,9 +142,10 @@ interface GameNames {
   professions: Record<string, string>
   factions: Record<string, string>
   specs: Record<string, string>
+  effects: Record<number, string[]> // effets d'objet (« Equip: … »), dans l'ordre de `sp` de items.json
 }
 const gameNames: Record<string, GameNames> = Object.fromEntries(
-  Object.keys(LANG_LOCALES).map((l) => [l, { items: {}, quests: {}, subclasses: {}, professions: {}, factions: {}, specs: {} }]),
+  Object.keys(LANG_LOCALES).map((l) => [l, { items: {}, quests: {}, subclasses: {}, professions: {}, factions: {}, specs: {}, effects: {} }]),
 )
 
 function isLocalized(v: unknown): v is Localized {
@@ -177,6 +178,17 @@ function collectItemNames(raw: unknown) {
   if (isLocalized(sub)) addName('subclasses', sub.en_US, sub)
   const fac = r.preview_item?.requirements?.reputation?.faction?.name
   if (isLocalized(fac)) addName('factions', fac.en_US, fac)
+  // Effets : même filtre que `sp` (toOutItem), gardés si au moins un diffère de l'anglais.
+  type Spells = { spells?: { description?: unknown }[] }
+  const id = r.id ?? r.item?.id
+  const descs = ((r as Spells & { preview_item?: Spells }).preview_item?.spells ?? (r as Spells).spells ?? [])
+    .map((s) => s.description)
+    .filter((d): d is Localized => isLocalized(d) && !!d.en_US)
+  if (id === undefined || descs.length === 0) return
+  for (const [lang, locale] of Object.entries(LANG_LOCALES)) {
+    const list = descs.map((d) => d[locale] || d.en_US)
+    if (list.some((x, i) => x !== descs[i].en_US)) gameNames[lang].effects[id] = list
+  }
 }
 
 /** Applique fn à chaque élément avec au plus CONCURRENCY appels simultanés. */
@@ -839,6 +851,7 @@ for (const [lang, n] of Object.entries(gameNames)) {
       professions: n.professions,
       factions: n.factions,
       specs: n.specs,
+      effects: pick(n.effects, new Set(items.keys())),
     }) + '\n',
   )
 }

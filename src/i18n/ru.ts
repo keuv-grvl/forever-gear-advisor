@@ -98,6 +98,7 @@ export const ru: Messages = {
   'cand.levelRequired': 'Требуемый уровень',
   'cand.levelEstimated': 'Примерный уровень: API не сообщает требуемый уровень',
   'cand.with': 'в паре с',
+  'cand.effectNotScored': "не учитывается в оценке",
   'src.craft': 'Ремесло: {prof}',
   'src.craftKnown': "рецепт изучен",
   'src.craftToLearn': "рецепт нужно изучить",

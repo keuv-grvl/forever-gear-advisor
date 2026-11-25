@@ -96,6 +96,7 @@ export const fr: Messages = {
   'cand.levelRequired': 'Niveau requis',
   'cand.levelEstimated': "Niveau estimé : l'API ne donne pas de niveau requis",
   'cand.with': 'avec',
+  'cand.effectNotScored': "non compté dans le score",
   'src.craft': 'Craft : {prof}',
   'src.craftKnown': "recette connue",
   'src.craftToLearn': "recette à apprendre",

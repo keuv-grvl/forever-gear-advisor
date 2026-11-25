@@ -98,6 +98,7 @@ export const es: Messages = {
   'cand.levelRequired': 'Nivel requerido',
   'cand.levelEstimated': 'Nivel estimado: la API no indica el nivel requerido',
   'cand.with': 'con',
+  'cand.effectNotScored': "no se cuenta en la puntuación",
   'src.craft': 'Fabricación: {prof}',
   'src.craftKnown': "receta conocida",
   'src.craftToLearn': "receta por aprender",

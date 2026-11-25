@@ -95,6 +95,7 @@ export const tw: Messages = {
   'cand.levelRequired': '需要等級',
   'cand.levelEstimated': '估計等級：API未提供需要等級',
   'cand.with': '搭配',
+  'cand.effectNotScored': "未計入評分",
   'src.craft': '製作：{prof}',
   'src.craftKnown': "已學會配方",
   'src.craftToLearn': "需學習配方",

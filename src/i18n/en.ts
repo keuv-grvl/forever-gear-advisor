@@ -104,6 +104,7 @@ export const en = {
   'cand.levelRequired': 'Required level',
   'cand.levelEstimated': 'Estimated level: the API gives no required level',
   'cand.with': 'with',
+  'cand.effectNotScored': "not counted in the score",
   'src.craft': 'Crafting: {prof}',
   'src.craftKnown': "recipe known",
   'src.craftToLearn': "recipe to learn",

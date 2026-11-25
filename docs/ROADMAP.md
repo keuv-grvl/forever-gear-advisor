@@ -104,6 +104,7 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 - [x] `weights.json` pour les 27 spés (Polestar).
 - [x] Filtrage des candidats, gain par slot, affichage (`Recommendations.vue`), choix de la spé, options « Anticiper » et « type d'armure principal », infobulles.
 - [x] Tri par gain ou par emplacement (ordre de la fiche personnage) ; meilleure option affichée, deux autres repliées ; préférences gardées dans le navigateur.
+- [x] Effets d'objet en vert, comme en jeu : tableau d'équipement (stats `is_equip_bonus` de l'API, sauf l'Esprit rangé avec les stats de base sur demande de l'utilisateur, puis « Equipé / Utiliser ») et options proposées (`sp`, traduits dans `public/data/i18n/*.json` → `effects`), avec « non compté dans le score ». Compter certains effets (ex. Rage of the Storm : +10 % Frappe-tempête) reste à voir au cas par cas.
 
 **Phase 5, sources**
 

@@ -83,6 +83,8 @@ export interface GameNames {
   specs: Record<string, string>
   /** Suffixes aléatoires (« de la baleine »), clé = liste de bonus du client. */
   suffixes?: Record<number, string>
+  /** Effets d'objet (« Equipé : … »), dans l'ordre de `sp` de items.json. */
+  effects?: Record<number, string[]>
 }
 const names = shallowRef<GameNames | null>(null)
 const namesCache = new Map<Lang, Promise<GameNames | null>>()
@@ -112,6 +114,8 @@ export function suffixedName(id: number, suffix: number, fallback: string): stri
   if (lang.value === 'cn' || lang.value === 'tw') return sfx + base
   return `${base} ${sfx}`
 }
+/** Effets d'un objet dans la langue (l'anglais de items.json à défaut). */
+export const itemEffects = (id: number, fallback: string[]) => names.value?.effects?.[id] ?? fallback
 export const questTitle = (id: number, fallback: string) => names.value?.quests[id] ?? fallback
 export const subclassName = (en: string) => names.value?.subclasses[en] ?? en
 export const professionName = (en: string) => names.value?.professions[en] ?? en

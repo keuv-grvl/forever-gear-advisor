@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
-import { factionName, formatMoney, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
+import { factionName, formatMoney, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
 import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
 
@@ -16,6 +17,9 @@ const props = defineProps<{
   /** Métiers du perso (absent : inconnus). */
   crafter?: Crafter
 }>()
+
+/** Effets de l'objet dans la langue (« Equipé : … »). */
+const effects = computed(() => itemEffects(props.c.item.id, props.c.item.sp ?? []).map((e) => e.trim()).filter(Boolean))
 
 const QUEST_KEY = { dungeon: 'src.questDungeon', raid: 'src.questRaid' } as const
 
@@ -53,6 +57,10 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
         <a :href="wowheadItemUrl(c.with.id)" target="_blank" rel="noopener">{{ itemName(c.with.id, c.with.n) }}</a></template
       >
     </span>
+    <!-- Effets (« Equipé : … ») : en vert comme en jeu ; le score ne compte que les stats. -->
+    <div v-for="(e, i) in effects" :key="i" class="effect">
+      {{ e }}<span v-if="i === effects.length - 1" class="muted">{{ ' (' + t('cand.effectNotScored') + ')' }}</span>
+    </div>
     <div class="sources">
       <template v-for="(s, i) in sources" :key="i">
         <span v-if="s.t === 'craft'" :title="reagentsText(s)"
