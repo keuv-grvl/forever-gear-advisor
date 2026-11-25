@@ -37,6 +37,7 @@ const FATEDFR_SRC_BITS = ['client', 'questie', 'att', 'vmangos', 'cmangos', 'pfq
 const bitMask = (names: string[]) => names.reduce((m, n) => m | (1 << FATEDFR_SRC_BITS.indexOf(n)), 0)
 const FATEDFR_FOREVER = bitMask(['client', 'questie', 'att', 'legacy', 'spf'])
 const FATEDFR_CLASSIC = bitMask(['vmangos', 'cmangos', 'pfquest'])
+const FATEDFR_ATT = bitMask(['att'])
 
 const FOREVER_DB = {
   version: '2026.11.2',
@@ -555,6 +556,21 @@ for (const id of [...itemIds].sort((a, b) => a - b)) {
   const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(foreverQuests.get(id) ?? []), ...(vendors.get(id) ?? [])]
   if (list.length) sources[id] = list
 }
+
+// Objets non disponibles. AllTheThings référence ce qu'on peut obtenir : les 69 objets propres à Forever portés par
+// nos persos de test y sont tous. Un objet propre à Forever (aucune base Classic) qu'ATT ignore et sans aucune source
+// connue est donc considéré comme non disponible (ex. Quick Strike Ring 288927, « not available to players » sur Wowhead).
+// Les objets observés sur un perso sont gardés : quelqu'un les porte.
+let unavailable = 0
+for (const [id, it] of items) {
+  const mask = fatedfr.src.item[id]
+  if (it.src === 'seen' || mask === undefined || sources[id]) continue
+  if (!(mask & FATEDFR_CLASSIC) && !(mask & FATEDFR_ATT)) {
+    items.delete(id)
+    unavailable++
+  }
+}
+console.log(`  ${unavailable} objets propres à Forever probablement non disponibles écartés`)
 
 // Niveau d'accès. Beaucoup d'objets Forever n'ont pas de niveau requis (30 %), dont des récompenses
 // de quête de niveau 60 : sans ça, ils seraient proposés à n'importe quel niveau.
