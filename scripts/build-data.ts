@@ -483,8 +483,9 @@ function buildVendorSources(db: FatedfrDb, itemIds: Set<number>): Map<number, Ve
 }
 
 /**
- * Récompenses de quêtes propres à Forever, absentes de la base de Polestar (ex. Khan Jehn 93128 → Abandoned Ferocity).
- * Seulement les quêtes qu'aucune base Classic ne connaît : le lien quête → objet vient alors forcément d'une source Forever.
+ * Récompenses de quêtes absentes de la base de Polestar (ex. Khan Jehn 93128 → Abandoned Ferocity), seulement quand
+ * le lien vient forcément d'une source Forever : la quête OU l'objet est inconnu de toutes les bases Classic
+ * (une base Classic ne peut pas lier une quête à un objet qu'elle ne connaît pas, ex. Arathi Armbands 270080).
  */
 function buildForeverQuestRewards(
   db: FatedfrDb,
@@ -496,9 +497,12 @@ function buildForeverQuestRewards(
   for (const [itemId, questIds] of Object.entries(db.rew)) {
     const id = Number(itemId)
     if (!itemIds.has(id)) continue
+    const itemMask = db.src.item[itemId] ?? 0
+    const itemForeverOnly = !!(itemMask & FATEDFR_FOREVER) && !(itemMask & FATEDFR_CLASSIC)
     for (const q of questIds) {
       const mask = db.src.quest[q] ?? 0
-      if (!(mask & FATEDFR_FOREVER) || mask & FATEDFR_CLASSIC) continue
+      if (!(mask & FATEDFR_FOREVER)) continue
+      if (mask & FATEDFR_CLASSIC && !itemForeverOnly) continue
       if (known.get(id)?.some((s) => s.id === q)) continue
       // Faction et classes : connues par la table quest de Polestar ; sinon titre et niveaux de fatedfr.
       const row = db.quest[q]
@@ -544,7 +548,7 @@ const fatedfr = await loadFatedfr()
 const vendors = buildVendorSources(fatedfr, itemIds)
 console.log(`  ${vendors.size} objets vendus (base du ${fatedfr.meta.build})`)
 const foreverQuests = buildForeverQuestRewards(fatedfr, itemIds, fdb, questTable)
-console.log(`  ${foreverQuests.size} objets donnés par une quête Forever absente de Polestar`)
+console.log(`  ${foreverQuests.size} objets donnés par une quête absente de Polestar (lien attesté Forever)`)
 
 const sources: Record<number, (CraftSource | QuestSource | VendorSource)[]> = {}
 for (const id of [...itemIds].sort((a, b) => a - b)) {
