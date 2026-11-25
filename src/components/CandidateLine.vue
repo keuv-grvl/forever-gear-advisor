@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
 import { factionName, formatMoney, formatNumber, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
-import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
+import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl, type Reputation } from '../lib/blizzard'
 import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
 
 const props = defineProps<{
@@ -16,7 +16,24 @@ const props = defineProps<{
   side: 'A' | 'H'
   /** Métiers du perso (absent : inconnus). */
   crafter?: Crafter
+  /** Réputations du perso, par nom anglais de faction (absent : inconnues). */
+  reputations?: ReadonlyMap<string, Reputation>
 }>()
+
+// Points de réputation (depuis le début de Neutre) où commence chaque rang : Détesté … Exalté.
+const REP_START = [-42000, -6000, -3000, 0, 3000, 9000, 21000, 42000]
+
+/** Réputation requise : atteinte, ou rang actuel du perso et points qui manquent. */
+const repStatus = computed(() => {
+  const r = props.c.item.rep
+  if (!r || !props.reputations) return null
+  const faction = (props.side === 'H' && r[2]) || r[0]
+  const cur = props.reputations.get(faction)
+  if (cur && cur.tier >= r[1]) return { met: true, text: t('src.repMet') }
+  const missing = formatNumber(Math.max(0, (REP_START[r[1]] ?? 0) - (cur?.raw ?? 0)), 0)
+  if (!cur) return { met: false, text: t('src.repUnmet', { missing }) }
+  return { met: false, text: t('src.repProgress', { standing: standing(cur.tier), value: cur.value, max: cur.max, missing }) }
+})
 
 /** Effets de l'objet dans la langue (« Equipé : … »). */
 const effects = computed(() => itemEffects(props.c.item.id, props.c.item.sp ?? []).map((e) => e.trim()).filter(Boolean))
@@ -82,7 +99,7 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
       </template>
       <span v-if="c.item.rep">{{
         t('src.rep', { faction: factionName((props.side === 'H' && c.item.rep[2]) || c.item.rep[0]), standing: standing(c.item.rep[1]) })
-      }}</span>
+      }}<span v-if="repStatus" :class="repStatus.met ? 'rep-ok' : 'rep-todo'">{{ ' · ' + repStatus.text }}</span></span>
       <template v-if="sources.length === 0 && !c.item.rep">
         <span v-if="c.item.sfx" :title="t('src.randomNote')">{{ t('src.random') }}</span>
         <span v-else-if="!c.item.bop">{{ t('src.boe') }}</span>

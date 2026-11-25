@@ -76,6 +76,8 @@ const crafter = computed<Crafter | undefined>(() => {
   if (!list) return undefined
   return { professions: new Set(list.map((p) => p.id)), recipes: new Set(list.flatMap((p) => p.recipes)) }
 })
+// Réputations du perso, par nom anglais de faction (absentes si l'API ne les a pas données).
+const reputations = computed(() => (props.data.reputations ? new Map(props.data.reputations.map((r) => [r.name, r])) : undefined))
 const activeQuests = computed(() => new Set(props.data.quests?.active ?? []))
 
 // Prix HV (facultatifs) : chargés à chaque perso, servis par le cache CDN la plupart du temps.
@@ -333,6 +335,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                     :price-note="priceNote"
                     :side="side"
                     :crafter="crafter"
+                    :reputations="reputations"
                   />
                 </ul>
               </td>

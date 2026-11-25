@@ -94,6 +94,14 @@ export function isValidCharacterName(name: string): boolean {
   return /^\p{Ll}+-\p{Ll}+$/u.test(name)
 }
 
+export interface Reputation {
+  name: string
+  tier: number
+  value: number
+  max: number
+  raw: number
+}
+
 export interface CharacterData {
   profile: CharacterProfile
   equipment: Equipment
@@ -104,6 +112,8 @@ export interface CharacterData {
   quests?: { active?: number[]; done?: number[] }
   /** Métiers : id (171 Alchimie…), compétence, recettes connues (ids). Absent si l'API ne les a pas donnés. */
   professions?: { id: number; skill: number; max: number; recipes: number[] }[]
+  /** Réputations : nom anglais de la faction, rang (0 Détesté … 7 Exalté), points dans le rang et depuis Neutre. */
+  reputations?: Reputation[]
   /** Région de la recherche (ajoutée par fetchCharacter). */
   region?: Region
 }

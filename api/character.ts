@@ -25,7 +25,7 @@ export async function GET(request: Request): Promise<Response> {
       const guild = (p as { guild?: { slug?: string } }).guild?.slug
       return guild ? get(`/data/wow/guild/${guild}/roster`).catch(() => null) : null
     })
-    const [profile, equipment, specializations, roster, active, completed, professions] = await Promise.all([
+    const [profile, equipment, specializations, roster, active, completed, professions, reputations] = await Promise.all([
       profileP,
       get(`${base}/equipment`),
       // Sans locale : nom anglais (clé des poids Polestar) et nom dans la langue, voir specNames.
@@ -36,6 +36,8 @@ export async function GET(request: Request): Promise<Response> {
       get(`${base}/quests/completed`).catch(() => null),
       // Métiers et recettes connues : un craft lié quand ramassé n'est accessible qu'avec le métier.
       get(`${base}/professions`).catch(() => null),
+      // Réputations, sans locale : nom anglais de la faction, clé des réputations requises de items.json.
+      blizzardGet(region, 'profile', `${base}/reputations`, '').catch(() => null),
     ])
     return json(
       200,
@@ -44,6 +46,7 @@ export async function GET(request: Request): Promise<Response> {
         guildMembers: memberNames(roster),
         quests: { active: questIds(active, 'in_progress'), done: questIds(completed, 'quests') },
         professions: professionSkills(professions),
+        reputations: reputationStandings(reputations),
       },
       300,
     )
@@ -60,6 +63,19 @@ function memberNames(roster: unknown): string[] | undefined {
 }
 
 /** Ids des quêtes d'une liste du profil (`in_progress` ou `quests`), sans les noms ni les liens. */
+/** Réputations : nom anglais de la faction, rang (0 Détesté … 7 Exalté) et points (dans le rang, et depuis Neutre). */
+function reputationStandings(res: unknown) {
+  type R = { faction?: { name?: { en_US?: string } | string }; standing?: { raw?: number; value?: number; max?: number; tier?: number } }
+  const list = (res as { reputations?: R[] } | null)?.reputations
+  return list?.flatMap((r) => {
+    const n = r.faction?.name
+    const name = typeof n === 'string' ? n : n?.en_US
+    const s = r.standing
+    if (!name || !s || typeof s.tier !== 'number') return []
+    return [{ name, tier: s.tier, value: s.value ?? 0, max: s.max ?? 0, raw: s.raw ?? 0 }]
+  })
+}
+
 interface ProfessionTier {
   skill_points?: number
   max_skill_points?: number
