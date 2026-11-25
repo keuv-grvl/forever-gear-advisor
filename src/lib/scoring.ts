@@ -20,12 +20,7 @@ export interface ScorableItem {
   stats: Record<string, number>
   armor: number
   dps: number
-  /** Vitesse de l'arme, en secondes. */
-  speed?: number
 }
-
-/** Score d'un objet selon une source de poids (Polestar, Forever Leveling BiS…). */
-export type Scorer = (item: ScorableItem, asOffHand?: boolean) => number
 
 // Forever exprime crit, toucher, hâte… en points de rating ; les poids sont par 1 %.
 // Points de rating pour 1 %, identiques à tous les niveaux (client Forever, gametables/combatratings,
@@ -75,13 +70,7 @@ export function unweightedStats(item: ScorableItem): string[] {
 const RANGED_SLOTS = new Set(['RANGED', 'RANGEDRIGHT', 'THROWN'])
 
 export function findSpec(file: WeightsFile, className: string, specName?: string): SpecWeights | undefined {
-  // « Feral Combat » → feral, « Beast Mastery » → beastmastery (clés de Forever Leveling BiS) ; ses spés sans
-  // équivalent Polestar retombent sur le plus proche (bear → feral, survivalmelee → survival).
-  const ALIASES: Record<string, string> = { bear: 'feral', survivalmelee: 'survival' }
-  const norm = (s: string) => {
-    const k = s.toLowerCase().replace(/ combat$/, '').replace(/[^a-z]/g, '')
-    return ALIASES[k] ?? k
-  }
+  const norm = (s: string) => s.toLowerCase().replace(/ combat$/, '') // « Feral Combat » → « feral »
   const ofClass = file.specs.filter((s) => s.class.toLowerCase() === className.toLowerCase())
   return (specName && ofClass.find((s) => norm(s.spec) === norm(specName))) || ofClass[0]
 }
@@ -101,11 +90,6 @@ export function weightsAt(file: WeightsFile, spec: SpecWeights, level: number): 
  * Score d'un objet. `asOffHand` : arme portée en main gauche, comptée à la moitié du poids de la main droite
  * (pénalité de dégâts de la main gauche, règle Polestar).
  */
-export function polestarScorer(file: WeightsFile, spec: SpecWeights, level: number): Scorer {
-  const w = weightsAt(file, spec, level)
-  return (item, asOffHand = false) => scoreItem(item, w, asOffHand)
-}
-
 export function scoreItem(item: ScorableItem, w: Record<string, number>, asOffHand = false): number {
   let score = 0
   for (const [type, value] of Object.entries(item.stats)) {
