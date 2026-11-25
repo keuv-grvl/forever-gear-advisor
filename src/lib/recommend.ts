@@ -152,15 +152,19 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
     out.push(advice(slot, list))
   }
 
-  // Paires (anneaux, bijoux) : un candidat remplace le plus faible des deux.
+  // Paires (anneaux, bijoux) : une ligne par emplacement. Le plus faible (un emplacement vide d'abord) reçoit
+  // les meilleurs candidats ; l'autre, les suivants, sans le premier choix du faible s'il est unique.
   for (const [a, b] of [
     ['FINGER_1', 'FINGER_2'],
     ['TRINKET_1', 'TRINKET_2'],
   ]) {
-    const weakSlot = eqScore(a) <= eqScore(b) ? a : b
-    const current = eqScore(weakSlot)
-    const list = scored.filter((c) => SLOTS_FOR[c.item.slot].includes(a)).map((c) => ({ item: c.item, score: c.s, gain: c.s - current }))
-    out.push(advice(weakSlot, list))
+    const aFirst = bySlot.has(a) === bySlot.has(b) ? eqScore(a) <= eqScore(b) : !bySlot.has(a)
+    const [weak, strong] = aFirst ? [a, b] : [b, a]
+    const fits = scored.filter((c) => SLOTS_FOR[c.item.slot].includes(a))
+    const vs = (slot: string, list: typeof fits) => list.map((c) => ({ item: c.item, score: c.s, gain: c.s - eqScore(slot) }))
+    const weakAdvice = advice(weak, vs(weak, fits))
+    const taken = weakAdvice.candidates[0]?.item
+    out.push(weakAdvice, advice(strong, vs(strong, fits.filter((c) => !(taken?.u && c.item.id === taken.id)))))
   }
 
   // Armes : on compare des ensembles (2M seule, ou main droite + main gauche).
