@@ -182,6 +182,14 @@ function toggle(slot: string) {
   if (!next.delete(slot)) next.add(slot)
   open.value = next
 }
+// Tout déplier / tout replier : « replier » dès que toutes les lignes dépliables sont ouvertes.
+const allOpen = computed(() => {
+  const list = rows.value.filter(expandable)
+  return list.length > 0 && list.every((r) => open.value.has(r.slot))
+})
+function toggleAll() {
+  open.value = allOpen.value ? new Set() : new Set(rows.value.filter(expandable).map((r) => r.slot))
+}
 // Clic sur la ligne : déplie, sauf sur un lien (Wowhead) ou un bouton (infobulle, flèche).
 function onRowClick(e: MouseEvent, r: Row) {
   if (!expandable(r) || (e.target as HTMLElement).closest('a, button')) return
@@ -257,6 +265,9 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
         />
       </span>
       <span class="bar" :title="`${totals.pct} %`"><span :style="{ width: `${totals.pct}%` }"></span></span>
+      <button type="button" class="toggle-all" :aria-pressed="allOpen" @click="toggleAll">
+        {{ t(allOpen ? 'gear.collapseAll' : 'gear.expandAll') }}
+      </button>
     </p>
 
     <div class="table-wrap">

@@ -70,6 +70,8 @@ export const pt: Messages = {
   'gear.bestHint':
     "Pontuação da melhor opção encontrada com as configurações acima, ganho entre parênteses; a barra mostra quanto o item equipado já alcança. Clique em uma linha para ver as opções desse espaço.",
   'gear.toggle': "Opções para {slot}",
+  'gear.expandAll': "Expandir tudo",
+  'gear.collapseAll': "Recolher tudo",
   'gear.total': "Visão geral: {score} / {best}",
   'gear.totalHint':
     "Soma das pontuações dos espaços, comparada à soma das melhores pontuações possíveis com as configurações acima (especialização, armadura, nível, origens). Para as armas, a melhor combinação (duas mãos, ou mão principal + mão secundária) é contada uma só vez.",

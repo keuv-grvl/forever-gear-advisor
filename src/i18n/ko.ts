@@ -70,6 +70,8 @@ export const ko: Messages = {
   'gear.bestHint':
     "위 설정으로 찾은 최선의 선택지 점수이며 괄호 안은 향상폭입니다. 막대는 현재 아이템이 그중 얼마나 도달했는지 보여 줍니다. 행을 클릭하면 해당 부위의 선택지를 볼 수 있습니다.",
   'gear.toggle': "{slot} 선택지",
+  'gear.expandAll': "모두 펼치기",
+  'gear.collapseAll': "모두 접기",
   'gear.total': "전체: {score} / {best}",
   'gear.totalHint':
     "모든 부위 점수의 합계를 위 설정(전문화, 방어구, 레벨, 획득처)으로 가능한 최고 점수의 합계와 비교합니다. 무기는 최선의 조합(양손 무기 또는 주장비 + 보조장비)을 한 번만 계산합니다.",

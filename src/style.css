@@ -367,6 +367,21 @@ details.more .candidates {
   height: 8px;
   border-radius: 4px;
 }
+.gear-total .toggle-all {
+  font: inherit;
+  font-weight: normal;
+  font-size: 0.85em;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.gear-total .toggle-all:hover {
+  background: var(--hover);
+}
 .gear tr.options-row > td {
   background: var(--hover);
   padding-top: 0.2rem;
