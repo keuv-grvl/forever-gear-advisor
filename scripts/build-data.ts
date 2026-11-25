@@ -565,6 +565,52 @@ interface FatedfrDb extends FatedfrItems {
   quest: Record<string, [title: string, level: number | null, minLevel: number | null]>
   nfac: Record<string, string>
   src: { npc: Record<string, number>; item: Record<string, number>; quest: Record<string, number> }
+  // Détails de quête de QuestieDB Forever : 0 masque de races, 2 prérequis « un parmi », 3 prérequis « tous »…
+  qx: Record<string, [races: number | null, classes: number | null, preSingle: number[] | null, preGroup: number[] | null, ...rest: unknown[]]>
+}
+
+// Masques de races de QuestieDB : bit (race − 1) pour les 8 races d'origine ; les deux races Skyborne de Forever
+// (API : 95 High Order, Alliance ; 96 Windshaper, Horde) sur les bits 32 et 33 (constaté : 1 897 masques avec le
+// bit 32 n'ont que des races de l'Alliance, 1 635 avec le bit 33 que des races de la Horde).
+const ALLIANCE_RACES = (1n << 0n) | (1n << 2n) | (1n << 3n) | (1n << 6n) | (1n << 32n) // humain, nain, elfe de la nuit, gnome
+const HORDE_RACES = (1n << 1n) | (1n << 4n) | (1n << 5n) | (1n << 7n) | (1n << 33n) // orc, mort-vivant, tauren, troll
+
+interface Sides {
+  A: boolean
+  H: boolean
+}
+
+/**
+ * Factions qui peuvent faire une quête : son masque de races, et ses prérequis (tous ceux du groupe, au moins un des
+ * « un parmi »). Khan Jehn (93128) n'a pas de masque mais demande Checking Things Out (93122), réservée à la Horde.
+ */
+function questFactions(db: FatedfrDb): (id: number) => Sides {
+  const memo = new Map<number, Sides>()
+  const both = { A: true, H: true }
+  const sides = (id: number, stack: Set<number>): Sides => {
+    const known = memo.get(id)
+    if (known) return known
+    const x = db.qx[id]
+    if (!x || stack.has(id)) return both
+    stack.add(id)
+    const mask = BigInt(x[0] ?? 0)
+    let s: Sides = mask ? { A: (mask & ALLIANCE_RACES) !== 0n, H: (mask & HORDE_RACES) !== 0n } : both
+    if (!s.A && !s.H) s = both // masque sans race jouable : on ne conclut rien
+    // Un prérequis qui contredit la quête est ignoré : QuestieDB lie parfois une quête de l'Alliance à une quête de
+    // la Horde dans la même suite (93044 → 93041), et la quête elle-même fait foi.
+    const restrict = (q: Sides) => {
+      if ((s.A && q.A) || (s.H && q.H)) s = { A: s.A && q.A, H: s.H && q.H }
+    }
+    for (const p of x[3] ?? []) restrict(sides(p, stack))
+    if (x[2]?.length) {
+      const any = x[2].map((p) => sides(p, stack))
+      restrict({ A: any.some((q) => q.A), H: any.some((q) => q.H) })
+    }
+    stack.delete(id)
+    memo.set(id, s)
+    return s
+  }
+  return (id) => sides(id, new Set())
 }
 
 async function loadFatedfr(): Promise<FatedfrDb> {
@@ -678,6 +724,23 @@ const sources: Record<number, (CraftSource | QuestSource | VendorSource)[]> = {}
 for (const id of [...itemIds].sort((a, b) => a - b)) {
   const list = [...(crafts.get(id) ?? []), ...(fdb.get(id) ?? []), ...(foreverQuests.get(id) ?? []), ...(vendors.get(id) ?? [])]
   if (list.length) sources[id] = list
+}
+
+// Faction des quêtes d'après leurs races et leurs prérequis (QuestieDB Forever, via fatedfr) : une récompense dont la
+// suite de quêtes commence côté Horde n'est pas accessible à l'Alliance.
+{
+  const factions = questFactions(fatedfr)
+  let restricted = 0
+  for (const list of Object.values(sources))
+    for (const s of list) {
+      if (s.t !== 'quest' || s.side) continue
+      const f = factions(s.id)
+      if (f.A !== f.H) {
+        s.side = f.A ? 1 : 2
+        restricted++
+      }
+    }
+  console.log(`  ${restricted} récompenses de quête réservées à une faction par les races ou les prérequis de la quête`)
 }
 
 // Réputation requise absente de l'API. Le client Forever (ItemSparse) a le rang requis (MinReputation) ; il donne la
