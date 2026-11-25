@@ -40,10 +40,15 @@ body {
   margin: 0;
 }
 
+/* Page en colonne sur toute la hauteur : le pied de page reste en bas même quand la page est vide. */
 main {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: 1.5rem 1rem 1.5rem;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
@@ -465,6 +470,7 @@ details.more .candidates {
 .loader {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.6rem;
   margin: 1.25rem 0;
   color: var(--muted);
@@ -516,8 +522,13 @@ details.more .candidates {
 
 /* Pied de page du site (src/App.vue). */
 .site-footer {
-  margin-top: 2.5rem;
+  margin-top: auto;
   padding-top: 0.75rem;
   border-top: 1px solid var(--border);
   text-align: center;
+}
+
+/* Espace minimal au-dessus du pied de page quand le contenu le touche. */
+main > :nth-last-child(2) {
+  margin-bottom: 2.5rem;
 }
