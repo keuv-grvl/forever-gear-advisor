@@ -1,6 +1,6 @@
 // GET /api/character?region=eu&name=helga-tartine[&locale=fr_FR]
-// Renvoie profil, équipement, spés et membres de la guilde (autocomplétion) en une seule invocation (quota Vercel),
-// réponses allégées et mises en cache CDN.
+// Renvoie profil, équipement, spés, quêtes (en cours, terminées) et membres de la guilde (autocomplétion)
+// en une seule invocation (quota Vercel), réponses allégées et mises en cache CDN.
 
 import { blizzardGet, HttpError, json, LOCALES, REGIONS, slim } from './_lib/blizzard.js'
 
@@ -25,13 +25,24 @@ export async function GET(request: Request): Promise<Response> {
       const guild = (p as { guild?: { slug?: string } }).guild?.slug
       return guild ? get(`/data/wow/guild/${guild}/roster`).catch(() => null) : null
     })
-    const [profile, equipment, specializations, roster] = await Promise.all([
+    const [profile, equipment, specializations, roster, active, completed] = await Promise.all([
       profileP,
       get(`${base}/equipment`),
       get(`${base}/specializations`),
       rosterP,
+      // Quêtes en cours et terminées : facultatives, comme le roster.
+      get(`${base}/quests`).catch(() => null),
+      get(`${base}/quests/completed`).catch(() => null),
     ])
-    return json(200, { ...(slim({ profile, equipment, specializations }) as object), guildMembers: memberNames(roster) }, 300)
+    return json(
+      200,
+      {
+        ...(slim({ profile, equipment, specializations }) as object),
+        guildMembers: memberNames(roster),
+        quests: { active: questIds(active, 'in_progress'), done: questIds(completed, 'quests') },
+      },
+      300,
+    )
   } catch (err) {
     if (err instanceof HttpError) return json(err.status, { error: err.message }, err.status === 404 ? 60 : 0)
     return json(502, { error: err instanceof Error ? err.message : String(err) })
@@ -42,4 +53,10 @@ export async function GET(request: Request): Promise<Response> {
 function memberNames(roster: unknown): string[] | undefined {
   const members = (roster as { members?: { character?: { name?: string; surname?: string } }[] } | null)?.members
   return members?.flatMap(({ character: c }) => (c?.name && c.surname ? [`${c.name} ${c.surname}`] : []))
+}
+
+/** Ids des quêtes d'une liste du profil (`in_progress` ou `quests`), sans les noms ni les liens. */
+function questIds(res: unknown, key: string): number[] | undefined {
+  const list = (res as Record<string, { id?: number }[] | undefined> | null)?.[key]
+  return list?.flatMap((q) => (typeof q.id === 'number' ? [q.id] : []))
 }

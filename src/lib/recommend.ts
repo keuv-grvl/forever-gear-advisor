@@ -41,6 +41,7 @@ export type Source =
       cls?: number
       choice?: 1
       inst?: 'dungeon' | 'raid'
+      rpt?: 1
     }
   | { t: 'vendor'; npc: number; name: string; sub?: string; side?: string }
 
@@ -49,12 +50,16 @@ export function sideOf(faction: string): 'A' | 'H' {
   return faction === 'HORDE' ? 'H' : 'A'
 }
 
-/** Sources accessibles au perso : quêtes d'une autre faction ou classe, vendeurs de l'autre faction écartés. */
-export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', classId: number): Source[] {
+/**
+ * Sources accessibles au perso : quêtes d'une autre faction ou classe, quêtes déjà faites (sauf répétables)
+ * et vendeurs de l'autre faction écartés.
+ */
+export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', classId: number, done?: ReadonlySet<number>): Source[] {
   const questSide = side === 'A' ? 1 : 2
   const classBit = 1 << (classId - 1)
   return (sources ?? []).filter((s) => {
-    if (s.t === 'quest') return (!s.side || s.side === questSide) && (!s.cls || (s.cls & classBit) !== 0)
+    if (s.t === 'quest')
+      return (!s.side || s.side === questSide) && (!s.cls || (s.cls & classBit) !== 0) && (s.rpt === 1 || !done?.has(s.id))
     if (s.t === 'vendor') return !s.side || s.side.includes(side)
     return true
   })
@@ -101,6 +106,8 @@ export interface RecommendOptions {
   sources: Record<number, Source[]>
   /** Origines acceptées (toutes si absent). */
   origins?: ReadonlySet<Origin>
+  /** Quêtes déjà faites par le perso : leurs récompenses ne sont plus accessibles (sauf quêtes répétables). */
+  doneQuests?: ReadonlySet<number>
 }
 
 // Slots d'armure où le type (tissu, cuir, mailles, plaques) compte ; le dos est toujours en tissu.
@@ -139,10 +146,11 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const mainArmor = bestArmorType(o.classId, maxLevel)
   const side = sideOf(o.faction)
   // Objet dont toutes les sources connues sont réservées à l'autre faction (ex. Advisor's Gnarled Staff,
-  // vendu seulement par l'intendant Chanteguerre) ou à une autre classe : inaccessible. Sans source connue, on le garde.
+  // vendu seulement par l'intendant Chanteguerre), à une autre classe ou des quêtes déjà faites : inaccessible.
+  // Sans source connue, on le garde.
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
-    const mine = sourcesFor(all, side, o.classId)
+    const mine = sourcesFor(all, side, o.classId, o.doneQuests)
     return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins))
   }
   const usable = db.filter(

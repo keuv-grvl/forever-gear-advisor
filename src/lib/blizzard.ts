@@ -95,6 +95,8 @@ export interface CharacterData {
   specializations: Specializations
   /** « Prénom Nom » des membres de la guilde (autocomplétion). */
   guildMembers?: string[]
+  /** Ids des quêtes en cours et terminées (absents si l'API ne les a pas donnés). */
+  quests?: { active?: number[]; done?: number[] }
 }
 
 /** « Helga Tartine » : le nom tel qu'affiché en jeu. */

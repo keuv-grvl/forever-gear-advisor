@@ -57,6 +57,8 @@ watch(
 
 const spec = computed(() => findSpec(game.value.weights, profile.value.character_class.name, specName.value))
 const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
+const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
+const activeQuests = computed(() => new Set(props.data.quests?.active ?? []))
 
 const advice = computed(() => {
   if (!spec.value) return []
@@ -70,6 +72,7 @@ const advice = computed(() => {
     mainArmorOnly: mainArmorOnly.value,
     sources: game.value.sources,
     origins: new Set(origins.value),
+    doneQuests: doneQuests.value,
   })
 })
 
@@ -80,7 +83,7 @@ const rows = computed(() =>
 )
 
 function sourcesOf(item: DbItem): Source[] {
-  return sourcesFor(game.value.sources[item.id], sideOf(profile.value.faction.type), profile.value.character_class.id)
+  return sourcesFor(game.value.sources[item.id], sideOf(profile.value.faction.type), profile.value.character_class.id, doneQuests.value)
 }
 
 const HINTS = {
@@ -142,7 +145,7 @@ function othersLabel(n: number): string {
       </span>
     </div>
     <fieldset class="controls origins">
-      <legend>Origine <Hint :text="HINTS.origins" /></legend>
+      <legend>Origine<Hint :text="HINTS.origins" /></legend>
       <label v-for="o in ORIGINS" :key="o"><input v-model="origins" type="checkbox" :value="o" /> {{ ORIGIN_LABELS[o] }}</label>
     </fieldset>
     <p v-if="origins.length === 0" class="error">Coche au moins une origine.</p>
@@ -170,12 +173,18 @@ function othersLabel(n: number): string {
               <p v-if="a.candidates.length === 0" class="muted">Rien de mieux trouvé</p>
               <template v-else>
                 <ul class="candidates">
-                  <CandidateLine :c="a.candidates[0]" :sources="sourcesOf(a.candidates[0].item)" />
+                  <CandidateLine :c="a.candidates[0]" :sources="sourcesOf(a.candidates[0].item)" :active-quests="activeQuests" />
                 </ul>
                 <details v-if="a.candidates.length > 1" class="more">
                   <summary>{{ othersLabel(a.candidates.length - 1) }}</summary>
                   <ul class="candidates">
-                    <CandidateLine v-for="c in a.candidates.slice(1)" :key="c.item.id" :c="c" :sources="sourcesOf(c.item)" />
+                    <CandidateLine
+                      v-for="c in a.candidates.slice(1)"
+                      :key="c.item.id"
+                      :c="c"
+                      :sources="sourcesOf(c.item)"
+                      :active-quests="activeQuests"
+                    />
                   </ul>
                 </details>
               </template>

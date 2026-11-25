@@ -174,9 +174,17 @@ a.q:hover {
 }
 
 .control {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  white-space: nowrap;
+}
+
+.badge {
+  margin-left: 0.3rem;
+  padding: 0 0.35rem;
+  border-radius: 3px;
+  background: var(--q-rare);
+  color: var(--bg);
+  font-size: 0.85em;
+  font-weight: 600;
 }
 
 fieldset.origins {
@@ -190,22 +198,23 @@ fieldset.origins legend {
   padding: 0 0.3rem;
 }
 
-/* Infobulle « ? » (src/components/Hint.vue). */
+/* Infobulle « ? » cerclé en exposant (src/components/Hint.vue). */
 .hint {
   position: relative;
   display: inline-grid;
   place-items: center;
-  width: 1.15rem;
-  height: 1.15rem;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: 0.1rem;
   padding: 0;
   border: 1px solid var(--muted);
   border-radius: 50%;
   color: var(--muted);
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   font-weight: 600;
   line-height: 1;
   cursor: help;
-  vertical-align: middle;
+  vertical-align: super;
 }
 
 .hint:hover,

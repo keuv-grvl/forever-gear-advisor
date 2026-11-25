@@ -362,6 +362,7 @@ interface QuestSource {
   cls?: number // classes autorisées, masque (bit id-1) ; absent = toutes
   choice?: 1 // objet au choix parmi plusieurs
   inst?: 'dungeon' | 'raid' // quête de donjon ou de raid (type QuestInfo du client : 81, 62)
+  rpt?: 1 // répétable : reste une source même si le perso l'a déjà faite
 }
 
 async function readJsonl<T>(file: string): Promise<T[]> {
@@ -379,6 +380,7 @@ interface QuestInfo {
   side?: number
   classes?: number
   type?: number // QuestInfo du client : 81 donjon, 62 raid, 41 JcJ, 1 groupe
+  repeatable?: boolean
 }
 
 const QUEST_INSTANCE: Record<number, QuestSource['inst']> = { 81: 'dungeon', 62: 'raid' }
@@ -393,6 +395,7 @@ function questSource(id: number, q: QuestInfo | undefined): QuestSource {
   if (q?.classes) s.cls = q.classes
   const inst = q?.type !== undefined ? QUEST_INSTANCE[q.type] : undefined
   if (inst) s.inst = inst
+  if (q?.repeatable) s.rpt = 1
   return s
 }
 

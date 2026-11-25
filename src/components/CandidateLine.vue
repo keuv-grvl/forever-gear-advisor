@@ -3,7 +3,7 @@
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
 import type { Candidate, DbItem, Source } from '../lib/recommend'
 
-defineProps<{ c: Candidate; sources: Source[] }>()
+defineProps<{ c: Candidate; sources: Source[]; activeQuests: ReadonlySet<number> }>()
 
 const STANDINGS = ['Détesté', 'Hostile', 'Inamical', 'Neutre', 'Amical', 'Honoré', 'Révéré', 'Exalté']
 const QUEST_LABEL = { dungeon: 'Quête de donjon', raid: 'Quête de raid' }
@@ -40,6 +40,7 @@ function levelText(item: DbItem): string {
           {{ s.inst ? QUEST_LABEL[s.inst] : 'Quête' }} :
           <a :href="wowheadQuestUrl(s.id)" target="_blank" rel="noopener">{{ s.title ?? `#${s.id}` }}</a>
           <template v-if="s.min ?? s.lvl"> (niv {{ s.min ?? s.lvl }})</template>
+          <strong v-if="activeQuests.has(s.id)" class="badge">en cours</strong>
         </span>
       </template>
       <span v-if="c.item.rep">Réputation : {{ c.item.rep[0] }} ({{ STANDINGS[c.item.rep[1]] ?? c.item.rep[1] }})</span>
