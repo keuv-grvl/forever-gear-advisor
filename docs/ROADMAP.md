@@ -1,11 +1,13 @@
 # ROADMAP, WoW Forever Gear Advisor
 
 > Document de contexte pour les sessions Claude. À lire en premier, à tenir à jour en fin de session.
-> Dernière mise à jour : 2026-11-25 (phases 1 et 2)
+> Dernière mise à jour : 2026-11-25 (phases 1 à 4, sources quêtes et craft)
 
 ## Objectif
 
-Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), puis indique **quels objets améliorer** et **où les obtenir** (craft, donjon/boss, quête, HV), quel que soit son niveau. Pas de design poussé : l'utilité d'abord.
+Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), puis indique **quels objets améliorer** et **où les obtenir** (quête, craft), quel que soit son niveau. Pas de design poussé : l'utilité d'abord.
+
+**Règle n°1 : données WoW Forever uniquement.** Jamais Classic Era, Classic, retail, cMaNGOS/VMaNGOS, ni repli « vanilla » : Forever a rééquilibré beaucoup d'objets (Boulder Pads, Belt of Arugal… n'ont pas les mêmes stats qu'en Era). Une donnée absente en Forever s'affiche comme inconnue. **Pas de drops** (décision du 2026-11-25) : leurs données ouvertes mêlent des bases Classic.
 
 ## Stack et déploiement
 
@@ -14,7 +16,7 @@ Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), pui
 - Pas de vrai backend. Le dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy vers Blizzard : `api/character.ts` (profil + équipement + spés en un appel), code partagé dans `api/_lib/` (le `_` empêche Vercel d'en faire une fonction). Imports en `.js` dans `api/` (Vercel compile le TS).
 - En dev local, Vite redirige `/api` vers la prod (`vite.config.ts`, surcharge possible via `API_TARGET`).
 - **Le client secret Blizzard ne doit jamais atteindre le navigateur** : variables d'environnement Vercel uniquement, jamais commité. Ni le token : le proxy le garde côté serveur.
-- Les variables `BLIZZARD_*` sont de type *Sensitive* (Production + Preview) : `vercel env pull` ne les récupère pas. Pour un script local (phase 3), il faudra les fournir autrement.
+- Les variables `BLIZZARD_*` sont de type *Sensitive* (Production + Preview) : `vercel env pull` ne les récupère pas. Les scripts locaux lisent `.env.blizzard.local` (client Blizzard dédié, rempli à la main, ignoré par git, à révoquer quand l'implémentation est stable).
 - Les previews sont protégées (Vercel Authentication) : les tester avec `vercel curl <url>` (un secret « Protection Bypass for Automation » a été ajouté au projet pour ça).
 
 ## Quotas Vercel (plan Hobby, gratuit)
@@ -24,6 +26,10 @@ Par mois : 1 M d'invocations de fonctions, 4 h de CPU actif, 10 Go de Fast Origi
 - Un seul appel `/api` par action utilisateur, réponses allégées (`slim`) et cache CDN (`s-maxage`).
 - Données lourdes en JSON statiques (CDN), jamais générées par une fonction.
 - Grouper les commits avant de pousser.
+
+## Licences
+
+Code sous MIT (`LICENSE`). Données de `public/data/` sous GPL-3.0 (`public/data/LICENSE`, sources dans `public/data/NOTICE.md`), parce qu'elles dérivent de Polestar (poids) et de forever-db (quêtes). Choix de l'utilisateur, 2026-11-25.
 
 ## Faits sur l'API Blizzard Forever (source : wowdb.dev/forever-api, vérifiée le 2026-11-23 et le 2026-11-25)
 
@@ -37,27 +43,33 @@ Par mois : 1 M d'invocations de fonctions, 4 h de CPU actif, 10 Go de Fast Origi
 - Forme des données (confirmée) : `equipped_items[]` avec `slot.type`, `quality.type`, `level.value`, `requirements.level.value`, `item_subclass`, `inventory_type.type` (`TWOHWEAPON`…), `stats[]` (`is_equip_bonus`), `weapon.dps`/`attack_speed` (ms). `specialization_groups[].specializations[].spent_points`.
 - Perso de test : `helga-tartine`, EU, PvP (chamane naine, niv. 38, Amélioration).
 - **Champs non garantis** : seuls `item`, `slot`, `name` sont sûrs sur un objet équipé. `pal-ouffette` (EU, paladin 36) n'a `level` (niveau d'objet) sur **aucun** objet, ni `equipped_item_level` dans son profil. Le scoring ne doit pas dépendre du niveau d'objet du profil : le compléter via `items.json` (phase 3).
-- Stats vues : `STAMINA`, `STRENGTH`, `INTELLECT`, `SPIRIT`, `ATTACK_POWER`, `SPELL_POWER`, `DEFENSE`, résistances, et des bonus conditionnels (« Attack Power Vs Beasts »).
+- Stats vues : `STAMINA`, `STRENGTH`, `INTELLECT`, `SPIRIT`, `ATTACK_POWER`, `SPELL_POWER`, `DEFENSE`, résistances, et des bonus conditionnels (« Attack Power Vs Beasts »). Certains types finissent par une virgule (`BONUS_STAT_ATTACK_POWER_VS_BEAST,`) ; « +X à toutes les résistances » arrive **sans** `type`.
+- **Ratings, pas des %** : « +14 Critical Strike » = l'ancien « +1 % crit ». Pour 1 % : crit 14, toucher 10, hâte 10, expertise 10, pénétration d'armure 10, esquive 12, parade 15, blocage 5 ; défense par point. Identique à tous les niveaux (client Forever `gametables/combatratings`, d'après Polestar). Codé dans `src/lib/scoring.ts`.
+- **L'API statique est partielle** : `/data/wow/item/{id}` (namespace `static-forever-eu`) ne connaît que ~40 % des objets portés par nos persos de test (32/81). Il manque surtout des objets de quête et de donjon, et les objets propres à Forever (ids 27xxxx). Le client Forever (`ItemSparse`) a le même sous-ensemble : les autres arrivent sans doute par hotfix serveur. D'où l'ajout des objets observés sur des persos (`scripts/seeds.local.json`).
+- La recherche `/data/wow/search/item` plafonne à 10 pages de 100 : paginer par plage d'id (`orderby=id&id=[N,]`). Le paramètre `id=3020` seul ne marche pas.
+- `required_level` vaut 0 pour ~30 % des objets, et **1** pour des objets Forever de haut niveau (variante de Sulfuras 289295, niveau d'objet 45). Les deux sont traités comme « inconnu ». Niveau d'accès `al` dans `items.json` = niveau requis, sinon niveau min. de la quête qui le donne, sinon niveau d'objet − 5 (écart constaté sur les objets Forever : Enduring Cap 33/28, Boulder Pads 41/36), marqué estimé (`ale`).
+- Objets écartés : noms de test (`QATest`, `Testing`, `[PH]`, `Bland Dagger`…), objets aux stats incohérentes avec leur niveau (Restored Wand : niveau 1, 44,7 DPS, probablement à niveau variable), objets à suffixe aléatoire observés (« of the Owl » : stats propres à l'exemplaire).
+- Recettes : `/data/wow/profession/{id}` → `skill_tiers` → `/skill-tier/{id}` → `categories[].recipes` → `/data/wow/recipe/{id}` (objet fabriqué, réactifs ; **pas** de niveau de compétence). 2 494 recettes.
+- Règles d'équipement (`src/lib/rules.ts`) : celles de Classic, vérifiées sur 252 objets portés par 17 persos Forever. **Écart Forever** : les voleurs portent des haches à une main (Greater Scythe of the Tiger, voleur 43).
 
 ## Décisions d'architecture
 
 1. **Données statiques générées au build** : un script Node (lancé en local avec les identifiants) produit des JSON livrés avec l'app (`public/data/`). Seul le profil du personnage est appelé en live.
    - `items.json` : stats, slot, niveau requis, type d'armure, qualité.
-   - `sources.json` : par objet, ses sources (`craft`, `drop`, `quest`, `vendor`).
-   - `weights.json` : poids de stats par classe/spé.
+   - `sources.json` : par objet, ses sources (`craft`, `quest`).
+   - `weights.json` : poids de stats des 27 spés, niveaux 10 à 60, tirés de Polestar (`scripts/build-weights.ts`, commit figé).
 2. **Détection de la spé** : arbre de talents avec le plus de points dans `/specializations`.
-3. **Scoring** : `score = Σ(stat × poids[spé][stat]) + armes (DPS/vitesse)`. Gain d'un slot = `score(meilleur candidat) − score(équipé)`. Résultat trié par gain décroissant ; slot vide = gain maximal.
-4. **Candidats** : niveau requis ≤ niveau du perso (et pas trop bas), type d'armure/arme utilisable par la classe, restrictions de classe/faction. Option « à anticiper » : jusqu'à +5 niveaux.
-5. **Liens Wowhead** pour creuser : `https://www.wowhead.com/forever/item={id}` (patterns `/forever/npc=` et `/forever/item=` confirmés ; à vérifier pour quest, zone). **Liens sortants uniquement, ne pas scraper Wowhead.**
+3. **Scoring** (`src/lib/scoring.ts`) : `score = Σ(stat / rating par 1 % × poids) + armure × poids + DPS × poids`. Poids de la tranche Polestar du niveau (moins de 25, 25-39, 40-49, 50-59, 60). `SPELL_POWER` compte en dégâts et en soins ; une arme en main gauche compte pour moitié (règle Polestar). Gain = score du candidat − score de l'objet porté ; slot vide = gain maximal.
+4. **Candidats** (`src/lib/recommend.ts`) : niveau d'accès ≤ niveau du perso (+5 avec « Anticiper »), portable par la classe à ce niveau, faction. Option « type d'armure principal » (cochée par défaut) : mailles pour un paladin ≥ 40, etc. Anneaux et bijoux : le candidat remplace le plus faible des deux. Armes : comparaison d'ensembles (2M seule contre main droite + main gauche).
+5. **Liens Wowhead** pour creuser : `https://www.wowhead.com/forever/item={id}` et `/forever/quest={id}` (confirmés, ainsi que `/forever/npc=`). **Liens sortants uniquement, ne pas scraper Wowhead.**
+6. **Pas de SQLite côté navigateur** (question du 2026-11-25) : 6 500 objets, 1,2 Mo (166 Ko gzip) ; le moteur calcule un perso en moins de 10 ms en JS. sql.js (WASM ~1 Mo) pèserait plus que les données. À reconsidérer pour le script de build si on croise beaucoup plus de sources.
+7. **Cache du script** : `.cache/blizzard/` (une réponse par URL), durée de vie 7 jours, et ménage en fin de génération réussie (tout fichier non utilisé est supprimé). Taille stable ~50 Mo.
 
-## Sources de données externes pour le loot
+## Sources de données externes (audit du 2026-11-25)
 
-À auditer avant usage (format, couverture, **licence**) :
-
-- `fitzforge/polestar` : Codex (donjons, boss, loot, quêtes, rares), données avec `LICENSE-DATA.txt`. Piste n°1.
-- `cmangos/classic-db` (GPL v3) : base Vanilla 1.12, approximative pour Forever. Piste n°2.
-- AtlasLoot / Questie : données Lua d'addons, dernier recours.
-- Wowhead propose un Gear Planner Forever : s'en inspirer pour les poids, mettre un lien « ouvrir dans le Gear Planner ».
+- **Polestar** (`fitzforge/polestar`, GPL-3.0) : utilisé pour les **poids** (`docs/gear-weights.md`) et les **quêtes** via sa base `forever-db/` (releases `data-v*`, tables `quest`, `quest_reward` ; données Forever de QuestieDB). Sa table `item` n'a que les noms (pas de stats). Son `item_source` (drops) n'est pas utilisé (pas de drops) ; le loot des boss qu'il tire d'AtlasLoot reste local chez eux, non redistribué.
+- **forever-db de fatedfr** (`foreverfraddons/forever-db`, addon CurseForge « forever-db », GPL-3.0, mis à jour 2×/jour) : très complet (drops de boss avec taux, vendeurs, quêtes, 32 279 objets du client Forever sans stats), 72/81 objets portés avec une source. **Non utilisé** : ses liens de drop et vendeurs mêlent VMaNGOS/cMaNGOS/pfQuest sans provenance par entrée. Le champ `src` (bit k = k-ième source de `meta.sourceList`) n'existe que pour les entités (item, npc, obj, quest). À reconsidérer si la règle « pas de drops » change.
+- **Écartés** : namespace Classic Era (`static-classic1x`, stats fausses pour Forever), cMaNGOS/VMaNGOS, wago.tools (règle Forever uniquement), Wowhead (pas de scraping).
 
 Toujours afficher la provenance d'une info de source, et garder le lien Wowhead comme référence.
 
@@ -78,25 +90,27 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 **Phase 3, données statiques**
 
-- [ ] Script `scripts/build-data.ts` : items via `search/item`, recettes via métiers → recettes, index inversé `objet → recette`.
-- [ ] Sortie dans `public/data/*.json`, versionnée ou régénérée via un script npm documenté.
+- [x] `scripts/build-data.ts` (`npm run data:items`) : objets via `search/item` + fiches, objets observés sur des persos, recettes, quêtes forever-db. 6 479 objets, 2 776 avec source (1 279 craft, 1 511 quête).
+- [x] `scripts/build-weights.ts` (`npm run data:weights`). Sorties versionnées dans `public/data/`.
 
 **Phase 4, moteur de recommandation**
 
-- [ ] `weights.json` pour une première classe/spé, puis étendre aux 27 arbres.
-- [ ] Filtrage des candidats, calcul du gain par slot, tri et affichage des améliorations.
+- [x] `weights.json` pour les 27 spés (Polestar).
+- [x] Filtrage des candidats, gain par slot, tri, affichage (`Recommendations.vue`), choix de la spé, options « Anticiper » et « type d'armure principal ».
 
 **Phase 5, sources**
 
-- [ ] Afficher craft (réactifs, métier du perso) et prix HV.
-- [ ] Intégrer le loot de boss/donjon et les récompenses de quêtes après audit des dépôts (voir plus haut).
-- [ ] Liens Wowhead : objet, boss, donjon, quête.
+- [x] Craft (métier, réactifs en infobulle) et quêtes (lien Wowhead, niveau, faction filtrée).
+- [ ] Prix HV (`/data/wow/ruleset/{id}/auctions/…`, namespace dynamic) pour les objets craftés ou vendus.
+- [ ] Indiquer si le perso a le métier (`/professions`) et le niveau de compétence de la recette (absent de l'API).
+- [ ] Plus d'objets observés : élargir `seeds.local.json` (autres guildes) pour couvrir les objets absents de l'API statique.
 
 **Phase 6, finitions**
 
 - [ ] Cache local (localStorage/IndexedDB) du profil et des données.
 - [ ] Gestion d'erreurs (404 perso, région, token expiré).
-- [ ] Tests unitaires du scoring.
+- [ ] Tests unitaires du scoring et des règles (aujourd'hui vérifiés par scripts ad hoc sur les persos de test).
+- [ ] Afficher les stats non pondérées ignorées (résistances, bonus « contre les Bêtes »).
 
 ## Règles de travail pour les sessions Claude
 
@@ -107,6 +121,6 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 ## Questions ouvertes
 
-- Format et licence exacts des données Polestar / CMaNGOS.
-- Par quelle classe/spé commencer pour les premiers poids de stats ?
-- Pattern d'URL Wowhead Forever pour item, quête et zone.
+- Pourquoi `pal-ouffette` n'a aucun niveau d'objet dans l'API ? Hypothèse : perso connecté récemment (08:10 UTC le jour du test, les autres la veille), profil partiel. À revérifier après déconnexion.
+- Les objets Forever à `required_level` 1 et niveau d'objet élevé (27xxxx–28xxxx) sont-ils à niveau variable ? Si oui, leurs stats statiques ne sont pas celles que le joueur obtiendra.
+- Le rating de critique / toucher compte-t-il aussi pour les sorts en Forever ? (supposé oui : libellé générique « Critical Strike »).
