@@ -21,10 +21,11 @@ export interface CharacterProfile {
   race: Named
   character_class: Named
   guild?: Named
-  ruleset: Named
-  average_item_level: number
-  equipped_item_level: number
-  last_login_timestamp: number
+  ruleset?: Named
+  // Absents pour certains persos : l'API Forever ne garantit pas ces champs.
+  average_item_level?: number
+  equipped_item_level?: number
+  last_login_timestamp?: number
 }
 
 export interface ItemStat {
@@ -34,19 +35,20 @@ export interface ItemStat {
   is_negated?: boolean
 }
 
+// Seuls item, slot et name sont garantis. Ex. : `pal-ouffette` n'a `level` sur aucun objet.
 export interface EquippedItem {
   item: { id: number }
   slot: Typed
-  quality: Typed
+  quality?: Typed
   name: string
-  item_class: Named
-  item_subclass: Named
-  inventory_type: Typed
+  item_class?: Named
+  item_subclass?: Named
+  inventory_type?: Typed
   armor?: { value: number }
   stats?: ItemStat[]
   spells?: { spell: Named; description: string }[]
   requirements?: { level?: { value: number } }
-  level: { value: number }
+  level?: { value: number }
   weapon?: {
     damage: { min_value: number; max_value: number }
     attack_speed: { value: number }

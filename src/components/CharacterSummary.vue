@@ -17,9 +17,10 @@ const spec = computed(() => detectSpec(props.data.specializations))
       <template v-else> (spé non détectée)</template>
     </p>
     <p class="muted">
-      {{ p.faction.name }} · {{ p.ruleset.name }}
+      {{ p.faction.name }}
+      <template v-if="p.ruleset"> · {{ p.ruleset.name }}</template>
       <template v-if="p.guild"> · &lt;{{ p.guild.name }}&gt;</template>
-      · niveau d'objet moyen {{ p.equipped_item_level }}
+      <template v-if="p.equipped_item_level"> · niveau d'objet moyen {{ p.equipped_item_level }}</template>
     </p>
   </section>
 </template>

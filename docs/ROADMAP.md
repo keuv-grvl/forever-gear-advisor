@@ -36,6 +36,8 @@ Par mois : 1 M d'invocations de fonctions, 4 h de CPU actif, 10 Go de Fast Origi
 - Rulesets : 1 PvP, 2 Normal, 3 RP, 15 RP-PvP. Le profil renvoie le ruleset du perso.
 - Forme des données (confirmée) : `equipped_items[]` avec `slot.type`, `quality.type`, `level.value`, `requirements.level.value`, `item_subclass`, `inventory_type.type` (`TWOHWEAPON`…), `stats[]` (`is_equip_bonus`), `weapon.dps`/`attack_speed` (ms). `specialization_groups[].specializations[].spent_points`.
 - Perso de test : `helga-tartine`, EU, PvP (chamane naine, niv. 38, Amélioration).
+- **Champs non garantis** : seuls `item`, `slot`, `name` sont sûrs sur un objet équipé. `pal-ouffette` (EU, paladin 36) n'a `level` (niveau d'objet) sur **aucun** objet, ni `equipped_item_level` dans son profil. Le scoring ne doit pas dépendre du niveau d'objet du profil : le compléter via `items.json` (phase 3).
+- Stats vues : `STAMINA`, `STRENGTH`, `INTELLECT`, `SPIRIT`, `ATTACK_POWER`, `SPELL_POWER`, `DEFENSE`, résistances, et des bonus conditionnels (« Attack Power Vs Beasts »).
 
 ## Décisions d'architecture
 

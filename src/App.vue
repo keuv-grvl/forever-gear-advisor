@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onErrorCaptured, onMounted, ref } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
 import EquipmentTable from './components/EquipmentTable.vue'
 import {
@@ -42,6 +42,12 @@ async function load() {
     loading.value = false
   }
 }
+
+// Une donnée inattendue de l'API ne doit pas laisser un bloc vide sans explication.
+onErrorCaptured((err) => {
+  error.value = `Erreur d'affichage : ${err instanceof Error ? err.message : String(err)}`
+  return false
+})
 
 onMounted(() => {
   const params = new URLSearchParams(location.search)

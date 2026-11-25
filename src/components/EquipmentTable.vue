@@ -31,7 +31,7 @@ const OPTIONAL = new Set(['SHIRT', 'TABARD'])
 const rows = computed(() => {
   const bySlot = new Map(props.items.map((i) => [i.slot.type, i]))
   // Une arme à deux mains occupe aussi la main gauche.
-  const twoHanded = bySlot.get('MAIN_HAND')?.inventory_type.type === 'TWOHWEAPON'
+  const twoHanded = bySlot.get('MAIN_HAND')?.inventory_type?.type === 'TWOHWEAPON'
   return SLOTS.filter(([type]) => bySlot.has(type) || !(OPTIONAL.has(type) || (type === 'OFF_HAND' && twoHanded))).map(
     ([type, label]) => ({ type, label, item: bySlot.get(type) }),
   )
@@ -66,13 +66,13 @@ function statsText(item: EquippedItem): string {
             <td>{{ row.label }}</td>
             <template v-if="row.item">
               <td>
-                <a :href="wowheadItemUrl(row.item.item.id)" target="_blank" rel="noopener" :class="['q', row.item.quality.type.toLowerCase()]">
+                <a :href="wowheadItemUrl(row.item.item.id)" target="_blank" rel="noopener" :class="['q', row.item.quality?.type.toLowerCase()]">
                   {{ row.item.name }}
                 </a>
               </td>
-              <td>{{ row.item.level.value }}</td>
+              <td>{{ row.item.level?.value ?? '–' }}</td>
               <td>{{ row.item.requirements?.level?.value ?? '–' }}</td>
-              <td>{{ row.item.item_subclass.name }}</td>
+              <td>{{ row.item.item_subclass?.name ?? '–' }}</td>
               <td class="stats">{{ statsText(row.item) }}</td>
             </template>
             <td v-else colspan="5" class="empty">vide</td>
