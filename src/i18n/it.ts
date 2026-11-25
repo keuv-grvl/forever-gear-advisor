@@ -42,16 +42,11 @@ export const it: Messages = {
   'equip.title': 'Equipaggiamento',
   'equip.slot': 'Slot',
   'equip.item': 'Oggetto',
-  'equip.itemLevel': 'Livello oggetto',
-  'equip.reqLevel': 'Liv. richiesto',
-  'equip.type': 'Tipo',
-  'equip.stats': 'Statistiche ed effetti',
   'equip.empty': 'vuoto',
   'equip.armor': '{value} armatura',
   'equip.dps': '{dps} DPS ({speed})',
   'equip.resistances': 'resistenze',
 
-  'reco.title': 'Miglioramenti',
   'reco.spec': 'Specializzazione',
   'reco.sortBy': 'Ordina per',
   'reco.sortGain': 'Guadagno',
@@ -68,14 +63,13 @@ export const it: Messages = {
   'origin.rep': 'Reputazione',
   'origin.unknown': 'Fonte sconosciuta',
 
-  'reco.colSlot': 'Slot',
-  'reco.colEquipped': 'Equipaggiato (punteggio)',
   'reco.colEquippedTitle': "Punteggio: somma delle statistiche dell'oggetto, ponderate per la specializzazione",
-  'reco.colBest': 'Opzione migliore',
-  'reco.empty': 'vuoto',
   'reco.nothing': 'Niente di meglio trovato',
-  'reco.moreOne': '1 altra opzione',
-  'reco.moreMany': '{n} altre opzioni',
+  'gear.colScore': "Punteggio",
+  'gear.colBest': "Miglior possibile",
+  'gear.bestHint':
+    "Punteggio della migliore opzione trovata con le impostazioni sopra, guadagno tra parentesi; la barra mostra quanto ne raggiunge l'oggetto equipaggiato. Clicca su una riga per vedere le opzioni di quello slot.",
+  'gear.toggle': "Opzioni per {slot}",
 
   'hint.spec':
     'Le statistiche non valgono lo stesso per ogni specializzazione (pesi Polestar). Predefinita: la specializzazione in cui hai messo più punti talento.',

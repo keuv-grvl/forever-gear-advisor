@@ -1,15 +1,29 @@
 <script setup lang="ts">
+// Équipement du perso et marge de progression : une ligne par emplacement avec le score de l'objet porté et le
+// meilleur score possible (selon la spé et les filtres). Un clic sur une ligne affiche les options de l'emplacement.
 import { computed, ref, watch } from 'vue'
-import { langInfo, specName as specLabel, t, type MessageKey } from '../i18n'
-import { detectSpec, fetchPrices, wowheadItemUrl, type CharacterData, type Prices } from '../lib/blizzard'
+import { formatNumber, langInfo, specName as specLabel, t, type MessageKey } from '../i18n'
+import { detectSpec, fetchPrices, wowheadItemUrl, type CharacterData, type EquippedItem, type Prices } from '../lib/blizzard'
 import { SLOT_ORDER, type GameData } from '../lib/data'
 import { randomOffers } from '../lib/random'
-import { itemKey, ORIGINS, recommend, sideOf, sourcesFor, type Crafter, type DbItem, type Origin, type Source } from '../lib/recommend'
+import {
+  itemKey,
+  ORIGINS,
+  recommend,
+  sideOf,
+  sourcesFor,
+  type Crafter,
+  type DbItem,
+  type Origin,
+  type SlotAdvice,
+  type Source,
+} from '../lib/recommend'
 import { CLASS_KEYS, wearableArmorTypes } from '../lib/rules'
 import { findSpec, weightsAt } from '../lib/scoring'
 import { readPrefs, writePrefs } from '../lib/suggest'
 import CandidateLine from './CandidateLine.vue'
 import Hint from './Hint.vue'
+import ItemStats from './ItemStats.vue'
 
 const props = defineProps<{ data: CharacterData; game: GameData }>()
 const game = computed(() => props.game)
@@ -19,7 +33,6 @@ const profile = computed(() => props.data.profile)
 const classKey = computed(() => CLASS_KEYS[profile.value.character_class.id] ?? profile.value.character_class.name)
 const specChoices = computed(() => game.value.weights.specs.filter((s) => s.class === classKey.value))
 const specName = ref('')
-
 
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
@@ -41,12 +54,14 @@ watch(
   { deep: true },
 )
 
-// Spé détectée par défaut, à chaque nouveau perso.
+// Spé détectée par défaut et lignes repliées, à chaque nouveau perso.
+const open = ref(new Set<string>())
 watch(
   () => [props.data, game.value] as const,
   () => {
     const detected = detectSpec(props.data.specializations)
     specName.value = findSpec(game.value.weights, classKey.value, detected?.name)?.spec ?? ''
+    open.value = new Set()
   },
   { immediate: true },
 )
@@ -100,7 +115,7 @@ const advice = computed(() => {
     faction: profile.value.faction.type,
     weights: weightsAt(game.value.weights, spec.value, profile.value.level),
     anticipate: anticipate.value ? 5 : 0,
-    perSlot: 3,
+    perSlot: 5,
     mainArmorOnly: mainArmorOnly.value,
     sources: game.value.sources,
     origins: new Set(origins.value),
@@ -109,10 +124,48 @@ const advice = computed(() => {
   })
 })
 
-// Gain : les plus grosses améliorations d'abord (ordre du moteur). Emplacement : ordre de la fiche personnage.
-const rows = computed(() =>
-  sortBy.value === 'slot' ? [...advice.value].sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot)) : advice.value,
-)
+interface Row {
+  slot: string
+  label: string
+  item?: EquippedItem
+  advice?: SlotAdvice
+  /** Score de l'objet porté (0 si l'emplacement est vide) ; absent si l'emplacement n'est pas évalué (chemise…). */
+  score?: number
+  /** Meilleur score possible : score + gain de la meilleure option. */
+  best?: number
+  gain: number
+}
+
+// Une ligne par emplacement de la fiche personnage. Chemise et tabard seulement s'ils sont portés ; pas de main
+// gauche avec une arme à deux mains (les options d'arme comparent alors des ensembles, voir recommend).
+const OPTIONAL = new Set(['SHIRT', 'TABARD'])
+const rows = computed<Row[]>(() => {
+  const bySlot = new Map(props.data.equipment.equipped_items.map((i) => [i.slot.type, i]))
+  const adviceBySlot = new Map(advice.value.map((a) => [a.slot, a]))
+  const twoHanded = bySlot.get('MAIN_HAND')?.inventory_type?.type === 'TWOHWEAPON'
+  const list = SLOT_ORDER.filter((s) => bySlot.has(s) || !(OPTIONAL.has(s) || (s === 'OFF_HAND' && twoHanded))).map((slot): Row => {
+    const a = adviceBySlot.get(slot)
+    const score = a ? (a.equipped?.score ?? 0) : undefined
+    const gain = Math.max(0, a?.candidates[0]?.gain ?? 0)
+    return { slot, label: t(`slot.${slot}` as MessageKey), item: bySlot.get(slot), advice: a, score, best: score === undefined ? undefined : score + gain, gain }
+  })
+  // Gain : les plus grosses marges de progression d'abord. Emplacement : ordre de la fiche personnage.
+  return sortBy.value === 'gain' ? list.sort((x, y) => y.gain - x.gain || SLOT_ORDER.indexOf(x.slot) - SLOT_ORDER.indexOf(y.slot)) : list
+})
+
+const expandable = (r: Row) => (r.advice?.candidates.length ?? 0) > 0
+function toggle(slot: string) {
+  const next = new Set(open.value)
+  if (!next.delete(slot)) next.add(slot)
+  open.value = next
+}
+// Clic sur la ligne : déplie, sauf sur un lien (Wowhead) ou un bouton (infobulle, flèche).
+function onRowClick(e: MouseEvent, r: Row) {
+  if (!expandable(r) || (e.target as HTMLElement).closest('a, button')) return
+  toggle(r.slot)
+}
+/** Part du meilleur score déjà atteinte, pour la barre de progression. */
+const ratio = (r: Row) => (r.best ? Math.min(100, Math.round(((r.score ?? 0) / r.best) * 100)) : 100)
 
 function sourcesOf(item: DbItem): Source[] {
   return sourcesFor(game.value.sources[item.id], item, {
@@ -132,16 +185,13 @@ const armorHint = computed(() => {
   return t('hint.armor', { best, lighter, level: maxLevel.value })
 })
 
-const slotLabel = (slot: string) => t(`slot.${slot}` as MessageKey)
-const othersLabel = (n: number) => (n > 1 ? t('reco.moreMany', { n }) : t('reco.moreOne'))
-
 // Pied de tableau : texte traduit, avec un lien à la place de {polestar}.
 const footer = computed(() => t('reco.footer', { date: game.value.generated }).split('{polestar}'))
 </script>
 
 <template>
   <section>
-    <h3>{{ t('reco.title') }}</h3>
+    <h3>{{ t('equip.title') }}</h3>
     <div class="controls">
       <span class="control">
         <label>
@@ -178,57 +228,72 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
     <p v-if="origins.length === 0" class="error">{{ t('reco.pickOrigin') }}</p>
 
     <div class="table-wrap">
-      <table>
+      <table class="gear">
         <thead>
           <tr>
-            <th>{{ t('reco.colSlot') }}</th>
-            <th :title="t('reco.colEquippedTitle')">{{ t('reco.colEquipped') }}</th>
-            <th>{{ t('reco.colBest') }}</th>
+            <th>{{ t('equip.slot') }}</th>
+            <th>{{ t('equip.item') }}</th>
+            <th class="num" :title="t('reco.colEquippedTitle')">{{ t('gear.colScore') }}</th>
+            <th class="num">{{ t('gear.colBest') }}<Hint :text="t('gear.bestHint')" /></th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="a in rows" :key="a.slot">
-            <td>{{ slotLabel(a.slot) }}</td>
-            <td>
-              <template v-if="a.equipped">
-                <a :href="wowheadItemUrl(a.equipped.id, a.equipped.sfx)" target="_blank" rel="noopener">{{ a.equipped.name }}</a>
-                <span class="muted"> ({{ a.equipped.score.toFixed(1) }})</span>
-              </template>
-              <span v-else class="empty">{{ t('reco.empty') }}</span>
-            </td>
-            <td>
-              <p v-if="a.candidates.length === 0" class="muted">{{ t('reco.nothing') }}</p>
-              <template v-else>
+          <template v-for="r in rows" :key="r.slot">
+            <tr :class="{ expandable: expandable(r), open: open.has(r.slot) }" @click="onRowClick($event, r)">
+              <td class="slot">
+                <button
+                  v-if="expandable(r)"
+                  type="button"
+                  class="expand"
+                  :aria-expanded="open.has(r.slot)"
+                  :aria-label="t('gear.toggle', { slot: r.label })"
+                  @click="toggle(r.slot)"
+                >
+                  ▸
+                </button>
+                {{ r.label }}
+              </td>
+              <td>
+                <template v-if="r.item">
+                  <a
+                    :href="wowheadItemUrl(r.item.item.id, r.item.bonus_list?.[0])"
+                    target="_blank"
+                    rel="noopener"
+                    :class="['q', r.item.quality?.type.toLowerCase()]"
+                    >{{ r.item.name }}</a
+                  >
+                  <ItemStats :item="r.item" />
+                </template>
+                <span v-else class="empty">{{ t('equip.empty') }}</span>
+              </td>
+              <td class="num">{{ r.score === undefined ? '–' : formatNumber(r.score) }}</td>
+              <td class="num best">
+                <template v-if="r.gain > 0 && r.best !== undefined">
+                  {{ formatNumber(r.best) }} <span class="gain-inline">(+{{ formatNumber(r.gain) }})</span>
+                  <span class="bar" :title="`${ratio(r)} %`"><span :style="{ width: `${ratio(r)}%` }"></span></span>
+                </template>
+                <span v-else-if="r.advice" class="muted small">{{ t('reco.nothing') }}</span>
+                <template v-else>–</template>
+              </td>
+            </tr>
+            <tr v-if="open.has(r.slot) && r.advice" class="options-row">
+              <td colspan="4">
                 <ul class="candidates">
                   <CandidateLine
-                    :c="a.candidates[0]"
-                    :sources="sourcesOf(a.candidates[0].item)"
+                    v-for="c in r.advice.candidates"
+                    :key="itemKey(c.item)"
+                    :c="c"
+                    :sources="sourcesOf(c.item)"
                     :active-quests="activeQuests"
-                    :price="prices?.prices[itemKey(a.candidates[0].item)]"
+                    :price="prices?.prices[itemKey(c.item)]"
                     :price-note="priceNote"
                     :side="side"
                     :crafter="crafter"
                   />
                 </ul>
-                <details v-if="a.candidates.length > 1" class="more">
-                  <summary>{{ othersLabel(a.candidates.length - 1) }}</summary>
-                  <ul class="candidates">
-                    <CandidateLine
-                      v-for="c in a.candidates.slice(1)"
-                      :key="itemKey(c.item)"
-                      :c="c"
-                      :sources="sourcesOf(c.item)"
-                      :active-quests="activeQuests"
-                      :price="prices?.prices[itemKey(c.item)]"
-                      :price-note="priceNote"
-                      :side="side"
-                      :crafter="crafter"
-                    />
-                  </ul>
-                </details>
-              </template>
-            </td>
-          </tr>
+              </td>
+            </tr>
+          </template>
         </tbody>
       </table>
     </div>

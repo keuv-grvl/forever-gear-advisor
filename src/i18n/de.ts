@@ -42,16 +42,11 @@ export const de: Messages = {
   'equip.title': 'Ausrüstung',
   'equip.slot': 'Platz',
   'equip.item': 'Gegenstand',
-  'equip.itemLevel': 'Gegenstandsstufe',
-  'equip.reqLevel': 'Ben. Stufe',
-  'equip.type': 'Typ',
-  'equip.stats': 'Werte und Effekte',
   'equip.empty': 'leer',
   'equip.armor': '{value} Rüstung',
   'equip.dps': '{dps} DPS ({speed})',
   'equip.resistances': 'Widerstände',
 
-  'reco.title': 'Verbesserungen',
   'reco.spec': 'Spezialisierung',
   'reco.sortBy': 'Sortieren nach',
   'reco.sortGain': 'Zugewinn',
@@ -68,14 +63,13 @@ export const de: Messages = {
   'origin.rep': 'Ruf',
   'origin.unknown': 'Unbekannte Quelle',
 
-  'reco.colSlot': 'Platz',
-  'reco.colEquipped': 'Angelegt (Score)',
   'reco.colEquippedTitle': 'Score: Summe der Werte des Gegenstands, gewichtet für die Spezialisierung',
-  'reco.colBest': 'Beste Option',
-  'reco.empty': 'leer',
   'reco.nothing': 'Nichts Besseres gefunden',
-  'reco.moreOne': '1 weitere Option',
-  'reco.moreMany': '{n} weitere Optionen',
+  'gear.colScore': "Score",
+  'gear.colBest': "Bestmöglich",
+  'gear.bestHint':
+    "Score der besten Option mit den obigen Einstellungen, Zugewinn in Klammern; der Balken zeigt, wie viel davon dein aktueller Gegenstand erreicht. Klicke auf eine Zeile, um die Optionen für diesen Platz zu sehen.",
+  'gear.toggle': "Optionen für {slot}",
 
   'hint.spec':
     'Werte sind nicht für jede Spezialisierung gleich viel wert (Gewichtung von Polestar). Standard: die Spezialisierung, in die du die meisten Talentpunkte gesteckt hast.',

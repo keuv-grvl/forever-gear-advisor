@@ -281,3 +281,67 @@ details.more summary {
 details.more .candidates {
   margin-top: 0.4rem;
 }
+
+/* Tableau d'équipement (src/components/GearTable.vue) : une ligne par emplacement, options dépliables. */
+:root {
+  --hover: rgba(127, 127, 127, 0.08);
+  --bar: rgba(127, 127, 127, 0.22);
+}
+.gear .num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.gear td.slot {
+  white-space: nowrap;
+}
+.gear tr.expandable {
+  cursor: pointer;
+}
+.gear tr.expandable:hover,
+.gear tr.open {
+  background: var(--hover);
+}
+.gear button.expand {
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  padding: 0 0.3rem 0 0;
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.15s;
+}
+.gear tr.open button.expand {
+  transform: rotate(90deg);
+}
+.gear td.slot:not(:has(button)) {
+  padding-left: 1.4rem;
+}
+.gear .item-stats {
+  font-size: 0.85em;
+  margin-top: 0.15rem;
+}
+.gear .gain-inline {
+  color: var(--q-uncommon);
+  font-weight: 600;
+}
+.gear .bar {
+  display: block;
+  height: 4px;
+  margin-top: 0.3rem;
+  margin-left: auto;
+  width: 6rem;
+  border-radius: 2px;
+  background: var(--bar);
+  overflow: hidden;
+}
+.gear .bar > span {
+  display: block;
+  height: 100%;
+  background: var(--q-uncommon);
+}
+.gear tr.options-row > td {
+  background: var(--hover);
+  padding: 0.5rem 0.6rem 0.75rem 1.4rem;
+}

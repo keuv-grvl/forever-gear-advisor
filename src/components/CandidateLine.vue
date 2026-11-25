@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
-import { factionName, formatMoney, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
+import { factionName, formatMoney, formatNumber, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl } from '../lib/blizzard'
 import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
 
@@ -46,7 +46,7 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
 
 <template>
   <li>
-    <span class="gain">+{{ c.gain.toFixed(1) }}</span>
+    <span class="gain">+{{ formatNumber(c.gain) }}</span>
     <a :href="wowheadItemUrl(c.item.id, c.item.sfx)" target="_blank" rel="noopener" :class="['q', c.item.q.toLowerCase()]">{{
       c.item.sfx ? suffixedName(c.item.id, c.item.sfx, c.item.n) : itemName(c.item.id, c.item.n)
     }}</a>

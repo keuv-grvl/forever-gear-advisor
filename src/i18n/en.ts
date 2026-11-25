@@ -47,17 +47,12 @@ export const en = {
   'equip.title': 'Equipment',
   'equip.slot': 'Slot',
   'equip.item': 'Item',
-  'equip.itemLevel': 'Item level',
-  'equip.reqLevel': 'Req. level',
-  'equip.type': 'Type',
-  'equip.stats': 'Stats and effects',
   'equip.empty': 'empty',
   'equip.armor': '{value} armor',
   'equip.dps': '{dps} DPS ({speed})',
   'equip.resistances': 'resistances',
 
   // Améliorations : options
-  'reco.title': 'Upgrades',
   'reco.spec': 'Spec',
   'reco.sortBy': 'Sort by',
   'reco.sortGain': 'Gain',
@@ -75,14 +70,13 @@ export const en = {
   'origin.unknown': 'Unknown source',
 
   // Améliorations : tableau
-  'reco.colSlot': 'Slot',
-  'reco.colEquipped': 'Equipped (score)',
   'reco.colEquippedTitle': 'Score: sum of the item’s stats, weighted for the spec',
-  'reco.colBest': 'Best option',
-  'reco.empty': 'empty',
   'reco.nothing': 'Nothing better found',
-  'reco.moreOne': '1 more option',
-  'reco.moreMany': '{n} more options',
+  'gear.colScore': "Score",
+  'gear.colBest': "Best possible",
+  'gear.bestHint':
+    "Score of the best option found with the settings above, gain in parentheses; the bar shows how much of it your current item reaches. Click a row to see the options for that slot.",
+  'gear.toggle': "Options for {slot}",
 
   // Infobulles
   'hint.spec': 'Stats are not worth the same for every spec (Polestar weights). Default: the spec with the most talent points.',

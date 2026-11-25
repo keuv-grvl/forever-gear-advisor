@@ -42,16 +42,11 @@ export const pt: Messages = {
   'equip.title': 'Equipamento',
   'equip.slot': 'Espaço',
   'equip.item': 'Item',
-  'equip.itemLevel': 'Nível de item',
-  'equip.reqLevel': 'Nível req.',
-  'equip.type': 'Tipo',
-  'equip.stats': 'Atributos e efeitos',
   'equip.empty': 'vazio',
   'equip.armor': '{value} de armadura',
   'equip.dps': '{dps} DPS ({speed})',
   'equip.resistances': 'resistências',
 
-  'reco.title': 'Melhorias',
   'reco.spec': 'Especialização',
   'reco.sortBy': 'Ordenar por',
   'reco.sortGain': 'Ganho',
@@ -68,14 +63,13 @@ export const pt: Messages = {
   'origin.rep': 'Reputação',
   'origin.unknown': 'Fonte desconhecida',
 
-  'reco.colSlot': 'Espaço',
-  'reco.colEquipped': 'Equipado (pontuação)',
   'reco.colEquippedTitle': 'Pontuação: soma dos atributos do item, ponderados para a especialização',
-  'reco.colBest': 'Melhor opção',
-  'reco.empty': 'vazio',
   'reco.nothing': 'Nada melhor encontrado',
-  'reco.moreOne': 'Mais 1 opção',
-  'reco.moreMany': 'Mais {n} opções',
+  'gear.colScore': "Pontuação",
+  'gear.colBest': "Melhor possível",
+  'gear.bestHint':
+    "Pontuação da melhor opção encontrada com as configurações acima, ganho entre parênteses; a barra mostra quanto o item equipado já alcança. Clique em uma linha para ver as opções desse espaço.",
+  'gear.toggle': "Opções para {slot}",
 
   'hint.spec':
     'Os atributos não valem o mesmo para cada especialização (pesos do Polestar). Padrão: a especialização em que você colocou mais pontos de talento.',

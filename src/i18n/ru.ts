@@ -42,16 +42,11 @@ export const ru: Messages = {
   'equip.title': 'Экипировка',
   'equip.slot': 'Ячейка',
   'equip.item': 'Предмет',
-  'equip.itemLevel': 'Уровень предмета',
-  'equip.reqLevel': 'Треб. уровень',
-  'equip.type': 'Тип',
-  'equip.stats': 'Характеристики и эффекты',
   'equip.empty': 'пусто',
   'equip.armor': 'Броня: {value}',
   'equip.dps': '{dps} урона/с ({speed})',
   'equip.resistances': 'сопротивления',
 
-  'reco.title': 'Улучшения',
   'reco.spec': 'Специализация',
   'reco.sortBy': 'Сортировка',
   'reco.sortGain': 'Прирост',
@@ -68,14 +63,13 @@ export const ru: Messages = {
   'origin.rep': 'Репутация',
   'origin.unknown': 'Неизвестный источник',
 
-  'reco.colSlot': 'Ячейка',
-  'reco.colEquipped': 'Надето (оценка)',
   'reco.colEquippedTitle': 'Оценка: сумма характеристик предмета с весами для специализации',
-  'reco.colBest': 'Лучший вариант',
-  'reco.empty': 'пусто',
   'reco.nothing': 'Ничего лучше не найдено',
-  'reco.moreOne': 'Ещё 1 вариант',
-  'reco.moreMany': 'Ещё вариантов: {n}',
+  'gear.colScore': "Оценка",
+  'gear.colBest': "Лучшее возможное",
+  'gear.bestHint':
+    "Оценка лучшего варианта с текущими настройками, прирост в скобках; полоска показывает, какую часть уже даёт надетый предмет. Нажмите на строку, чтобы увидеть варианты для этой ячейки.",
+  'gear.toggle': "Варианты: {slot}",
 
   'hint.spec':
     'Ценность характеристик зависит от специализации (веса Polestar). По умолчанию — специализация, в которую вложено больше всего очков талантов.',

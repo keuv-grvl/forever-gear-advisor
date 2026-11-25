@@ -42,16 +42,11 @@ export const es: Messages = {
   'equip.title': 'Equipo',
   'equip.slot': 'Ranura',
   'equip.item': 'Objeto',
-  'equip.itemLevel': 'Nivel de objeto',
-  'equip.reqLevel': 'Nivel req.',
-  'equip.type': 'Tipo',
-  'equip.stats': 'Estadísticas y efectos',
   'equip.empty': 'vacío',
   'equip.armor': '{value} de armadura',
   'equip.dps': '{dps} DPS ({speed})',
   'equip.resistances': 'resistencias',
 
-  'reco.title': 'Mejoras',
   'reco.spec': 'Especialización',
   'reco.sortBy': 'Ordenar por',
   'reco.sortGain': 'Ganancia',
@@ -68,14 +63,13 @@ export const es: Messages = {
   'origin.rep': 'Reputación',
   'origin.unknown': 'Fuente desconocida',
 
-  'reco.colSlot': 'Ranura',
-  'reco.colEquipped': 'Equipado (puntuación)',
   'reco.colEquippedTitle': 'Puntuación: suma de las estadísticas del objeto, ponderadas para la especialización',
-  'reco.colBest': 'Mejor opción',
-  'reco.empty': 'vacío',
   'reco.nothing': 'No se ha encontrado nada mejor',
-  'reco.moreOne': '1 opción más',
-  'reco.moreMany': '{n} opciones más',
+  'gear.colScore': "Puntuación",
+  'gear.colBest': "Mejor posible",
+  'gear.bestHint':
+    "Puntuación de la mejor opción encontrada con los ajustes de arriba, ganancia entre paréntesis; la barra muestra cuánto alcanza ya el objeto equipado. Haz clic en una fila para ver las opciones de esa ranura.",
+  'gear.toggle': "Opciones para {slot}",
 
   'hint.spec':
     'Las estadísticas no valen lo mismo para cada especialización (pesos de Polestar). Por defecto: la especialización en la que tienes más puntos de talento.',

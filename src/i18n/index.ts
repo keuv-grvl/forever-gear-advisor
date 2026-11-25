@@ -130,6 +130,11 @@ export function specName(en: string): string {
   return key ? specs[key] : en
 }
 
+/** Nombre avec `digits` décimales, à la façon de la langue (« 31,2 » en français). */
+export function formatNumber(n: number, digits = 1): string {
+  return n.toLocaleString(langInfo().bcp47, { minimumFractionDigits: digits, maximumFractionDigits: digits })
+}
+
 /** Montant en cuivre → « 12 po 34 pa » (cuivre affiché seulement sous 1 po). */
 export function formatMoney(copper: number): string {
   const [g, s, c] = [Math.floor(copper / 10000), Math.floor(copper / 100) % 100, copper % 100]

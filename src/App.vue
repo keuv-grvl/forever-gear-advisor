@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onErrorCaptured, onMounted, ref, watch } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
-import EquipmentTable from './components/EquipmentTable.vue'
-import Recommendations from './components/Recommendations.vue'
+import GearTable from './components/GearTable.vue'
 import { lang, langInfo, LANGS, t } from './i18n'
 import { loadGameData, type GameData } from './lib/data'
 import { remember, suggestions } from './lib/suggest'
@@ -128,10 +127,9 @@ onMounted(() => {
     <p v-if="error" class="error">{{ error }}</p>
     <template v-if="data">
       <CharacterSummary :data="data" />
-      <Recommendations v-if="game" :data="data" :game="game" />
+      <GearTable v-if="game" :data="data" :game="game" />
       <p v-else-if="gameError" class="error">{{ t('error.gameData', { message: gameError }) }}</p>
       <p v-else class="muted">{{ t('loading.gameData') }}</p>
-      <EquipmentTable :items="data.equipment.equipped_items" />
     </template>
   </main>
 </template>
