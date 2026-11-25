@@ -65,9 +65,12 @@ export function sourcesFor(sources: Source[] | undefined, side: 'A' | 'H', class
   })
 }
 
-/** Origine d'un objet, pour le filtre : `rep` = demande une réputation, `unknown` = aucune source connue. */
-export type Origin = 'quest' | 'dungeon' | 'craft' | 'vendor' | 'rep' | 'unknown'
-export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'rep', 'unknown']
+/**
+ * Origine d'un objet, pour le filtre : `rep` = demande une réputation ; sans source connue, `boe` = lié quand
+ * équipé (du butin, en général, qu'on peut acheter à l'HV), `unknown` = lié quand ramassé.
+ */
+export type Origin = 'quest' | 'dungeon' | 'craft' | 'vendor' | 'boe' | 'rep' | 'unknown'
+export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'boe', 'rep', 'unknown']
 
 /**
  * L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée ;
@@ -75,8 +78,9 @@ export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'rep', 
  */
 export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>): boolean {
   if (item.rep && !allowed.has('rep')) return false
-  if (sources.length === 0) return item.rep ? true : allowed.has('unknown')
-  return sources.some((s) => allowed.has(s.t === 'quest' ? (s.inst ? 'dungeon' : 'quest') : s.t))
+  if (sources.length > 0) return sources.some((s) => allowed.has(s.t === 'quest' ? (s.inst ? 'dungeon' : 'quest') : s.t))
+  if (item.rep) return true
+  return allowed.has(item.bop ? 'unknown' : 'boe')
 }
 
 export interface Candidate {

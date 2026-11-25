@@ -1,5 +1,7 @@
 // Client navigateur : passe toujours par /api (jamais d'appel direct à Blizzard).
 
+import { wowheadUrl } from '../i18n'
+
 export const REGIONS = ['eu', 'us', 'kr', 'tw'] as const
 export type Region = (typeof REGIONS)[number]
 
@@ -64,7 +66,8 @@ export interface Equipment {
 export interface Specializations {
   specialization_groups: {
     is_active: boolean
-    specializations: { specialization: Named; spent_points: number }[]
+    // name : nom anglais (clé des poids Polestar) ; label : nom dans la langue demandée (api/character.ts).
+    specializations: { specialization: Named & { label?: string }; spent_points: number }[]
   }[]
 }
 
@@ -97,6 +100,8 @@ export interface CharacterData {
   guildMembers?: string[]
   /** Ids des quêtes en cours et terminées (absents si l'API ne les a pas donnés). */
   quests?: { active?: number[]; done?: number[] }
+  /** Région de la recherche (ajoutée par fetchCharacter). */
+  region?: Region
 }
 
 /** « Helga Tartine » : le nom tel qu'affiché en jeu. */
@@ -105,17 +110,18 @@ export function displayName(p: CharacterProfile): string {
 }
 
 /** Un seul appel (une invocation Vercel) pour profil + équipement + spés. */
-export async function fetchCharacter(region: Region, name: string): Promise<CharacterData> {
-  const res = await fetch(`/api/character?region=${region}&name=${encodeURIComponent(name)}`)
+/** `locale` : locale Blizzard (fr_FR…) des noms renvoyés ; la logique n'utilise que des ids et des types. */
+export async function fetchCharacter(region: Region, name: string, locale: string): Promise<CharacterData> {
+  const res = await fetch(`/api/character?region=${region}&name=${encodeURIComponent(name)}&locale=${locale}`)
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string }
     throw new ApiError(res.status, body.error ?? `HTTP ${res.status}`)
   }
-  return (await res.json()) as CharacterData
+  return { ...((await res.json()) as CharacterData), region }
 }
 
 /** Spé principale = arbre avec le plus de points dans le groupe actif. */
-export function detectSpec(specs: Specializations): { name: string; id: number; points: number } | null {
+export function detectSpec(specs: Specializations): { name: string; label?: string; id: number; points: number } | null {
   const group = specs.specialization_groups.find((g) => g.is_active) ?? specs.specialization_groups[0]
   if (!group || group.specializations.length === 0) return null
   const best = group.specializations.reduce((a, b) => (b.spent_points > a.spent_points ? b : a))
@@ -124,13 +130,26 @@ export function detectSpec(specs: Specializations): { name: string; id: number; 
 }
 
 export function wowheadItemUrl(itemId: number): string {
-  return `https://www.wowhead.com/forever/item=${itemId}`
+  return wowheadUrl('item', itemId)
 }
 
 export function wowheadQuestUrl(questId: number): string {
-  return `https://www.wowhead.com/forever/quest=${questId}`
+  return wowheadUrl('quest', questId)
 }
 
 export function wowheadNpcUrl(npcId: number): string {
-  return `https://www.wowhead.com/forever/npc=${npcId}`
+  return wowheadUrl('npc', npcId)
+}
+
+/** Prix indicatifs à l'HV (voir api/prices.ts) : par id d'objet, [prix en cuivre, nombre de maisons]. */
+export interface Prices {
+  generated: string
+  houses: number
+  prices: Record<number, [copper: number, houses: number]>
+}
+
+export async function fetchPrices(region: Region, ruleset: number, faction: string): Promise<Prices> {
+  const res = await fetch(`/api/prices?region=${region}&ruleset=${ruleset}&faction=${encodeURIComponent(faction)}`)
+  if (!res.ok) throw new ApiError(res.status, `prix HV : HTTP ${res.status}`)
+  return (await res.json()) as Prices
 }

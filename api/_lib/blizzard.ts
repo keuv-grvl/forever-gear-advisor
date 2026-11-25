@@ -2,7 +2,7 @@
 // Le client secret et le token ne sortent jamais d'ici.
 
 export const REGIONS = new Set(['us', 'eu', 'kr', 'tw'])
-export const LOCALES = new Set(['en_US', 'en_GB', 'fr_FR', 'de_DE', 'es_ES', 'it_IT', 'pt_BR', 'ru_RU', 'ko_KR', 'zh_TW'])
+export const LOCALES = new Set(['en_US', 'en_GB', 'fr_FR', 'de_DE', 'es_ES', 'it_IT', 'pt_BR', 'ru_RU', 'ko_KR', 'zh_TW', 'zh_CN'])
 
 let cachedToken: { value: string; expiresAt: number } | null = null
 
@@ -45,7 +45,7 @@ export async function blizzardGet(
 ): Promise<unknown> {
   const url = new URL(`https://${region}.api.blizzard.com${encodeURI(path)}`)
   url.searchParams.set('namespace', `${namespace}-forever-${region}`)
-  url.searchParams.set('locale', locale)
+  if (locale) url.searchParams.set('locale', locale) // sans locale : textes dans toutes les langues
 
   let res = await fetch(url, { headers: { Authorization: `Bearer ${await getToken()}` } })
   if (res.status === 401) res = await fetch(url, { headers: { Authorization: `Bearer ${await getToken(true)}` } })

@@ -28,7 +28,8 @@ export async function GET(request: Request): Promise<Response> {
     const [profile, equipment, specializations, roster, active, completed] = await Promise.all([
       profileP,
       get(`${base}/equipment`),
-      get(`${base}/specializations`),
+      // Sans locale : nom anglais (clé des poids Polestar) et nom dans la langue, voir specNames.
+      blizzardGet(region, 'profile', `${base}/specializations`, '').then((r) => specNames(r, locale)),
       rosterP,
       // Quêtes en cours et terminées : facultatives, comme le roster.
       get(`${base}/quests`).catch(() => null),
@@ -59,4 +60,26 @@ function memberNames(roster: unknown): string[] | undefined {
 function questIds(res: unknown, key: string): number[] | undefined {
   const list = (res as Record<string, { id?: number }[] | undefined> | null)?.[key]
   return list?.flatMap((q) => (typeof q.id === 'number' ? [q.id] : []))
+}
+
+/**
+ * Spés demandées sans locale (chaque nom dans toutes les langues) : `name` reste en anglais pour la logique,
+ * `label` est le nom dans la langue demandée. Talents retirés : inutiles, et lourds dans toutes les langues.
+ */
+function specNames(raw: unknown, locale: string): unknown {
+  type Spec = { specialization?: { name?: unknown; label?: string }; talents?: unknown; specialization_name?: unknown }
+  const groups = (raw as { specialization_groups?: { specializations?: Spec[] }[] } | null)?.specialization_groups
+  for (const g of groups ?? []) {
+    for (const s of g.specializations ?? []) {
+      delete s.talents
+      delete s.specialization_name
+      const n = s.specialization?.name
+      if (s.specialization && n && typeof n === 'object') {
+        const all = n as Record<string, string>
+        s.specialization.name = all.en_US
+        s.specialization.label = all[locale] ?? all.en_US
+      }
+    }
+  }
+  return raw
 }

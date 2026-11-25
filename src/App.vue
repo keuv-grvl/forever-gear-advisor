@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, onErrorCaptured, onMounted, ref } from 'vue'
+import { computed, onErrorCaptured, onMounted, ref, watch } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
 import EquipmentTable from './components/EquipmentTable.vue'
 import Recommendations from './components/Recommendations.vue'
+import { lang, langInfo, LANGS, t } from './i18n'
 import { loadGameData, type GameData } from './lib/data'
 import { remember, suggestions } from './lib/suggest'
 import {
@@ -30,10 +31,13 @@ const nameSuggestions = computed(() => {
   return suggestions(region.value)
 })
 
+// Perso affiché, pour le recharger dans une autre langue.
+let current: { region: Region; name: string } | null = null
+
 async function load() {
   const name = normalizeCharacterName(nameInput.value)
   if (!isValidCharacterName(name)) {
-    error.value = 'Saisis le prénom et le nom du personnage, par exemple « Helga Tartine ».'
+    error.value = t('error.name')
     return
   }
   error.value = ''
@@ -48,17 +52,18 @@ async function load() {
     })
     .catch((err) => (gameError.value = err instanceof Error ? err.message : String(err)))
   try {
-    const d = await fetchCharacter(region.value, name)
+    const d = await fetchCharacter(region.value, name, langInfo().locale)
     data.value = d
+    current = { region: region.value, name }
     nameInput.value = displayName(d.profile)
     remember(region.value, nameInput.value, d.profile.guild?.slug, d.guildMembers)
     suggestTick.value++
   } catch (err) {
     data.value = null
     if (err instanceof ApiError && err.status === 404) {
-      error.value = `Personnage « ${name} » introuvable en ${region.value.toUpperCase()}.`
+      error.value = t('error.notFound', { name, region: region.value.toUpperCase() })
     } else {
-      error.value = `Erreur : ${err instanceof Error ? err.message : String(err)}`
+      error.value = t('error.generic', { message: err instanceof Error ? err.message : String(err) })
     }
   } finally {
     loading.value = false
@@ -67,8 +72,20 @@ async function load() {
 
 // Une donnée inattendue de l'API ne doit pas laisser un bloc vide sans explication.
 onErrorCaptured((err) => {
-  error.value = `Erreur d'affichage : ${err instanceof Error ? err.message : String(err)}`
+  error.value = t('error.render', { message: err instanceof Error ? err.message : String(err) })
   return false
+})
+
+// Autre langue : noms du perso (classe, objets, stats…) redemandés dans cette langue ; l'ancien reste affiché d'ici là.
+watch(lang, async () => {
+  if (!current) return
+  const { region: r, name } = current
+  try {
+    const d = await fetchCharacter(r, name, langInfo().locale)
+    if (current?.name === name && current.region === r) data.value = d
+  } catch {
+    // on garde l'affichage précédent
+  }
 })
 
 onMounted(() => {
@@ -85,15 +102,20 @@ onMounted(() => {
 
 <template>
   <main>
-    <h1>Forever Gear Advisor</h1>
+    <header class="top">
+      <h1>Forever Gear Advisor</h1>
+      <select v-model="lang" class="lang" :aria-label="t('form.language')" :title="t('form.language')">
+        <option v-for="l in LANGS" :key="l.code" :value="l.code">{{ l.label }}</option>
+      </select>
+    </header>
     <form @submit.prevent="load">
-      <select v-model="region" aria-label="Région">
+      <select v-model="region" :aria-label="t('form.region')">
         <option v-for="r in REGIONS" :key="r" :value="r">{{ r.toUpperCase() }}</option>
       </select>
       <input
         v-model="nameInput"
-        placeholder="Prénom Nom (ex. Helga Tartine)"
-        aria-label="Personnage"
+        :placeholder="t('form.placeholder')"
+        :aria-label="t('form.character')"
         list="character-suggestions"
         autocomplete="off"
         autofocus
@@ -101,14 +123,14 @@ onMounted(() => {
       <datalist id="character-suggestions">
         <option v-for="n in nameSuggestions" :key="n" :value="n" />
       </datalist>
-      <button :disabled="loading">{{ loading ? 'Chargement…' : 'Charger' }}</button>
+      <button :disabled="loading">{{ loading ? t('form.loading') : t('form.load') }}</button>
     </form>
     <p v-if="error" class="error">{{ error }}</p>
     <template v-if="data">
       <CharacterSummary :data="data" />
       <Recommendations v-if="game" :data="data" :game="game" />
-      <p v-else-if="gameError" class="error">Données d'objets indisponibles : {{ gameError }}</p>
-      <p v-else class="muted">Chargement des données d'objets…</p>
+      <p v-else-if="gameError" class="error">{{ t('error.gameData', { message: gameError }) }}</p>
+      <p v-else class="muted">{{ t('loading.gameData') }}</p>
       <EquipmentTable :items="data.equipment.equipped_items" />
     </template>
   </main>

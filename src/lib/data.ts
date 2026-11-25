@@ -37,24 +37,25 @@ export function loadGameData(): Promise<GameData> {
   return pending
 }
 
-export const SLOT_LABELS: Record<string, string> = {
-  HEAD: 'Tête',
-  NECK: 'Cou',
-  SHOULDER: 'Épaules',
-  BACK: 'Dos',
-  CHEST: 'Torse',
-  SHIRT: 'Chemise',
-  TABARD: 'Tabard',
-  WRIST: 'Poignets',
-  HANDS: 'Mains',
-  WAIST: 'Taille',
-  LEGS: 'Jambes',
-  FEET: 'Pieds',
-  FINGER_1: 'Doigt 1',
-  FINGER_2: 'Doigt 2',
-  TRINKET_1: 'Bijou 1',
-  TRINKET_2: 'Bijou 2',
-  MAIN_HAND: 'Main droite',
-  OFF_HAND: 'Main gauche',
-  RANGED: 'Distance',
-}
+/** Emplacements dans l'ordre de la fiche personnage (libellés : clés `slot.*` de src/i18n). */
+export const SLOT_ORDER = [
+  'HEAD',
+  'NECK',
+  'SHOULDER',
+  'BACK',
+  'CHEST',
+  'SHIRT',
+  'TABARD',
+  'WRIST',
+  'HANDS',
+  'WAIST',
+  'LEGS',
+  'FEET',
+  'FINGER_1',
+  'FINGER_2',
+  'TRINKET_1',
+  'TRINKET_2',
+  'MAIN_HAND',
+  'OFF_HAND',
+  'RANGED',
+]

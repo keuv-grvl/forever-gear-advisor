@@ -65,14 +65,31 @@ async function getToken(): Promise<string> {
 }
 
 let apiCalls = 0
-/** GET sur l'API Forever, avec cache disque. Renvoie null sur 404. */
-async function api<T>(namespace: 'static' | 'profile', path: string, query = ''): Promise<T | null> {
-  const url = `https://${REGION}.api.blizzard.com${encodeURI(path)}?namespace=${namespace}-forever-${REGION}&locale=${LOCALE}${query ? '&' + query : ''}`
+/**
+ * GET sur l'API Forever, avec cache disque. Renvoie null sur 404.
+ * Avec `collect` : requête sans paramètre locale, chaque texte arrive dans toutes les langues ({ en_US, fr_FR, … }) ;
+ * `collect` relève les noms traduits (voir Traductions) et le résultat est converti en anglais.
+ */
+async function api<T>(
+  namespace: 'static' | 'profile',
+  path: string,
+  query = '',
+  collect?: (raw: unknown) => void,
+): Promise<T | null> {
+  const locale = collect ? '' : `&locale=${LOCALE}`
+  const url = `https://${REGION}.api.blizzard.com${encodeURI(path)}?namespace=${namespace}-forever-${REGION}${locale}${query ? '&' + query : ''}`
+  const raw = await apiRaw(url, path)
+  if (!collect || raw === null) return raw as T | null
+  collect(raw)
+  return localize(raw, LOCALE) as T
+}
+
+async function apiRaw(url: string, path: string): Promise<unknown> {
   const name = `${createHash('sha1').update(url).digest('hex')}.json`
   const file = `${CACHE}/${name}`
   usedCacheFiles.add(name)
   if (existsSync(file) && Date.now() - (await stat(file)).mtimeMs < CACHE_MAX_AGE_DAYS * 86_400_000) {
-    return JSON.parse(await readFile(file, 'utf8')) as T | null
+    return JSON.parse(await readFile(file, 'utf8')) as unknown
   }
 
   for (let attempt = 0; ; attempt++) {
@@ -94,8 +111,68 @@ async function api<T>(namespace: 'static' | 'profile', path: string, query = '')
     if (!res.ok) throw new Error(`HTTP ${res.status} sur ${path}`)
     const body = await res.text()
     await writeFile(file, body)
-    return JSON.parse(body) as T
+    return JSON.parse(body) as unknown
   }
+}
+
+// ---------- Traductions ----------
+// Noms du jeu dans les langues de l'app (celles de Wowhead), relevés dans les réponses « toutes langues » de l'API
+// Forever. Écrits dans public/data/i18n/<langue>.json ; l'anglais est celui de items.json et sources.json.
+
+const LANG_LOCALES: Record<string, string> = {
+  de: 'de_DE',
+  es: 'es_ES',
+  fr: 'fr_FR',
+  it: 'it_IT',
+  pt: 'pt_BR',
+  ru: 'ru_RU',
+  ko: 'ko_KR',
+  cn: 'zh_CN',
+  tw: 'zh_TW',
+}
+type Localized = Record<string, string | null> & { en_US: string }
+interface GameNames {
+  items: Record<number, string>
+  quests: Record<number, string>
+  subclasses: Record<string, string>
+  professions: Record<string, string>
+  factions: Record<string, string>
+  specs: Record<string, string>
+}
+const gameNames: Record<string, GameNames> = Object.fromEntries(
+  Object.keys(LANG_LOCALES).map((l) => [l, { items: {}, quests: {}, subclasses: {}, professions: {}, factions: {}, specs: {} }]),
+)
+
+function isLocalized(v: unknown): v is Localized {
+  return !!v && typeof v === 'object' && !Array.isArray(v) && typeof (v as Localized).en_US === 'string'
+}
+
+/** Remplace chaque texte « toutes langues » par sa version dans `locale` (anglais à défaut). */
+function localize(v: unknown, locale: string): unknown {
+  if (Array.isArray(v)) return v.map((x) => localize(x, locale))
+  if (isLocalized(v)) return v[locale] ?? v.en_US
+  if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, localize(x, locale)]))
+  return v
+}
+
+/** Relève un nom traduit ; clé = id (objets, quêtes) ou nom anglais (sous-classes, métiers, factions). */
+function addName(kind: keyof GameNames, key: number | string | undefined, value: unknown) {
+  if (key === undefined || !isLocalized(value)) return
+  for (const [lang, locale] of Object.entries(LANG_LOCALES)) {
+    const s = value[locale]
+    if (s && s !== value.en_US) (gameNames[lang][kind] as Record<string | number, string>)[key] = s
+  }
+}
+
+/** Noms d'un objet (fiche statique ou objet porté) : nom, sous-classe, faction de réputation requise. */
+function collectItemNames(raw: unknown) {
+  type R = { id?: number; item?: { id?: number }; name?: unknown; item_subclass?: { name?: unknown } }
+  const r = raw as R & { preview_item?: { requirements?: { reputation?: { faction?: { name?: unknown } } } } }
+  addName('items', r.id ?? r.item?.id, r.name)
+  const sub = r.item_subclass?.name
+  if (isLocalized(sub)) addName('subclasses', sub.en_US, sub)
+  const fac = r.preview_item?.requirements?.reputation?.faction?.name
+  if (isLocalized(fac)) addName('factions', fac.en_US, fac)
 }
 
 /** Applique fn à chaque élément avec au plus CONCURRENCY appels simultanés. */
@@ -286,7 +363,10 @@ async function harvestEquipment(known: Set<number>): Promise<OutItem[]> {
   await pool(
     [...names],
     async (name) => {
-      const eq = await api<{ equipped_items: ApiItemPreview[] }>('profile', `/profile/wow/character/${name}/equipment`)
+      const eq = await api<{ equipped_items: ApiItemPreview[] }>('profile', `/profile/wow/character/${name}/equipment`, '', (raw) => {
+        for (const it of (raw as { equipped_items?: { bonus_list?: unknown[] }[] }).equipped_items ?? [])
+          if (!it.bonus_list?.length) collectItemNames(it) // nom à suffixe (« of the Whale ») : pas celui de l'objet de base
+      })
       for (const it of eq?.equipped_items ?? []) {
         // Objets à suffixe aléatoire (« of the Whale ») : stats propres à l'exemplaire, on ne les généralise pas.
         if (known.has(it.item.id) || seen.has(it.item.id) || it.bonus_list?.length) continue
@@ -310,7 +390,11 @@ interface CraftSource {
 }
 
 async function buildCrafts(itemIds: Set<number>): Promise<Map<number, CraftSource[]>> {
-  const index = await api<{ professions: Ref[] }>('static', '/data/wow/profession/index')
+  const index = await api<{ professions: Ref[] }>('static', '/data/wow/profession/index', '', (raw) => {
+    for (const p of (raw as { professions?: { name?: unknown }[] }).professions ?? []) {
+      if (isLocalized(p.name)) addName('professions', p.name.en_US, p.name)
+    }
+  })
   const recipes: { prof: string; id: number }[] = []
   for (const prof of index?.professions ?? []) {
     if (JUNK_NAME.test(prof.name)) continue
@@ -333,7 +417,11 @@ async function buildCrafts(itemIds: Set<number>): Promise<Map<number, CraftSourc
         horde_crafted_item?: Ref
         reagents?: { reagent: Ref; quantity: number }[]
         crafted_quantity?: { value?: number }
-      }>('static', `/data/wow/recipe/${id}`)
+      }>('static', `/data/wow/recipe/${id}`, '', (raw) => {
+        // Réactifs (infobulle du craft) : leurs noms rejoignent ceux des objets.
+        for (const x of (raw as { reagents?: { reagent?: { id?: number; name?: unknown } }[] }).reagents ?? [])
+          addName('items', x.reagent?.id, x.reagent?.name)
+      })
       const item = r?.crafted_item ?? r?.alliance_crafted_item ?? r?.horde_crafted_item
       if (!r || !item || !itemIds.has(item.id)) return
       const src: CraftSource = {
@@ -532,7 +620,7 @@ console.log('1. Objets équipables (API Forever)')
 const ids = await listEquippableIds()
 console.log(`  ${ids.length} objets équipables listés`)
 const apiItems = (
-  await pool(ids, async (id) => api<ApiItem>('static', `/data/wow/item/${id}`), 'fiches')
+  await pool(ids, async (id) => api<ApiItem>('static', `/data/wow/item/${id}`, '', collectItemNames), 'fiches')
 ).filter((x): x is ApiItem => x !== null)
 const items = new Map<number, OutItem>()
 for (const it of apiItems) {
@@ -606,6 +694,20 @@ for (const [id, it] of items) {
   else if ((it.il ?? 0) < 10 && (it.w?.[3] ?? 0) > 15) items.delete(id)
 }
 
+console.log('6. Noms traduits des quêtes et des spés (API Forever)')
+// Spés : le profil ne liste que les arbres où le perso a des points ; l'index les donne toutes (« Elemental Combat »).
+await api('static', '/data/wow/playable-specialization/index', '', (raw) => {
+  for (const sp of (raw as { character_specializations?: { name?: unknown }[] }).character_specializations ?? [])
+    if (isLocalized(sp.name)) addName('specs', sp.name.en_US, sp.name)
+})
+const questIds = new Set<number>()
+for (const list of Object.values(sources)) for (const s of list) if (s.t === 'quest') questIds.add(s.id)
+await pool(
+  [...questIds],
+  (id) => api('static', `/data/wow/quest/${id}`, '', (raw) => addName('quests', id, (raw as { title?: unknown }).title)),
+  'quêtes',
+)
+
 const generated = new Date().toISOString().slice(0, 10)
 await writeFile(
   'public/data/items.json',
@@ -628,6 +730,29 @@ await writeFile(
     sources,
   }) + '\n',
 )
+// Traductions : seulement les objets gardés (et les réactifs de leurs crafts) et les quêtes utilisées.
+const namedItems = new Set(items.keys())
+for (const list of Object.values(sources)) for (const s of list) if (s.t === 'craft') for (const [id] of s.reagents) namedItems.add(id)
+await mkdir('public/data/i18n', { recursive: true })
+for (const [lang, n] of Object.entries(gameNames)) {
+  const pick = <V>(rec: Record<number, V>, keep: Set<number>) =>
+    Object.fromEntries(Object.entries(rec).filter(([id]) => keep.has(Number(id))))
+  await writeFile(
+    `public/data/i18n/${lang}.json`,
+    JSON.stringify({
+      generated,
+      locale: LANG_LOCALES[lang],
+      source: 'API Blizzard WoW Forever, © Blizzard Entertainment',
+      items: pick(n.items, namedItems),
+      quests: pick(n.quests, questIds),
+      subclasses: n.subclasses,
+      professions: n.professions,
+      factions: n.factions,
+      specs: n.specs,
+    }) + '\n',
+  )
+}
+
 // Ménage du cache : seulement après une génération complète (un échec en cours de route ne vide rien).
 let pruned = 0
 for (const entry of await readdir(CACHE)) {

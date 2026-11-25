@@ -4,6 +4,18 @@
 
 // Ids de classe Blizzard.
 export const CLASS = { WARRIOR: 1, PALADIN: 2, HUNTER: 3, ROGUE: 4, PRIEST: 5, SHAMAN: 7, MAGE: 8, WARLOCK: 9, DRUID: 11 }
+/** Nom anglais de la classe, clé des poids Polestar (le nom renvoyé par l'API dépend de la langue). */
+export const CLASS_KEYS: Record<number, string> = {
+  1: 'Warrior',
+  2: 'Paladin',
+  3: 'Hunter',
+  4: 'Rogue',
+  5: 'Priest',
+  7: 'Shaman',
+  8: 'Mage',
+  9: 'Warlock',
+  11: 'Druid',
+}
 
 // Sous-classes d'armure (item_class 4).
 const ARMOR = { MISC: 0, CLOTH: 1, LEATHER: 2, MAIL: 3, PLATE: 4, SHIELD: 6, LIBRAM: 7, IDOL: 8, TOTEM: 9 }
@@ -100,7 +112,6 @@ export function bestArmorType(classId: number, level: number): number {
   return Math.max(...wearableArmorTypes(classId, level))
 }
 
-export const ARMOR_NAMES: Record<number, string> = { [CLOTH]: 'tissu', [LEATHER]: 'cuir', [MAIL]: 'mailles', [PLATE]: 'plaques' }
 
 // inventory_type → slots d'équipement possibles.
 export const SLOTS_FOR: Record<string, string[]> = {

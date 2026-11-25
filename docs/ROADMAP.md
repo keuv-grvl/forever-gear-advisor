@@ -13,7 +13,7 @@ Webapp qui charge le personnage WoW Forever d'un joueur (équipement, spé), pui
 
 - Vue 3 + Vite + TypeScript, dépôt GitHub, déploiement Vercel (`main` = prod, chaque branche = URL de preview).
 - Environnement de dev : `.devcontainer/` (Node 24, Vercel CLI, `npm ci` au démarrage). Node n'est pas installé dans le WSL hôte, il faut travailler dans le conteneur. Secrets en local : `vercel link` puis `vercel env pull .env.local` (ignoré par git via `*.local`).
-- Pas de vrai backend. Le dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy vers Blizzard : `api/character.ts` (profil + équipement + spés + noms des membres de la guilde en un appel), code partagé dans `api/_lib/` (le `_` empêche Vercel d'en faire une fonction). Imports en `.js` dans `api/` (Vercel compile le TS).
+- Pas de vrai backend. Le dossier `/api` (fonctions serverless Vercel) sert uniquement de proxy vers Blizzard : `api/character.ts` (profil + équipement + spés + quêtes + noms des membres de la guilde en une invocation), `api/prices.ts` (prix HV, cache 6 h), code partagé dans `api/_lib/` (le `_` empêche Vercel d'en faire une fonction). Imports en `.js` dans `api/` (Vercel compile le TS).
 - En dev local, Vite redirige `/api` vers la prod (`vite.config.ts`, surcharge possible via `API_TARGET`).
 - **Le client secret Blizzard ne doit jamais atteindre le navigateur** : variables d'environnement Vercel uniquement, jamais commité. Ni le token : le proxy le garde côté serveur.
 - Les variables `BLIZZARD_*` sont de type *Sensitive* (Production + Preview) : `vercel env pull` ne les récupère pas. Les scripts locaux lisent `.env.blizzard.local` (client Blizzard dédié, rempli à la main, ignoré par git, à révoquer quand l'implémentation est stable).
@@ -108,12 +108,16 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 - [x] Craft (métier, réactifs en infobulle), quêtes (lien Wowhead, niveau, faction et classe filtrées), vendeurs (lien Wowhead du PNJ, faction filtrée), réputation requise. 4 331 objets sur 6 150 ont une source. Un objet dont toutes les sources sont réservées à une autre faction ou classe n'est pas proposé.
 - [x] Filtre par origine : quêtes, quêtes de donjon ou raid (type de quête du client, table `quest` de forever-db Polestar : 81 donjon, 62 raid), craft, vendeurs, réputation (décochée : écarte tout objet qui demande une réputation), source inconnue. Les drops de donjon restent absents (décision « pas de drops »).
-- [ ] Prix HV (`/data/wow/ruleset/{id}/auctions/…`, namespace dynamic) pour les objets craftés ou vendus.
+- [x] Quêtes du perso (`/quests`, `/quests/completed`, dans `/api/character`) : récompenses d'une quête terminée retirées (sauf `repeatable` de forever-db), quête en cours signalée.
+- [x] Origine « Butin lié quand équipé » : objet non BoP sans autre source (binding de l'API Forever ; aucune donnée de drop Classic).
+- [x] Prix HV : `api/prices.ts` (`/data/wow/ruleset/{id}/auctions/{maison}`, namespace dynamic). Un ruleset a 15 maisons (Alliance, Horde, Blackwater ×5, sans enchère commune : groupes de royaumes a priori) et l'API ne dit pas laquelle sert un perso : prix = médiane des minimums des maisons de la faction. 5 dumps de ~13 Mo, ~2 s, ~0,8 s CPU ; cache CDN 6 h. Objets à suffixe (bonus_lists) ignorés.
+- [ ] Objets à suffixe aléatoire (« of the Whale ») : l'HV et l'équipement donnent un id de bonus (ex. 12728 = « of Agility », montant selon le niveau d'objet) ; décoder les stats demande les tables du client Forever (ItemBonus…), source à valider avec l'utilisateur.
 - [ ] Indiquer si le perso a le métier (`/professions`) et le niveau de compétence de la recette (absent de l'API).
 - [ ] Plus d'objets observés : élargir `seeds.local.json` (autres guildes) pour couvrir les objets absents de l'API statique.
 
 **Phase 6, finitions**
 
+- [x] Langues de Wowhead (en, de, es, fr, it, pt, ru, ko, cn, tw), menu en haut à droite : textes de l'interface (`src/i18n/`), noms du jeu (`public/data/i18n/`, API Forever toutes langues ; PNJ en anglais, l'API Forever n'a pas `creature`), locale de `/api/character`, liens Wowhead `/forever/<langue>/`. La logique n'utilise que des ids et des types (classe par id, spés demandées sans locale : nom anglais + libellé).
 - [ ] Cache local (localStorage/IndexedDB) du profil et des données.
 - [ ] Gestion d'erreurs (404 perso, région, token expiré).
 - [ ] Tests unitaires du scoring et des règles (aujourd'hui vérifiés par scripts ad hoc sur les persos de test).

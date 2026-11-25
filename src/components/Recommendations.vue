@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { detectSpec, wowheadItemUrl, type CharacterData } from '../lib/blizzard'
-import { SLOT_LABELS, type GameData } from '../lib/data'
+import { langInfo, specName as specLabel, t, type MessageKey } from '../i18n'
+import { detectSpec, fetchPrices, wowheadItemUrl, type CharacterData, type Prices } from '../lib/blizzard'
+import { SLOT_ORDER, type GameData } from '../lib/data'
 import { ORIGINS, recommend, sideOf, sourcesFor, type DbItem, type Origin, type Source } from '../lib/recommend'
-import { ARMOR_NAMES, wearableArmorTypes } from '../lib/rules'
+import { CLASS_KEYS, wearableArmorTypes } from '../lib/rules'
 import { findSpec, weightsAt } from '../lib/scoring'
 import { readPrefs, writePrefs } from '../lib/suggest'
 import CandidateLine from './CandidateLine.vue'
@@ -13,8 +14,11 @@ const props = defineProps<{ data: CharacterData; game: GameData }>()
 const game = computed(() => props.game)
 
 const profile = computed(() => props.data.profile)
-const specChoices = computed(() => game.value.weights.specs.filter((s) => s.class === profile.value.character_class.name))
+// Clé anglaise de la classe (poids Polestar) : le nom renvoyé par l'API dépend de la langue.
+const classKey = computed(() => CLASS_KEYS[profile.value.character_class.id] ?? profile.value.character_class.name)
+const specChoices = computed(() => game.value.weights.specs.filter((s) => s.class === classKey.value))
 const specName = ref('')
+
 
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
@@ -36,29 +40,42 @@ watch(
   { deep: true },
 )
 
-const ORIGIN_LABELS: Record<Origin, string> = {
-  quest: 'Quêtes',
-  dungeon: 'Quêtes de donjon ou raid',
-  craft: 'Craft',
-  vendor: 'Vendeurs',
-  rep: 'Réputation',
-  unknown: 'Source inconnue',
-}
-
 // Spé détectée par défaut, à chaque nouveau perso.
 watch(
   () => [props.data, game.value] as const,
   () => {
     const detected = detectSpec(props.data.specializations)
-    specName.value = findSpec(game.value.weights, profile.value.character_class.name, detected?.name)?.spec ?? ''
+    specName.value = findSpec(game.value.weights, classKey.value, detected?.name)?.spec ?? ''
   },
   { immediate: true },
 )
 
-const spec = computed(() => findSpec(game.value.weights, profile.value.character_class.name, specName.value))
+const spec = computed(() => findSpec(game.value.weights, classKey.value, specName.value))
 const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
 const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
 const activeQuests = computed(() => new Set(props.data.quests?.active ?? []))
+
+// Prix HV (facultatifs) : chargés à chaque perso, servis par le cache CDN la plupart du temps.
+const prices = ref<Prices | null>(null)
+watch(
+  () => [props.data.region, props.data.profile.ruleset?.id, props.data.profile.faction.type] as const,
+  ([region, ruleset, faction]) => {
+    prices.value = null
+    if (!region || ruleset === undefined) return
+    fetchPrices(region, ruleset, faction)
+      .then((p) => {
+        if (props.data.region === region && props.data.profile.faction.type === faction) prices.value = p
+      })
+      .catch(() => {}) // sans prix, le reste s'affiche normalement
+  },
+  { immediate: true },
+)
+const priceNote = computed(() => {
+  const p = prices.value
+  if (!p) return ''
+  const when = new Date(p.generated).toLocaleString(langInfo().bcp47, { dateStyle: 'short', timeStyle: 'short' })
+  return t('price.note', { houses: p.houses, faction: profile.value.faction.name, when })
+})
 
 const advice = computed(() => {
   if (!spec.value) return []
@@ -77,7 +94,6 @@ const advice = computed(() => {
 })
 
 // Gain : les plus grosses améliorations d'abord (ordre du moteur). Emplacement : ordre de la fiche personnage.
-const SLOT_ORDER = Object.keys(SLOT_LABELS)
 const rows = computed(() =>
   sortBy.value === 'slot' ? [...advice.value].sort((a, b) => SLOT_ORDER.indexOf(a.slot) - SLOT_ORDER.indexOf(b.slot)) : advice.value,
 )
@@ -86,94 +102,90 @@ function sourcesOf(item: DbItem): Source[] {
   return sourcesFor(game.value.sources[item.id], sideOf(profile.value.faction.type), profile.value.character_class.id, doneQuests.value)
 }
 
-const HINTS = {
-  spec: "Les stats n'ont pas la même valeur selon la spé (poids Polestar). Par défaut : la spé où tu as mis le plus de points de talent.",
-  sort: "Gain : les emplacements où l'amélioration est la plus forte d'abord. Emplacement : l'ordre de la fiche personnage (tête, cou, épaules…).",
-  anticipate: "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
-  origins:
-    "Un objet est proposé si au moins une de ses sources est cochée. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops (monstres, boss, coffres) ne sont pas dans les données : un objet de donjon n'apparaît que s'il est donné par une quête.",
-}
-
 const armorHint = computed(() => {
   const types = wearableArmorTypes(profile.value.character_class.id, maxLevel.value)
-  const best = ARMOR_NAMES[types[types.length - 1]]
-  if (types.length < 2) return `Ta classe ne porte que du ${best} : cette option ne change rien.`
-  const lighter = types.slice(0, -1).map((t) => ARMOR_NAMES[t])
-  return (
-    `Coché : pour la tête, les épaules, le torse, les poignets, les mains, la taille, les jambes et les pieds, seulement de l'armure en ${best}, ` +
-    `le type le plus lourd que ta classe porte au niveau ${maxLevel.value}. ` +
-    `Décoché : aussi l'armure en ${lighter.join(' et ')} (moins d'armure, parfois de meilleures stats). ` +
-    'Le dos, le cou, les doigts et les bijoux ne sont pas concernés.'
-  )
+  const armor = (id: number) => t(`armor.${id}` as MessageKey)
+  const best = armor(types[types.length - 1])
+  if (types.length < 2) return t('hint.armorOnly', { best })
+  const lighter = types.slice(0, -1).map(armor).join(t('list.and'))
+  return t('hint.armor', { best, lighter, level: maxLevel.value })
 })
 
-function othersLabel(n: number): string {
-  return n > 1 ? `${n} autres options` : '1 autre option'
-}
+const slotLabel = (slot: string) => t(`slot.${slot}` as MessageKey)
+const othersLabel = (n: number) => (n > 1 ? t('reco.moreMany', { n }) : t('reco.moreOne'))
+
+// Pied de tableau : texte traduit, avec un lien à la place de {polestar}.
+const footer = computed(() => t('reco.footer', { date: game.value.generated }).split('{polestar}'))
 </script>
 
 <template>
   <section>
-    <h3>Améliorations</h3>
+    <h3>{{ t('reco.title') }}</h3>
     <div class="controls">
       <span class="control">
         <label>
-          Spé
+          {{ t('reco.spec') }}
           <select v-model="specName">
-            <option v-for="s in specChoices" :key="s.spec" :value="s.spec">{{ s.spec }}</option>
+            <option v-for="s in specChoices" :key="s.spec" :value="s.spec">{{ specLabel(s.spec) }}</option>
           </select>
         </label>
-        <Hint :text="HINTS.spec" />
+        <Hint :text="t('hint.spec')" />
       </span>
       <span class="control">
         <label>
-          Trier par
+          {{ t('reco.sortBy') }}
           <select v-model="sortBy">
-            <option value="gain">Gain</option>
-            <option value="slot">Emplacement</option>
+            <option value="gain">{{ t('reco.sortGain') }}</option>
+            <option value="slot">{{ t('reco.sortSlot') }}</option>
           </select>
         </label>
-        <Hint :text="HINTS.sort" />
+        <Hint :text="t('hint.sort')" />
       </span>
       <span class="control">
-        <label><input v-model="mainArmorOnly" type="checkbox" /> Type d'armure principal seulement</label>
+        <label><input v-model="mainArmorOnly" type="checkbox" /> {{ t('reco.mainArmor') }}</label>
         <Hint :text="armorHint" />
       </span>
       <span class="control">
-        <label><input v-model="anticipate" type="checkbox" /> Anticiper (+5 niveaux)</label>
-        <Hint :text="HINTS.anticipate" />
+        <label><input v-model="anticipate" type="checkbox" /> {{ t('reco.anticipate') }}</label>
+        <Hint :text="t('hint.anticipate')" />
       </span>
     </div>
     <fieldset class="controls origins">
-      <legend>Origine<Hint :text="HINTS.origins" /></legend>
-      <label v-for="o in ORIGINS" :key="o"><input v-model="origins" type="checkbox" :value="o" /> {{ ORIGIN_LABELS[o] }}</label>
+      <legend>{{ t('reco.origin') }}<Hint :text="t('hint.origins')" /></legend>
+      <label v-for="o in ORIGINS" :key="o"><input v-model="origins" type="checkbox" :value="o" /> {{ t(`origin.${o}`) }}</label>
     </fieldset>
-    <p v-if="origins.length === 0" class="error">Coche au moins une origine.</p>
+    <p v-if="origins.length === 0" class="error">{{ t('reco.pickOrigin') }}</p>
 
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Slot</th>
-            <th title="Score : somme des stats de l'objet, pondérées pour la spé">Équipé (score)</th>
-            <th>Meilleure option</th>
+            <th>{{ t('reco.colSlot') }}</th>
+            <th :title="t('reco.colEquippedTitle')">{{ t('reco.colEquipped') }}</th>
+            <th>{{ t('reco.colBest') }}</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="a in rows" :key="a.slot">
-            <td>{{ SLOT_LABELS[a.slot] ?? a.slot }}</td>
+            <td>{{ slotLabel(a.slot) }}</td>
             <td>
               <template v-if="a.equipped">
                 <a :href="wowheadItemUrl(a.equipped.id)" target="_blank" rel="noopener">{{ a.equipped.name }}</a>
                 <span class="muted"> ({{ a.equipped.score.toFixed(1) }})</span>
               </template>
-              <span v-else class="empty">vide</span>
+              <span v-else class="empty">{{ t('reco.empty') }}</span>
             </td>
             <td>
-              <p v-if="a.candidates.length === 0" class="muted">Rien de mieux trouvé</p>
+              <p v-if="a.candidates.length === 0" class="muted">{{ t('reco.nothing') }}</p>
               <template v-else>
                 <ul class="candidates">
-                  <CandidateLine :c="a.candidates[0]" :sources="sourcesOf(a.candidates[0].item)" :active-quests="activeQuests" />
+                  <CandidateLine
+                    :c="a.candidates[0]"
+                    :sources="sourcesOf(a.candidates[0].item)"
+                    :active-quests="activeQuests"
+                    :price="prices?.prices[a.candidates[0].item.id]"
+                    :price-note="priceNote"
+                  />
                 </ul>
                 <details v-if="a.candidates.length > 1" class="more">
                   <summary>{{ othersLabel(a.candidates.length - 1) }}</summary>
@@ -184,6 +196,8 @@ function othersLabel(n: number): string {
                       :c="c"
                       :sources="sourcesOf(c.item)"
                       :active-quests="activeQuests"
+                      :price="prices?.prices[c.item.id]"
+                      :price-note="priceNote"
                     />
                   </ul>
                 </details>
@@ -195,11 +209,8 @@ function othersLabel(n: number): string {
     </div>
 
     <p class="muted small">
-      Score : somme des stats pondérées pour la spé (poids
-      <a :href="game.weights.source.url" target="_blank" rel="noopener">Polestar</a>, GPL-3.0). Le gain est l'écart avec l'objet porté.
-      « ~ » : niveau estimé, l'API ne donne pas de niveau requis. Objets : API Blizzard WoW Forever ({{ game.generated }}) ; quêtes :
-      forever-db (Polestar) ; vendeurs : forever-db (fatedfr). Les drops ne sont pas indiqués, et les objets à suffixe aléatoire (« of the
-      Owl ») ne sont pas proposés.
+      {{ footer[0] }}<a :href="game.weights.source.url" target="_blank" rel="noopener">Polestar</a>{{ footer[1] }}
+      <template v-if="t('reco.footerNpc')">{{ ' ' + t('reco.footerNpc') }}</template>
     </p>
   </section>
 </template>
