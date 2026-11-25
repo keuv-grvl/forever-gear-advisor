@@ -54,6 +54,16 @@ export const en = {
 
   // Améliorations : options
   'reco.spec': 'Spec',
+  'reco.weights': "Weights",
+  'weights.polestar': "Polestar",
+  'weights.flbis': "Forever Leveling BiS (local prototype)",
+  'hint.weights': "Source of the stat weights behind the scores. Polestar: weights by level band, weapon DPS without speed. Forever Leveling BiS: weights every 5 levels, with weapon speed and, for Enhancement, weights by weapon setup. Local prototype until its author agrees.",
+  'reco.setup': "Weapons",
+  'setup.twohand': "Two-hander (Windfury)",
+  'setup.shield': "One-hander + shield (Flametongue)",
+  'spec.bear': "Bear (tank)",
+  'spec.survivalmelee': "Survival (melee)",
+  'reco.flbisNote': "Weights: {source}. Local prototype, not published.",
   'reco.sortBy': 'Sort by',
   'reco.sortGain': 'Gain',
   'reco.sortSlot': 'Slot',

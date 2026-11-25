@@ -28,3 +28,8 @@ dist-ssr
 # Données de travail des scripts
 .cache/
 scripts/seeds.local.json
+
+# Forever Leveling BiS : code de l'addon et poids convertis, usage local seulement (copie interdite sans permission
+# écrite de l'auteur, voir docs/ROADMAP.md). Ne jamais versionner ni déployer.
+docs/ForeverLevelingBiS/
+public/data/local/

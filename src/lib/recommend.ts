@@ -2,7 +2,7 @@
 
 import type { EquippedItem } from './blizzard'
 import { bestArmorType, canDualWield, canWear, SLOTS_FOR } from './rules'
-import { scoreItem, type ScorableItem } from './scoring'
+import type { ScorableItem, Scorer } from './scoring'
 
 /** Objet de public/data/items.json (voir scripts/build-data.ts, clés courtes). */
 export interface DbItem {
@@ -133,7 +133,8 @@ export interface RecommendOptions {
   classId: number
   level: number
   faction: string // ALLIANCE / HORDE
-  weights: Record<string, number>
+  /** Score d'un objet pour la spé et le niveau (source de poids choisie). */
+  score: Scorer
   /** Niveaux d'avance : propose aussi des objets jusqu'à niveau + anticipate. */
   anticipate: number
   perSlot: number
@@ -146,6 +147,11 @@ export interface RecommendOptions {
   doneQuests?: ReadonlySet<number>
   /** Métiers du perso : un craft lié quand ramassé d'un autre métier n'est pas accessible. */
   crafter?: Crafter
+  /**
+   * Configuration d'armes imposée (poids propres à chacune, Forever Leveling BiS) : `twohand` ne propose que des
+   * armes à deux mains, `shield` une arme à une main et un bouclier. Absente : toutes les combinaisons.
+   */
+  weaponSetup?: string
 }
 
 // Slots d'armure où le type (tissu, cuir, mailles, plaques) compte ; le dos est toujours en tissu.
@@ -158,11 +164,17 @@ export function fromEquipped(it: EquippedItem): ScorableItem {
     const k = s.type.type.replace(/[^A-Z0-9_]/g, '')
     stats[k] = (stats[k] ?? 0) + s.value
   }
-  return { slot: it.inventory_type?.type ?? '', stats, armor: it.armor?.value ?? 0, dps: it.weapon?.dps.value ?? 0 }
+  return {
+    slot: it.inventory_type?.type ?? '',
+    stats,
+    armor: it.armor?.value ?? 0,
+    dps: it.weapon?.dps.value ?? 0,
+    speed: it.weapon ? it.weapon.attack_speed.value / 1000 : undefined,
+  }
 }
 
 export function fromDb(it: DbItem): ScorableItem {
-  return { slot: it.slot, stats: it.s ?? {}, armor: it.a ?? 0, dps: it.w?.[3] ?? 0 }
+  return { slot: it.slot, stats: it.s ?? {}, armor: it.a ?? 0, dps: it.w?.[3] ?? 0, speed: it.w ? it.w[2] / 1000 : undefined }
 }
 
 const ONE_HAND_MAIN = new Set(['WEAPON', 'WEAPONMAINHAND'])
@@ -175,7 +187,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   // Objet déjà porté : même id, et même suffixe pour un objet à stats aléatoires.
   const equippedKeys = new Set(equipped.map((e) => itemKey({ id: e.item.id, sfx: e.bonus_list?.length === 1 ? e.bonus_list[0] : undefined })))
 
-  const score = (it: ScorableItem, offHand = false) => scoreItem(it, o.weights, offHand)
+  const score = (it: ScorableItem, offHand = false) => o.score(it, offHand)
   const eqScore = (slot: string, offHand = false) => {
     const e = bySlot.get(slot)
     return e ? score(fromEquipped(e), offHand) : 0
@@ -247,7 +259,10 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const currentSet = eqScore('MAIN_HAND') + eqScore('OFF_HAND', true)
   // Arme en main gauche (« Left-Handed Blades », arme à une main) : seulement si la classe manie deux armes.
   // Bouclier et objet tenu en main gauche : toutes les classes qui peuvent les porter (canWear).
-  const offHandOk = (it: DbItem) => OFF_HAND.has(it.slot) || (dualWield && (it.slot === 'WEAPON' || it.slot === 'WEAPONOFFHAND'))
+  const offHandOk = (it: DbItem) =>
+    o.weaponSetup === 'shield'
+      ? it.slot === 'SHIELD'
+      : OFF_HAND.has(it.slot) || (dualWield && (it.slot === 'WEAPON' || it.slot === 'WEAPONOFFHAND'))
   const offHands = usable
     .filter(offHandOk)
     .map((item) => ({ item, s: score(fromDb(item), item.cls === 2) }))
@@ -256,6 +271,8 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
 
   const mainList: Candidate[] = []
   for (const c of scored) {
+    if (o.weaponSetup === 'twohand' && c.item.slot !== 'TWOHWEAPON') continue
+    if (o.weaponSetup === 'shield' && c.item.slot === 'TWOHWEAPON') continue
     if (c.item.slot === 'TWOHWEAPON') mainList.push({ item: c.item, score: c.s, gain: c.s - currentSet })
     else if (ONE_HAND_MAIN.has(c.item.slot)) {
       // On remplace une 2M : il faut aussi une main gauche, la meilleure autre que cette arme.

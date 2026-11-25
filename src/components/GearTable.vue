@@ -19,7 +19,8 @@ import {
   type Source,
 } from '../lib/recommend'
 import { CLASS_KEYS, wearableArmorTypes } from '../lib/rules'
-import { findSpec, weightsAt } from '../lib/scoring'
+import { flbisScorer, flbisSetups, flbisSpecKey, flbisSpecs, flbisWeights } from '../lib/flbis'
+import { findSpec, polestarScorer, type Scorer } from '../lib/scoring'
 import { readPrefs, writePrefs } from '../lib/suggest'
 import CandidateLine from './CandidateLine.vue'
 import Hint from './Hint.vue'
@@ -31,25 +32,58 @@ const game = computed(() => props.game)
 const profile = computed(() => props.data.profile)
 // Clé anglaise de la classe (poids Polestar) : le nom renvoyé par l'API dépend de la langue.
 const classKey = computed(() => CLASS_KEYS[profile.value.character_class.id] ?? profile.value.character_class.name)
-const specChoices = computed(() => game.value.weights.specs.filter((s) => s.class === classKey.value))
-const specName = ref('')
 
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
-const prefs = readPrefs({ sort: 'gain', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[] })
+const prefs = readPrefs({ sort: 'gain', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[], weights: 'polestar' })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
 const sortBy = ref<'gain' | 'slot'>(prefs.sort === 'slot' ? 'slot' : 'gain')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
 const anticipate = ref(prefs.anticipate === true)
 const origins = ref<Origin[]>(ORIGINS.filter((o) => !hidden.includes(o)))
+
+// Source des poids. Forever Leveling BiS : PROTOTYPE LOCAL, seulement si ses poids sont chargés (développement).
+type Provider = 'polestar' | 'flbis'
+const providers = computed<Provider[]>(() => (game.value.flbis ? ['polestar', 'flbis'] : ['polestar']))
+const provider = ref<Provider>(prefs.weights === 'flbis' ? 'flbis' : 'polestar')
+const flbis = computed(() => (provider.value === 'flbis' ? game.value.flbis : undefined))
+
+// Spé : clé commune aux sources (enhancement, beastmastery, feral…). Forever Leveling BiS a en plus bear et survivalmelee.
+const specKey = ref('')
+const specChoices = computed(() => {
+  const polestar = game.value.weights.specs.filter((s) => s.class === classKey.value)
+  const label = (key: string) => {
+    const en = polestar.find((s) => flbisSpecKey(s.spec) === key)?.spec
+    return en ? specLabel(en) : t(`spec.${key}` as MessageKey)
+  }
+  const keys = flbis.value ? flbisSpecs(flbis.value, classKey.value) : polestar.map((s) => flbisSpecKey(s.spec))
+  return keys.map((key) => ({ key, label: label(key) }))
+})
+// Changement de source : une spé absente de la nouvelle retombe sur la plus proche, sinon la première.
+watch(specChoices, (choices) => {
+  if (choices.some((c) => c.key === specKey.value)) return
+  const alias: Record<string, string> = { bear: 'feral', survivalmelee: 'survival' }
+  specKey.value = choices.find((c) => c.key === alias[specKey.value])?.key ?? choices[0]?.key ?? ''
+})
+
+// Configuration d'armes (Forever Leveling BiS, Amélioration : deux mains ou une main + bouclier), d'après l'arme portée.
+const setups = computed(() => (flbis.value ? flbisSetups(flbis.value, classKey.value, specKey.value) : []))
+const setup = ref('')
+const wornSetup = () =>
+  props.data.equipment.equipped_items.find((i) => i.slot.type === 'MAIN_HAND')?.inventory_type?.type === 'TWOHWEAPON' ? 'twohand' : 'shield'
+watch(setups, (list) => {
+  if (list.length && !list.includes(setup.value)) setup.value = list.includes(wornSetup()) ? wornSetup() : list[0]
+})
+
 watch(
-  [sortBy, mainArmorOnly, anticipate, origins],
+  [sortBy, mainArmorOnly, anticipate, origins, provider],
   () =>
     writePrefs({
       sort: sortBy.value,
       mainArmorOnly: mainArmorOnly.value,
       anticipate: anticipate.value,
       hiddenOrigins: ORIGINS.filter((o) => !origins.value.includes(o)),
+      weights: provider.value,
     }),
   { deep: true },
 )
@@ -60,13 +94,24 @@ watch(
   () => [props.data, game.value] as const,
   () => {
     const detected = detectSpec(props.data.specializations)
-    specName.value = findSpec(game.value.weights, classKey.value, detected?.name)?.spec ?? ''
+    const key = detected ? flbisSpecKey(detected.name) : ''
+    specKey.value = specChoices.value.find((c) => c.key === key)?.key ?? specChoices.value[0]?.key ?? ''
+    setup.value = setups.value.includes(wornSetup()) ? wornSetup() : (setups.value[0] ?? '')
     open.value = new Set()
   },
   { immediate: true },
 )
 
-const spec = computed(() => findSpec(game.value.weights, classKey.value, specName.value))
+// Score d'un objet pour la spé, au niveau du perso, selon la source de poids.
+const scorer = computed<Scorer | undefined>(() => {
+  const level = profile.value.level
+  if (flbis.value) {
+    const w = flbisWeights(flbis.value, classKey.value, specKey.value, level, setup.value || undefined)
+    return w && flbisScorer(w, setup.value || undefined)
+  }
+  const spec = findSpec(game.value.weights, classKey.value, specKey.value)
+  return spec && polestarScorer(game.value.weights, spec, level)
+})
 const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
 const side = computed(() => sideOf(profile.value.faction.type))
 const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
@@ -108,12 +153,13 @@ const items = computed(() => {
 })
 
 const advice = computed(() => {
-  if (!spec.value) return []
+  if (!scorer.value) return []
   return recommend(props.data.equipment.equipped_items, items.value, {
     classId: profile.value.character_class.id,
     level: profile.value.level,
     faction: profile.value.faction.type,
-    weights: weightsAt(game.value.weights, spec.value, profile.value.level),
+    score: scorer.value,
+    weaponSetup: setups.value.length ? setup.value : undefined,
     anticipate: anticipate.value ? 5 : 0,
     perSlot: 3,
     mainArmorOnly: mainArmorOnly.value,
@@ -224,14 +270,31 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
   <section>
     <h3>{{ t('equip.title') }}</h3>
     <div class="controls">
+      <span v-if="providers.length > 1" class="control">
+        <label>
+          {{ t('reco.weights') }}
+          <select v-model="provider">
+            <option v-for="p in providers" :key="p" :value="p">{{ t(`weights.${p}`) }}</option>
+          </select>
+        </label>
+        <Hint :text="t('hint.weights')" />
+      </span>
       <span class="control">
         <label>
           {{ t('reco.spec') }}
-          <select v-model="specName">
-            <option v-for="s in specChoices" :key="s.spec" :value="s.spec">{{ specLabel(s.spec) }}</option>
+          <select v-model="specKey">
+            <option v-for="s in specChoices" :key="s.key" :value="s.key">{{ s.label }}</option>
           </select>
         </label>
         <Hint :text="t('hint.spec')" />
+      </span>
+      <span v-if="setups.length" class="control">
+        <label>
+          {{ t('reco.setup') }}
+          <select v-model="setup">
+            <option v-for="s in setups" :key="s" :value="s">{{ t(`setup.${s}` as MessageKey) }}</option>
+          </select>
+        </label>
       </span>
       <span class="control">
         <label>
@@ -346,5 +409,6 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
       {{ footer[0] }}<a :href="game.weights.source.url" target="_blank" rel="noopener">Polestar</a>{{ footer[1] }}
       <template v-if="t('reco.footerNpc')">{{ ' ' + t('reco.footerNpc') }}</template>
     </p>
+    <p v-if="flbis" class="muted small">{{ t('reco.flbisNote', { source: flbis.source }) }}</p>
   </section>
 </template>

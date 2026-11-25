@@ -1,5 +1,6 @@
 // Données statiques (public/data/, servies par le CDN) : chargées une fois, à la première recherche.
 
+import type { FlbisFile } from './flbis'
 import type { RandomData } from './random'
 import type { DbItem, Source } from './recommend'
 import type { WeightsFile } from './scoring'
@@ -11,6 +12,8 @@ export interface GameData {
   weights: WeightsFile
   /** Objets à stats aléatoires (proposés seulement s'ils sont en vente à l'HV). */
   random: RandomData
+  /** PROTOTYPE LOCAL : poids de Forever Leveling BiS, seulement en développement (voir scripts/convert-flbis.ts). */
+  flbis?: FlbisFile
 }
 
 let pending: Promise<GameData> | null = null
@@ -27,13 +30,16 @@ export function loadGameData(): Promise<GameData> {
     getJson<{ sources: Record<number, Source[]> }>('/data/sources.json'),
     getJson<WeightsFile>('/data/weights.json'),
     getJson<RandomData>('/data/random.json'),
+    // Jamais en production : ces poids ne peuvent pas être publiés sans l'accord de leur auteur.
+    import.meta.env.DEV ? getJson<FlbisFile>('/data/local/weights-flbis.json').catch(() => undefined) : undefined,
   ])
-    .then(([items, sources, weights, random]) => ({
+    .then(([items, sources, weights, random, flbis]) => ({
       items: items.items,
       generated: items.generated,
       sources: sources.sources,
       weights,
       random,
+      flbis,
     }))
     .catch((err) => {
       pending = null // permettre un nouvel essai
