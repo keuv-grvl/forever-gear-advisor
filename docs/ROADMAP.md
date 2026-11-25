@@ -120,7 +120,7 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 **Phase 6, finitions**
 
-- [x] Un seul tableau « Équipement » (`GearTable.vue`, demande de l'utilisateur) : recherche, récap perso, puis une ligne par emplacement avec l'objet porté (stats et effets), son score et le meilleur score possible (gain entre parenthèses, barre de progression) ; tri par gain ou par emplacement. Les options d'un emplacement (jusqu'à 5) s'affichent sur clic. Niveaux d'objet, niveau requis et type retirés de l'affichage.
+- [x] Un seul tableau « Équipement » (`GearTable.vue`, demande de l'utilisateur) : recherche, récap perso, puis une ligne par emplacement avec l'objet porté (stats et effets), son score et le meilleur score possible (gain entre parenthèses, barre de progression) ; tri par gain ou par emplacement. Les options d'un emplacement (3 au plus) s'affichent sur clic, en retrait sous l'objet porté. Niveaux d'objet, niveau requis et type retirés de l'affichage.
 
 - [x] Langues de Wowhead (en, de, es, fr, it, pt, ru, ko, cn, tw), menu en haut à droite : textes de l'interface (`src/i18n/`), noms du jeu (`public/data/i18n/`, API Forever toutes langues ; PNJ en anglais, l'API Forever n'a pas `creature`), locale de `/api/character`, liens Wowhead `/forever/<langue>/`. La logique n'utilise que des ids et des types (classe par id, spés demandées sans locale : nom anglais + libellé).
 - [ ] Cache local (localStorage/IndexedDB) du profil et des données.

@@ -115,7 +115,7 @@ const advice = computed(() => {
     faction: profile.value.faction.type,
     weights: weightsAt(game.value.weights, spec.value, profile.value.level),
     anticipate: anticipate.value ? 5 : 0,
-    perSlot: 5,
+    perSlot: 3,
     mainArmorOnly: mainArmorOnly.value,
     sources: game.value.sources,
     origins: new Set(origins.value),
@@ -248,9 +248,8 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                   :aria-expanded="open.has(r.slot)"
                   :aria-label="t('gear.toggle', { slot: r.label })"
                   @click="toggle(r.slot)"
-                >
-                  ▸
-                </button>
+                >▸</button>
+                <span v-else class="expand" aria-hidden="true"></span>
                 {{ r.label }}
               </td>
               <td>
@@ -276,8 +275,10 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                 <template v-else>–</template>
               </td>
             </tr>
+            <!-- Options : sous la colonne « Objet », en retrait, comme une sous-liste de l'objet porté. -->
             <tr v-if="open.has(r.slot) && r.advice" class="options-row">
-              <td colspan="4">
+              <td></td>
+              <td colspan="3">
                 <ul class="candidates">
                   <CandidateLine
                     v-for="c in r.advice.candidates"

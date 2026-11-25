@@ -302,21 +302,28 @@ details.more .candidates {
 .gear tr.open {
   background: var(--hover);
 }
-.gear button.expand {
+.gear .expand {
+  /* Même largeur avec ou sans flèche : les libellés restent alignés. */
+  display: inline-block;
+  width: 1.1rem;
+  padding: 0;
   border: 0;
   background: none;
   color: var(--muted);
   font: inherit;
-  padding: 0 0.3rem 0 0;
+  text-align: left;
+}
+.gear button.expand {
   cursor: pointer;
-  display: inline-block;
   transition: transform 0.15s;
+  transform-origin: 0.3em 50%;
 }
 .gear tr.open button.expand {
   transform: rotate(90deg);
 }
-.gear td.slot:not(:has(button)) {
-  padding-left: 1.4rem;
+/* Ligne dépliée : l'objet porté et ses options forment un bloc. */
+.gear tr.open > td {
+  border-bottom-color: transparent;
 }
 .gear .item-stats {
   font-size: 0.85em;
@@ -343,5 +350,9 @@ details.more .candidates {
 }
 .gear tr.options-row > td {
   background: var(--hover);
-  padding: 0.5rem 0.6rem 0.75rem 1.4rem;
+  padding-top: 0.2rem;
+  padding-bottom: 0.75rem;
+}
+.gear tr.options-row .candidates {
+  padding-left: 1.25rem;
 }
