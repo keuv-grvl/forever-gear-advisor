@@ -3,7 +3,7 @@
 Webapp pour **WoW Forever** : charge un personnage (équipement, spé) et indique quels objets améliorer
 et comment les obtenir (quête, craft), à son niveau.
 
-En ligne : https://forever-gear-advisor.vercel.app/ (par exemple `?c=helga-tartine&r=eu`).
+En ligne : https://forever-gear-advisor.vercel.app/ (par exemple `/eu/helga-tartine`).
 
 ## Fonctionnement
 

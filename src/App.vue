@@ -33,7 +33,16 @@ const nameSuggestions = computed(() => {
 // Perso affiché, pour le recharger dans une autre langue.
 let current: { region: Region; name: string } | null = null
 
-async function load() {
+// URL d'un perso : /eu/helga-tartine (région, puis nom canonique). Le ruleset n'y est pas : la région et le nom
+// suffisent à trouver le perso, l'API donne son ruleset.
+const pathOf = (r: Region, name: string) => `/${r}/${encodeURIComponent(name)}`
+function parsePath(path: string): { region: Region; name: string } | null {
+  const m = /^\/([a-z]{2})\/([^/]+)\/?$/.exec(path)
+  if (!m || !(REGIONS as readonly string[]).includes(m[1])) return null
+  return { region: m[1] as Region, name: decodeURIComponent(m[2]) }
+}
+
+async function load(fromHistory = false) {
   const name = normalizeCharacterName(nameInput.value)
   if (!isValidCharacterName(name)) {
     error.value = t('error.name')
@@ -41,8 +50,9 @@ async function load() {
   }
   error.value = ''
   loading.value = true
-  // L'URL reflète la recherche, pour pouvoir la partager ou la recharger.
-  history.replaceState(null, '', `?c=${encodeURIComponent(name)}&r=${region.value}`)
+  // L'URL reflète la recherche (partage, rechargement) ; chaque nouveau perso est une entrée de l'historique.
+  const path = pathOf(region.value, name)
+  if (!fromHistory && location.pathname !== path) history.pushState(null, '', path)
   // Données d'objets (CDN, une seule fois) en parallèle du perso ; leur échec n'empêche pas d'afficher le perso.
   loadGameData()
     .then((g) => {
@@ -55,6 +65,7 @@ async function load() {
     data.value = d
     current = { region: region.value, name }
     nameInput.value = displayName(d.profile)
+    document.title = `${nameInput.value} · Forever Gear Advisor`
     remember(region.value, nameInput.value, d.profile.guild?.slug, d.guildMembers)
     suggestTick.value++
   } catch (err) {
@@ -87,16 +98,25 @@ watch(lang, async () => {
   }
 })
 
-onMounted(() => {
+// Ouvre le perso de l'URL : /eu/helga-tartine, ou l'ancienne forme ?c=helga-tartine&r=eu (remplacée par la nouvelle).
+function openFromUrl(fromHistory: boolean) {
+  let target = parsePath(location.pathname)
   const params = new URLSearchParams(location.search)
-  const r = params.get('r')
-  if (r && (REGIONS as readonly string[]).includes(r)) region.value = r as Region
   const c = params.get('c')
-  if (c) {
-    nameInput.value = c
-    load()
+  const r = params.get('r') ?? 'eu'
+  if (!target && c && (REGIONS as readonly string[]).includes(r)) {
+    target = { region: r as Region, name: normalizeCharacterName(c) }
+    history.replaceState(null, '', pathOf(target.region, target.name))
   }
-})
+  if (!target || (current?.region === target.region && current.name === target.name)) return
+  region.value = target.region
+  nameInput.value = target.name
+  load(fromHistory)
+}
+
+onMounted(() => openFromUrl(true))
+// Précédent / Suivant du navigateur : le perso de l'URL.
+window.addEventListener('popstate', () => openFromUrl(true))
 </script>
 
 <template>
@@ -107,7 +127,7 @@ onMounted(() => {
         <option v-for="l in LANGS" :key="l.code" :value="l.code">{{ l.label }}</option>
       </select>
     </header>
-    <form @submit.prevent="load">
+    <form @submit.prevent="load()">
       <select v-model="region" :aria-label="t('form.region')">
         <option v-for="r in REGIONS" :key="r" :value="r">{{ r.toUpperCase() }}</option>
       </select>

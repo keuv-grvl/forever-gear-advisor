@@ -125,6 +125,7 @@ Toujours afficher la provenance d'une info de source, et garder le lien Wowhead 
 
 - [x] Langues de Wowhead (en, de, es, fr, it, pt, ru, ko, cn, tw), menu en haut à droite : textes de l'interface (`src/i18n/`), noms du jeu (`public/data/i18n/`, API Forever toutes langues ; PNJ en anglais, l'API Forever n'a pas `creature`), locale de `/api/character`, liens Wowhead `/forever/<langue>/`. La logique n'utilise que des ids et des types (classe par id, spés demandées sans locale : nom anglais + libellé).
 - [x] ~~Sources de poids au choix~~ : prototype avec les poids de Forever Leveling BiS (vitesse d'arme, poids par configuration d'armes pour Amélioration), essayé puis abandonné le 2026-11-25 sur décision de l'utilisateur : pour un conseiller de leveling, les poids Polestar suffisent. La copie des poids de cet addon demande de toute façon une permission écrite de son auteur.
+- [x] URL d'un perso : `/eu/helga-tartine` (demande de l'utilisateur), sans le ruleset (la région et le nom suffisent, l'API donne le ruleset). Précédent / Suivant du navigateur, anciens liens `?c=…&r=…` convertis, réécriture vers `index.html` dans `vercel.json` (hors `/api`, `/data`, `/assets`).
 - [ ] Cache local (localStorage/IndexedDB) du profil et des données.
 - [ ] Gestion d'erreurs (404 perso, région, token expiré).
 - [ ] Tests unitaires du scoring et des règles (aujourd'hui vérifiés par scripts ad hoc sur les persos de test).
