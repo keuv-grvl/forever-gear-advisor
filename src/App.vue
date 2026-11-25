@@ -2,6 +2,8 @@
 import { onErrorCaptured, onMounted, ref } from 'vue'
 import CharacterSummary from './components/CharacterSummary.vue'
 import EquipmentTable from './components/EquipmentTable.vue'
+import Recommendations from './components/Recommendations.vue'
+import { loadGameData, type GameData } from './lib/data'
 import {
   ApiError,
   fetchCharacter,
@@ -17,6 +19,8 @@ const region = ref<Region>('eu')
 const loading = ref(false)
 const error = ref('')
 const data = ref<CharacterData | null>(null)
+const game = ref<GameData | null>(null)
+const gameError = ref('')
 
 async function load() {
   const name = normalizeCharacterName(nameInput.value)
@@ -29,6 +33,13 @@ async function load() {
   loading.value = true
   // L'URL reflète la recherche, pour pouvoir la partager ou la recharger.
   history.replaceState(null, '', `?c=${encodeURIComponent(name)}&r=${region.value}`)
+  // Données d'objets (CDN, une seule fois) en parallèle du perso ; leur échec n'empêche pas d'afficher le perso.
+  loadGameData()
+    .then((g) => {
+      game.value = g
+      gameError.value = ''
+    })
+    .catch((err) => (gameError.value = err instanceof Error ? err.message : String(err)))
   try {
     data.value = await fetchCharacter(region.value, name)
   } catch (err) {
@@ -74,6 +85,9 @@ onMounted(() => {
     <p v-if="error" class="error">{{ error }}</p>
     <template v-if="data">
       <CharacterSummary :data="data" />
+      <Recommendations v-if="game" :data="data" :game="game" />
+      <p v-else-if="gameError" class="error">Données d'objets indisponibles : {{ gameError }}</p>
+      <p v-else class="muted">Chargement des données d'objets…</p>
       <EquipmentTable :items="data.equipment.equipped_items" />
     </template>
   </main>

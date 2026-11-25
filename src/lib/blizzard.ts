@@ -29,7 +29,7 @@ export interface CharacterProfile {
 }
 
 export interface ItemStat {
-  type: Typed
+  type?: Typed // absent pour « +X à toutes les résistances »
   value: number
   is_equip_bonus?: boolean
   is_negated?: boolean
@@ -115,4 +115,8 @@ export function detectSpec(specs: Specializations): { name: string; id: number; 
 
 export function wowheadItemUrl(itemId: number): string {
   return `https://www.wowhead.com/forever/item=${itemId}`
+}
+
+export function wowheadQuestUrl(questId: number): string {
+  return `https://www.wowhead.com/forever/quest=${questId}`
 }

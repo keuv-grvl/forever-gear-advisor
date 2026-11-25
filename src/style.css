@@ -132,3 +132,43 @@ a.q:hover {
 .q.legendary,
 .q.artifact,
 .q.heirloom { color: var(--q-legendary); }
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.candidates {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.candidates li + li {
+  margin-top: 0.4rem;
+}
+
+.gain {
+  display: inline-block;
+  min-width: 3.5rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--q-uncommon);
+}
+
+.sources {
+  font-size: 0.85em;
+  margin-left: 3.5rem;
+}
+
+.sources > span + span::before {
+  content: ' · ';
+  color: var(--muted);
+}
+
+.small {
+  font-size: 0.85em;
+}

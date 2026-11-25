@@ -41,7 +41,7 @@ function statsText(item: EquippedItem): string {
   const parts: string[] = []
   if (item.weapon) parts.push(`${item.weapon.dps.value.toFixed(1)} DPS (${(item.weapon.attack_speed.value / 1000).toFixed(2)})`)
   if (item.armor) parts.push(`${item.armor.value} armure`)
-  for (const s of item.stats ?? []) if (!s.is_negated) parts.push(`${s.value > 0 ? '+' : ''}${s.value} ${s.type.name}`)
+  for (const s of item.stats ?? []) if (!s.is_negated) parts.push(`${s.value > 0 ? '+' : ''}${s.value} ${s.type?.name ?? 'résistances'}`)
   return parts.join(', ')
 }
 </script>
