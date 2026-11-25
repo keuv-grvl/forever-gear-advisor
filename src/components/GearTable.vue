@@ -333,6 +333,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                     :active-quests="activeQuests"
                     :price="prices?.prices[itemKey(c.item)]"
                     :price-note="priceNote"
+                    :prices-loaded="!!prices"
                     :side="side"
                     :crafter="crafter"
                     :reputations="reputations"

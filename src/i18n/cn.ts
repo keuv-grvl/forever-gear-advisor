@@ -60,7 +60,8 @@ export const cn: Messages = {
   'reco.pickOrigin': '请至少勾选一个来源。',
   'origin.quest': '任务',
   'origin.dungeon': '地下城或团队副本任务',
-  'origin.craft': '制造',
+  'origin.craft': "制造（你的专业）",
+  'origin.craftOther': "请人制造",
   'origin.vendor': '商人',
   'origin.boe': '装备后绑定的掉落',
   'origin.rep': '声望',
@@ -83,7 +84,7 @@ export const cn: Messages = {
   'hint.sort': '提升幅度：提升最大的部位排在前面。部位：按角色面板顺序（头部、颈部、肩部…）。',
   'hint.anticipate': '同时推荐最多比你高5级的物品，便于提前准备。每件物品旁都会显示需要等级。',
   'hint.origins':
-    '只要勾选了物品的任一来源，就会推荐该物品。“装备后绑定的掉落”：没有其他已知来源的可交易物品，通常来自怪物或宝箱，常在拍卖行出售。取消勾选“声望”会移除所有需要声望的物品，无论其来源。拾取后绑定的掉落（地下城首领等）不在数据中，归入“未知来源”。随机属性物品（“巨鲸之”“野熊之”等）只有在拍卖行有售时才会推荐（不含武器）。拾取后绑定的制造物品只有在角色拥有该专业时才推荐；装备后绑定的制造物品总会推荐（可以请别人制作）。',
+    '只要勾选了物品的任一来源，就会推荐该物品。“装备后绑定的掉落”：没有其他已知来源的可交易物品，通常来自怪物或宝箱，常在拍卖行出售。取消勾选“声望”会移除所有需要声望的物品，无论其来源。拾取后绑定的掉落（地下城首领等）不在数据中，归入“未知来源”。随机属性物品（“巨鲸之”“野熊之”等）只有在拍卖行有售时才会推荐（不含武器）。拾取后绑定的制造物品只有在角色拥有该专业时才推荐；装备后绑定的制造物品总会推荐（可以请别人制作）。“请人制造”：你没有的专业所制造的装备后绑定物品，可在拍卖行购买（在售时显示价格）或请工匠制作。',
   'hint.armorOnly': '你的职业只能穿{best}：此选项无效。',
   'hint.armor':
     '勾选：头部、肩部、胸部、手腕、手、腰部、腿部和脚只推荐{best}，即你的职业在{level}级时能穿的最重护甲类型。不勾选：也推荐{lighter}（护甲值较低，但有时属性更好）。背部、颈部、手指和饰品不受影响。',
@@ -101,7 +102,7 @@ export const cn: Messages = {
   'src.craft': '制造：{prof}',
   'src.craftKnown': "已学会配方",
   'src.craftToLearn': "需学习配方",
-  'src.craftOther': "不是你的专业：请人制作",
+  'src.craftOther': "请人制作",
   'src.vendor': '商人：',
   'src.quest': '任务：',
   'src.questDungeon': '地下城任务：',
@@ -109,9 +110,8 @@ export const cn: Messages = {
   'src.questLevel': '（{level}级）',
   'src.inProgress': '进行中',
   'src.rep': '声望：{faction}（{standing}）',
-  'src.repFaction': "声望：{faction}",
-  'src.repMet': "已达成",
-  'src.repMissing': "还差{missing}点",
+  'src.repMet': "{faction}声望已达成",
+  'src.repMissing': "{faction}声望还差{missing}",
   'src.repRequired': "需要{standing}",
   'src.repCurrent': "你现在是{standing}（{value}/{max}）",
   'src.repNever': "尚未接触该阵营",
@@ -121,6 +121,7 @@ export const cn: Messages = {
   'src.randomNote':
     "属性根据WoW Forever客户端数据表计算。基础物品的品质和等级：客户端有则取自客户端，否则取自forever-db（fatedfr），因为Forever API没有这些物品。",
   'src.ah': '拍卖行：{price}',
+  'src.notOnAh': "拍卖行无售",
   'price.note':
     '最低价，取该游戏模式下{houses}个{faction}拍卖行的中位数（API未说明你的角色使用哪一个）。数据采集于{when}。',
   'standing.0': '仇恨',

@@ -60,7 +60,8 @@ export const es: Messages = {
   'reco.pickOrigin': 'Marca al menos un origen.',
   'origin.quest': 'Misiones',
   'origin.dungeon': 'Misiones de mazmorra o banda',
-  'origin.craft': 'Fabricación',
+  'origin.craft': "Fabricación (tu profesión)",
+  'origin.craftOther': "Fabricación por encargo",
   'origin.vendor': 'Vendedores',
   'origin.boe': 'Botín que se liga al equiparlo',
   'origin.rep': 'Reputación',
@@ -86,7 +87,7 @@ export const es: Messages = {
   'hint.anticipate':
     'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
   'hint.origins':
-    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo).',
+    'Se propone un objeto si al menos una de sus fuentes está marcada. «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo a la venta en la casa de subastas. Si desmarcas «Reputación», se quitan todos los objetos que requieren reputación, sea cual sea su fuente. Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida». Los objetos con estadísticas aleatorias («de la ballena», «del oso»…) solo se proponen si están a la venta en la casa de subastas (sin armas). Un objeto fabricado que se liga al recogerlo solo se propone si tu personaje tiene la profesión; uno que se liga al equiparlo, siempre (alguien puede fabricártelo). «Fabricación por encargo»: objetos fabricados que se ligan al equiparlos, de una profesión que no tienes, para comprar en la casa de subastas (precio mostrado si está a la venta) o encargar a un artesano.',
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
   'hint.armor':
     'Marcado: para cabeza, hombros, pecho, muñecas, manos, cintura, piernas y pies, solo armadura de {best}, el tipo más pesado que lleva tu clase a nivel {level}. Desmarcado: también armadura de {lighter} (menos armadura, a veces mejores estadísticas). Espalda, cuello, dedos y abalorios no se ven afectados.',
@@ -104,7 +105,7 @@ export const es: Messages = {
   'src.craft': 'Fabricación: {prof}',
   'src.craftKnown': "receta conocida",
   'src.craftToLearn': "receta por aprender",
-  'src.craftOther': "no es tu profesión: encárgalo",
+  'src.craftOther': "encárgalo",
   'src.vendor': 'Vendedor:',
   'src.quest': 'Misión:',
   'src.questDungeon': 'Misión de mazmorra:',
@@ -112,9 +113,8 @@ export const es: Messages = {
   'src.questLevel': '(nv. {level})',
   'src.inProgress': 'en curso',
   'src.rep': 'Reputación: {faction} ({standing})',
-  'src.repFaction': "Reputación: {faction}",
-  'src.repMet': "alcanzada",
-  'src.repMissing': "faltan {missing} puntos",
+  'src.repMet': "Reputación alcanzada con {faction}",
+  'src.repMissing': "faltan {missing} de reputación con {faction}",
   'src.repRequired': "{standing} requerido",
   'src.repCurrent': "eres {standing} ({value}/{max})",
   'src.repNever': "facción aún no encontrada",
@@ -124,6 +124,7 @@ export const es: Messages = {
   'src.randomNote':
     "Estadísticas calculadas con las tablas del cliente de WoW Forever. Calidad y niveles del objeto base: del cliente si los tiene, si no de forever-db (fatedfr), porque la API de Forever no conoce estos objetos.",
   'src.ah': 'Subasta: {price}',
+  'src.notOnAh': "no está en subasta",
   'price.note':
     'Precio más bajo, mediana de las {houses} casas de subastas ({faction}) de este modo de juego (la API no indica cuál usa tu personaje). Datos del {when}.',
   'standing.0': 'Odiado',

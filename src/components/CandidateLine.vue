@@ -3,7 +3,7 @@ import { computed } from 'vue'
 // Une option proposée : gain, objet, niveau, arme associée, sources et prix à l'HV.
 import { factionName, formatMoney, formatNumber, itemEffects, itemName, professionName, questTitle, subclassName, suffixedName, t, type MessageKey } from '../i18n'
 import { wowheadItemUrl, wowheadNpcUrl, wowheadQuestUrl, type Reputation } from '../lib/blizzard'
-import type { Candidate, Crafter, DbItem, Source } from '../lib/recommend'
+import { sourceOrigin, type Candidate, type Crafter, type DbItem, type Source } from '../lib/recommend'
 
 const props = defineProps<{
   c: Candidate
@@ -18,29 +18,35 @@ const props = defineProps<{
   crafter?: Crafter
   /** Réputations du perso, par nom anglais de faction (absent : inconnues). */
   reputations?: ReadonlyMap<string, Reputation>
+  /** Prix de l'HV chargés : sans prix, un craft à faire fabriquer n'est pas en vente. */
+  pricesLoaded?: boolean
 }>()
+
+/** Craft d'un métier que le perso n'a pas : à acheter à l'HV ou à faire fabriquer. */
+const toCommission = computed(() => props.sources.some((s) => sourceOrigin(s, props.crafter) === 'craftOther'))
 
 // Points de réputation (depuis le début de Neutre) où commence chaque rang : Détesté … Exalté.
 const REP_START = [-42000, -6000, -3000, 0, 3000, 9000, 21000, 42000]
 
+const repFaction = computed(() => {
+  const r = props.c.item.rep
+  return r ? factionName((props.side === 'H' && r[2]) || r[0]) : ''
+})
+
 /**
- * Réputation requise, en court : « atteinte », ou les points qui manquent. Le détail (rang requis, rang du perso)
- * va dans l'infobulle.
+ * Réputation requise, en court : « atteinte » ou les points qui manquent, envers la faction. Le détail (rang requis,
+ * rang du perso) va dans l'infobulle.
  */
 const repStatus = computed(() => {
   const r = props.c.item.rep
   if (!r || !props.reputations) return null
-  const faction = (props.side === 'H' && r[2]) || r[0]
-  const cur = props.reputations.get(faction)
+  const cur = props.reputations.get((props.side === 'H' && r[2]) || r[0])
   const required = t('src.repRequired', { standing: standing(r[1]) })
   const title = `${required} · ${cur ? t('src.repCurrent', { standing: standing(cur.tier), value: cur.value, max: cur.max }) : t('src.repNever')}`
-  if (cur && cur.tier >= r[1]) return { met: true, text: t('src.repMet'), title }
+  const faction = repFaction.value
+  if (cur && cur.tier >= r[1]) return { met: true, text: t('src.repMet', { faction }), title }
   const missing = formatNumber(Math.max(0, (REP_START[r[1]] ?? 0) - (cur?.raw ?? 0)), 0)
-  return { met: false, text: t('src.repMissing', { missing }), title }
-})
-const repFaction = computed(() => {
-  const r = props.c.item.rep
-  return r ? factionName((props.side === 'H' && r[2]) || r[0]) : ''
+  return { met: false, text: t('src.repMissing', { missing, faction }), title }
 })
 
 /** Effets de l'objet dans la langue (« Equipé : … »). */
@@ -106,10 +112,9 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
       </template>
       <!-- Réputation : faction et points manquants (détail en infobulle) ; rang requis seul si on ne connaît pas
            les réputations du perso. -->
-      <span v-if="c.item.rep && repStatus" :title="repStatus.title"
-        >{{ t('src.repFaction', { faction: repFaction }) }}
-        <span :class="repStatus.met ? 'rep-ok' : 'rep-todo'">{{ repStatus.text }}</span></span
-      >
+      <span v-if="c.item.rep && repStatus" :title="repStatus.title" :class="repStatus.met ? 'rep-ok' : 'rep-todo'">{{
+        repStatus.text
+      }}</span>
       <span v-else-if="c.item.rep">{{ t('src.rep', { faction: repFaction, standing: standing(c.item.rep[1]) }) }}</span>
       <template v-if="sources.length === 0 && !c.item.rep">
         <span v-if="c.item.sfx" :title="t('src.randomNote')">{{ t('src.random') }}</span>
@@ -117,6 +122,7 @@ const standing = (n: number) => (n >= 0 && n <= 7 ? t(`standing.${n}` as Message
         <span v-else class="muted">{{ t('src.unknown') }}</span>
       </template>
       <span v-if="price" :title="priceNote">{{ t('src.ah', { price: formatMoney(price[0]) }) }}</span>
+      <span v-else-if="pricesLoaded && toCommission" class="muted">{{ t('src.notOnAh') }}</span>
     </div>
   </li>
 </template>

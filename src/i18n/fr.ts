@@ -60,7 +60,8 @@ export const fr: Messages = {
   'reco.pickOrigin': 'Coche au moins une origine.',
   'origin.quest': 'Quêtes',
   'origin.dungeon': 'Quêtes de donjon ou raid',
-  'origin.craft': 'Craft',
+  'origin.craft': "Craft (ton métier)",
+  'origin.craftOther': "Craft à faire fabriquer",
   'origin.vendor': 'Vendeurs',
   'origin.boe': 'Butin lié quand équipé',
   'origin.rep': 'Réputation',
@@ -84,7 +85,7 @@ export const fr: Messages = {
   'hint.anticipate':
     "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
   'hint.origins':
-    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues). Un craft lié quand ramassé n'est proposé que si ton perso a le métier ; un craft lié quand équipé l'est toujours (quelqu'un peut te le fabriquer).",
+    "Un objet est proposé si au moins une de ses sources est cochée. « Butin lié quand équipé » : objets sans autre source connue qu'on peut échanger, en général du butin de monstre ou de coffre, souvent en vente à l'HV. Décocher « Réputation » retire tous les objets qui demandent une réputation, quelle que soit leur source. Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ». Les objets à stats aléatoires (« de la baleine », « de l'ours »…) ne sont proposés que s'ils sont en vente à l'HV (armes exclues). Un craft lié quand ramassé n'est proposé que si ton perso a le métier ; un craft lié quand équipé l'est toujours (quelqu'un peut te le fabriquer). « Craft à faire fabriquer » : crafts liés quand équipé d'un métier que tu n'as pas, à acheter à l'HV (prix affiché s'il est en vente) ou à commander à un artisan.",
   'hint.armorOnly': 'Ta classe ne porte que du {best} : cette option ne change rien.',
   'hint.armor':
     "Coché : pour la tête, les épaules, le torse, les poignets, les mains, la taille, les jambes et les pieds, seulement de l'armure en {best}, le type le plus lourd que ta classe porte au niveau {level}. Décoché : aussi l'armure en {lighter} (moins d'armure, parfois de meilleures stats). Le dos, le cou, les doigts et les bijoux ne sont pas concernés.",
@@ -102,7 +103,7 @@ export const fr: Messages = {
   'src.craft': 'Craft : {prof}',
   'src.craftKnown': "recette connue",
   'src.craftToLearn': "recette à apprendre",
-  'src.craftOther': "pas ton métier : à faire fabriquer",
+  'src.craftOther': "à faire fabriquer",
   'src.vendor': 'Vendeur :',
   'src.quest': 'Quête :',
   'src.questDungeon': 'Quête de donjon :',
@@ -110,9 +111,8 @@ export const fr: Messages = {
   'src.questLevel': '(niv {level})',
   'src.inProgress': 'en cours',
   'src.rep': 'Réputation : {faction} ({standing})',
-  'src.repFaction': "Réputation : {faction}",
-  'src.repMet': "atteinte",
-  'src.repMissing': "{missing} points manquants",
+  'src.repMet': "Réputation atteinte envers {faction}",
+  'src.repMissing': "{missing} réputation manquante envers {faction}",
   'src.repRequired': "{standing} requis",
   'src.repCurrent': "tu es {standing} ({value}/{max})",
   'src.repNever': "faction pas encore rencontrée",
@@ -122,6 +122,7 @@ export const fr: Messages = {
   'src.randomNote':
     "Stats calculées avec les tables du client WoW Forever. Qualité et niveaux de l'objet de base : client Forever s'il les a, sinon forever-db (fatedfr), car l'API Forever ne connaît pas ces objets.",
   'src.ah': 'HV : {price}',
+  'src.notOnAh': "pas à l'HV",
   'price.note':
     "Prix le plus bas, médiane sur les {houses} hôtels des ventes {faction} de ce mode de jeu (l'API ne dit pas lequel sert ton perso). Relevé du {when}.",
   'standing.0': 'Détesté',

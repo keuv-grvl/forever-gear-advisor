@@ -60,7 +60,8 @@ export const ko: Messages = {
   'reco.pickOrigin': '획득처를 하나 이상 선택하세요.',
   'origin.quest': '퀘스트',
   'origin.dungeon': '던전 또는 공격대 퀘스트',
-  'origin.craft': '제작',
+  'origin.craft': "제작 (내 전문 기술)",
+  'origin.craftOther': "제작 의뢰",
   'origin.vendor': '상인',
   'origin.boe': '착용 시 귀속 전리품',
   'origin.rep': '평판',
@@ -84,7 +85,7 @@ export const ko: Messages = {
   'hint.anticipate':
     '현재 레벨보다 최대 5레벨 높은 아이템도 추천하여 미리 준비할 수 있습니다. 각 아이템 옆에 요구 레벨이 표시됩니다.',
   'hint.origins':
-    '획득처 중 하나 이상이 선택되어 있으면 아이템을 추천합니다. “착용 시 귀속 전리품”: 다른 알려진 획득처가 없는 거래 가능한 아이템으로, 보통 몬스터나 상자에서 얻으며 경매장에서 자주 판매됩니다. “평판”을 해제하면 획득처와 관계없이 평판이 필요한 아이템이 모두 제외됩니다. 획득 시 귀속 전리품(던전 우두머리 등)은 데이터에 없으며 “알 수 없는 획득처”에 포함됩니다. 무작위 능력치 아이템(“고래의”, “곰의” 등)은 경매장에 등록된 경우에만 추천합니다(무기 제외). 획득 시 귀속 제작 아이템은 캐릭터가 해당 전문 기술을 가진 경우에만 추천하고, 착용 시 귀속 제작 아이템은 항상 추천합니다(다른 사람이 만들어 줄 수 있음).',
+    '획득처 중 하나 이상이 선택되어 있으면 아이템을 추천합니다. “착용 시 귀속 전리품”: 다른 알려진 획득처가 없는 거래 가능한 아이템으로, 보통 몬스터나 상자에서 얻으며 경매장에서 자주 판매됩니다. “평판”을 해제하면 획득처와 관계없이 평판이 필요한 아이템이 모두 제외됩니다. 획득 시 귀속 전리품(던전 우두머리 등)은 데이터에 없으며 “알 수 없는 획득처”에 포함됩니다. 무작위 능력치 아이템(“고래의”, “곰의” 등)은 경매장에 등록된 경우에만 추천합니다(무기 제외). 획득 시 귀속 제작 아이템은 캐릭터가 해당 전문 기술을 가진 경우에만 추천하고, 착용 시 귀속 제작 아이템은 항상 추천합니다(다른 사람이 만들어 줄 수 있음). “제작 의뢰”: 내가 없는 전문 기술의 착용 시 귀속 제작 아이템으로, 경매장에서 사거나(판매 중이면 가격 표시) 제작자에게 의뢰할 수 있습니다.',
   'hint.armorOnly': '이 직업은 {best} 방어구만 착용하므로 이 옵션은 효과가 없습니다.',
   'hint.armor':
     '선택 시: 머리, 어깨, 가슴, 손목, 손, 허리, 다리, 발에는 {level}레벨에서 직업이 착용할 수 있는 가장 무거운 종류인 {best} 방어구만 추천합니다. 해제 시: {lighter} 방어구도 추천합니다(방어도는 낮지만 능력치가 더 좋을 때도 있음). 등, 목, 손가락, 장신구에는 영향이 없습니다.',
@@ -102,7 +103,7 @@ export const ko: Messages = {
   'src.craft': '제작: {prof}',
   'src.craftKnown': "알고 있는 제조법",
   'src.craftToLearn': "배워야 할 제조법",
-  'src.craftOther': "내 전문 기술 아님: 제작 의뢰",
+  'src.craftOther': "제작 의뢰",
   'src.vendor': '상인:',
   'src.quest': '퀘스트:',
   'src.questDungeon': '던전 퀘스트:',
@@ -110,9 +111,8 @@ export const ko: Messages = {
   'src.questLevel': '({level}레벨)',
   'src.inProgress': '진행 중',
   'src.rep': '평판: {faction} ({standing})',
-  'src.repFaction': "평판: {faction}",
-  'src.repMet': "달성",
-  'src.repMissing': "{missing}점 부족",
+  'src.repMet': "{faction} 평판 달성",
+  'src.repMissing': "{faction} 평판 {missing} 부족",
   'src.repRequired': "{standing} 필요",
   'src.repCurrent': "현재 {standing} ({value}/{max})",
   'src.repNever': "아직 만나지 않은 세력",
@@ -122,6 +122,7 @@ export const ko: Messages = {
   'src.randomNote':
     "능력치는 WoW Forever 클라이언트 테이블로 계산했습니다. 기본 아이템의 품질과 레벨은 클라이언트에 있으면 클라이언트에서, 없으면 forever-db(fatedfr)에서 가져왔습니다. Forever API에는 이 아이템들이 없습니다.",
   'src.ah': '경매장: {price}',
+  'src.notOnAh': "경매장에 없음",
   'price.note':
     '최저가, 이 게임 모드의 {faction} 경매장 {houses}곳의 중앙값(API는 캐릭터가 이용하는 경매장을 알려 주지 않음). {when} 기준.',
   'standing.0': '증오',

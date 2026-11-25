@@ -101,16 +101,26 @@ export function sourcesFor(sources: Source[] | undefined, item: { bop?: 1 }, ctx
  * Origine d'un objet, pour le filtre : `rep` = demande une réputation ; sans source connue, `boe` = lié quand
  * équipé (du butin, en général, qu'on peut acheter à l'HV), `unknown` = lié quand ramassé.
  */
-export type Origin = 'quest' | 'dungeon' | 'craft' | 'vendor' | 'boe' | 'rep' | 'unknown'
-export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'vendor', 'boe', 'rep', 'unknown']
+export type Origin = 'quest' | 'dungeon' | 'craft' | 'craftOther' | 'vendor' | 'boe' | 'rep' | 'unknown'
+export const ORIGINS: Origin[] = ['quest', 'dungeon', 'craft', 'craftOther', 'vendor', 'boe', 'rep', 'unknown']
+
+/**
+ * Origine d'une source. Craft : `craft` pour un métier du perso, `craftOther` (à faire fabriquer ou acheter) pour un
+ * métier qu'il n'a pas ; sourcesFor n'a alors gardé que les crafts liés quand équipé.
+ */
+export function sourceOrigin(s: Source, crafter?: Crafter): Origin {
+  if (s.t === 'quest') return s.inst ? 'dungeon' : 'quest'
+  if (s.t === 'craft') return crafter && s.pid !== undefined && !crafter.professions.has(s.pid) ? 'craftOther' : 'craft'
+  return s.t
+}
 
 /**
  * L'objet passe-t-il le filtre d'origine ? Il faut qu'au moins une de ses sources accessibles soit cochée ;
  * un objet qui demande une réputation est écarté si `rep` est décoché, quelle que soit sa source.
  */
-export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>): boolean {
+export function originAllowed(item: DbItem, sources: Source[], allowed: ReadonlySet<Origin>, crafter?: Crafter): boolean {
   if (item.rep && !allowed.has('rep')) return false
-  if (sources.length > 0) return sources.some((s) => allowed.has(s.t === 'quest' ? (s.inst ? 'dungeon' : 'quest') : s.t))
+  if (sources.length > 0) return sources.some((s) => allowed.has(sourceOrigin(s, crafter)))
   if (item.rep) return true
   return allowed.has(item.bop ? 'unknown' : 'boe')
 }
@@ -190,7 +200,7 @@ export function recommend(equipped: EquippedItem[], db: DbItem[], o: RecommendOp
   const reachable = (it: DbItem) => {
     const all = o.sources[it.id]
     const mine = sourcesFor(all, it, { side, classId: o.classId, done: o.doneQuests, crafter: o.crafter })
-    return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins))
+    return (!all?.length || mine.length > 0) && (!o.origins || originAllowed(it, mine, o.origins, o.crafter))
   }
   const usable = db.filter(
     (it) =>

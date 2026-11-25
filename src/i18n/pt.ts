@@ -60,7 +60,8 @@ export const pt: Messages = {
   'reco.pickOrigin': 'Marque pelo menos uma origem.',
   'origin.quest': 'Missões',
   'origin.dungeon': 'Missões de masmorra ou raide',
-  'origin.craft': 'Criação',
+  'origin.craft': "Fabricação (sua profissão)",
+  'origin.craftOther': "Fabricação por encomenda",
   'origin.vendor': 'Vendedores',
   'origin.boe': 'Saque vinculado quando equipado',
   'origin.rep': 'Reputação',
@@ -86,7 +87,7 @@ export const pt: Messages = {
   'hint.anticipate':
     'Sugere também itens até 5 níveis acima do seu, para você se preparar. O nível necessário aparece ao lado de cada item.',
   'hint.origins':
-    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Desmarcar “Reputação” remove todos os itens que exigem reputação, seja qual for a fonte. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas). Um item fabricado vinculado quando coletado só é sugerido se seu personagem tiver a profissão; um vinculado quando equipado é sempre sugerido (alguém pode fabricá-lo para você).',
+    'Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes à venda na Casa de Leilões. Desmarcar “Reputação” remove todos os itens que exigem reputação, seja qual for a fonte. Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”. Itens com atributos aleatórios (“da Baleia”, “do Urso”…) só são sugeridos se estiverem à venda na Casa de Leilões (sem armas). Um item fabricado vinculado quando coletado só é sugerido se seu personagem tiver a profissão; um vinculado quando equipado é sempre sugerido (alguém pode fabricá-lo para você). “Fabricação por encomenda”: itens fabricados vinculados quando equipados, de uma profissão que você não tem, para comprar na Casa de Leilões (preço mostrado se estiver à venda) ou encomendar a um artesão.',
   'hint.armorOnly': 'Sua classe só usa {best}: esta opção não muda nada.',
   'hint.armor':
     'Marcado: para cabeça, ombros, torso, pulsos, mãos, cintura, pernas e pés, só armadura de {best}, o tipo mais pesado que sua classe usa no nível {level}. Desmarcado: também armadura de {lighter} (menos armadura, às vezes atributos melhores). Costas, pescoço, dedos e berloques não são afetados.',
@@ -104,7 +105,7 @@ export const pt: Messages = {
   'src.craft': 'Criação: {prof}',
   'src.craftKnown': "receita conhecida",
   'src.craftToLearn': "receita a aprender",
-  'src.craftOther': "não é sua profissão: encomende",
+  'src.craftOther': "encomende",
   'src.vendor': 'Vendedor:',
   'src.quest': 'Missão:',
   'src.questDungeon': 'Missão de masmorra:',
@@ -112,9 +113,8 @@ export const pt: Messages = {
   'src.questLevel': '(nv. {level})',
   'src.inProgress': 'em andamento',
   'src.rep': 'Reputação: {faction} ({standing})',
-  'src.repFaction': "Reputação: {faction}",
-  'src.repMet': "alcançada",
-  'src.repMissing': "faltam {missing} pontos",
+  'src.repMet': "Reputação alcançada com {faction}",
+  'src.repMissing': "faltam {missing} de reputação com {faction}",
   'src.repRequired': "{standing} necessário",
   'src.repCurrent': "você está {standing} ({value}/{max})",
   'src.repNever': "facção ainda não encontrada",
@@ -124,6 +124,7 @@ export const pt: Messages = {
   'src.randomNote':
     "Atributos calculados com as tabelas do cliente de WoW Forever. Qualidade e níveis do item base: do cliente quando ele os tem, senão do forever-db (fatedfr), pois a API de Forever não conhece esses itens.",
   'src.ah': 'Leilão: {price}',
+  'src.notOnAh': "não está no leilão",
   'price.note':
     'Menor preço, mediana das {houses} casas de leilão ({faction}) deste modo de jogo (a API não diz qual delas o seu personagem usa). Levantamento de {when}.',
   'standing.0': 'Odiado',

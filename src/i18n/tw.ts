@@ -60,7 +60,8 @@ export const tw: Messages = {
   'reco.pickOrigin': '請至少勾選一個來源。',
   'origin.quest': '任務',
   'origin.dungeon': '地城或團隊副本任務',
-  'origin.craft': '製作',
+  'origin.craft': "製造（你的專業）",
+  'origin.craftOther': "請人製造",
   'origin.vendor': '商人',
   'origin.boe': '裝備後綁定的掉落',
   'origin.rep': '聲望',
@@ -83,7 +84,7 @@ export const tw: Messages = {
   'hint.sort': '提升幅度：提升最大的部位排在前面。部位：依角色面板順序（頭部、頸部、肩部…）。',
   'hint.anticipate': '也會推薦最多比你高5級的物品，方便提前準備。每件物品旁都會顯示需要等級。',
   'hint.origins':
-    '只要勾選了物品的任一來源，就會推薦該物品。「裝備後綁定的掉落」：沒有其他已知來源的可交易物品，通常來自怪物或寶箱，常在拍賣場販售。取消勾選「聲望」會移除所有需要聲望的物品，無論其來源。拾取後綁定的掉落（地城首領等）不在資料中，歸入「未知來源」。隨機屬性物品（「巨鯨之」「野熊之」等）只有在拍賣場有販售時才會推薦（不含武器）。拾取後綁定的製造物品只有在角色擁有該專業時才推薦；裝備後綁定的製造物品總會推薦（可以請別人製作）。',
+    '只要勾選了物品的任一來源，就會推薦該物品。「裝備後綁定的掉落」：沒有其他已知來源的可交易物品，通常來自怪物或寶箱，常在拍賣場販售。取消勾選「聲望」會移除所有需要聲望的物品，無論其來源。拾取後綁定的掉落（地城首領等）不在資料中，歸入「未知來源」。隨機屬性物品（「巨鯨之」「野熊之」等）只有在拍賣場有販售時才會推薦（不含武器）。拾取後綁定的製造物品只有在角色擁有該專業時才推薦；裝備後綁定的製造物品總會推薦（可以請別人製作）。「請人製造」：你沒有的專業所製造的裝備後綁定物品，可在拍賣場購買（販售中時顯示價格）或請工匠製作。',
   'hint.armorOnly': '你的職業只能穿{best}：此選項沒有作用。',
   'hint.armor':
     '勾選：頭部、肩部、胸部、手腕、手、腰部、腿部和腳只推薦{best}，也就是你的職業在{level}級時能穿的最重護甲類型。不勾選：也推薦{lighter}（護甲值較低，但有時屬性更好）。背部、頸部、手指和飾品不受影響。',
@@ -101,7 +102,7 @@ export const tw: Messages = {
   'src.craft': '製作：{prof}',
   'src.craftKnown': "已學會配方",
   'src.craftToLearn': "需學習配方",
-  'src.craftOther': "不是你的專業：請人製作",
+  'src.craftOther': "請人製作",
   'src.vendor': '商人：',
   'src.quest': '任務：',
   'src.questDungeon': '地城任務：',
@@ -109,9 +110,8 @@ export const tw: Messages = {
   'src.questLevel': '（{level}級）',
   'src.inProgress': '進行中',
   'src.rep': '聲望：{faction}（{standing}）',
-  'src.repFaction': "聲望：{faction}",
-  'src.repMet': "已達成",
-  'src.repMissing': "還差{missing}點",
+  'src.repMet': "{faction}聲望已達成",
+  'src.repMissing': "{faction}聲望還差{missing}",
   'src.repRequired': "需要{standing}",
   'src.repCurrent': "你現在是{standing}（{value}/{max}）",
   'src.repNever': "尚未接觸該陣營",
@@ -121,6 +121,7 @@ export const tw: Messages = {
   'src.randomNote':
     "屬性依據WoW Forever用戶端資料表計算。基礎物品的品質和等級：用戶端有則取自用戶端，否則取自forever-db（fatedfr），因為Forever API沒有這些物品。",
   'src.ah': '拍賣場：{price}',
+  'src.notOnAh': "拍賣場無售",
   'price.note':
     '最低價，取此遊戲模式下{houses}個{faction}拍賣場的中位數（API未說明你的角色使用哪一個）。資料擷取於{when}。',
   'standing.0': '仇恨',

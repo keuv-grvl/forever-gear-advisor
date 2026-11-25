@@ -66,7 +66,8 @@ export const en = {
   'reco.pickOrigin': 'Check at least one origin.',
   'origin.quest': 'Quests',
   'origin.dungeon': 'Dungeon or raid quests',
-  'origin.craft': 'Crafting',
+  'origin.craft': "Crafting (your profession)",
+  'origin.craftOther': "Crafting to commission",
   'origin.vendor': 'Vendors',
   'origin.boe': 'Bind on Equip loot',
   'origin.rep': 'Reputation',
@@ -91,7 +92,7 @@ export const en = {
   'hint.sort': 'Gain: slots with the biggest upgrade first. Slot: character sheet order (head, neck, shoulder…).',
   'hint.anticipate': 'Also suggests items up to 5 levels above yours, to plan ahead. The required level is shown next to each item.',
   'hint.origins':
-    'An item is suggested if at least one of its sources is checked. “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House. Unchecking “Reputation” removes every item that requires a reputation, whatever its source. Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”. Random-stat items (“of the Whale”, “of the Bear”…) are suggested only when they are for sale at the Auction House (weapons excluded). A Bind on Pickup craft is suggested only if your character has the profession; a Bind on Equip craft always is (someone can craft it for you).',
+    'An item is suggested if at least one of its sources is checked. “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House. Unchecking “Reputation” removes every item that requires a reputation, whatever its source. Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”. Random-stat items (“of the Whale”, “of the Bear”…) are suggested only when they are for sale at the Auction House (weapons excluded). A Bind on Pickup craft is suggested only if your character has the profession; a Bind on Equip craft always is (someone can craft it for you). “Crafting to commission”: Bind on Equip crafts from a profession you don’t have, to buy at the Auction House (price shown when for sale) or to order from a crafter.',
   'hint.armorOnly': 'Your class only wears {best}: this option changes nothing.',
   'hint.armor':
     'Checked: for head, shoulders, chest, wrists, hands, waist, legs and feet, only {best} armor, the heaviest type your class wears at level {level}. Unchecked: {lighter} armor too (less armor, sometimes better stats). Back, neck, fingers and trinkets are not affected.',
@@ -110,7 +111,7 @@ export const en = {
   'src.craft': 'Crafting: {prof}',
   'src.craftKnown': "recipe known",
   'src.craftToLearn': "recipe to learn",
-  'src.craftOther': "not your profession: have it crafted",
+  'src.craftOther': "have it crafted",
   'src.vendor': 'Vendor:',
   'src.quest': 'Quest:',
   'src.questDungeon': 'Dungeon quest:',
@@ -118,9 +119,8 @@ export const en = {
   'src.questLevel': '(lvl {level})',
   'src.inProgress': 'in progress',
   'src.rep': 'Reputation: {faction} ({standing})',
-  'src.repFaction': "Reputation: {faction}",
-  'src.repMet': "reached",
-  'src.repMissing': "{missing} points missing",
+  'src.repMet': "Reputation reached with {faction}",
+  'src.repMissing': "{missing} reputation missing with {faction}",
   'src.repRequired': "{standing} required",
   'src.repCurrent': "you are {standing} ({value}/{max})",
   'src.repNever': "faction not met yet",
@@ -130,6 +130,7 @@ export const en = {
   'src.randomNote':
     "Stats computed from the WoW Forever client tables. Base item quality and levels: from the client when it has them, otherwise from forever-db (fatedfr), since the Forever API does not know these items.",
   'src.ah': 'AH: {price}',
+  'src.notOnAh': "not on the AH",
   'price.note':
     'Lowest price, median over the {houses} {faction} auction houses of this game mode (the API does not say which one your character uses). Snapshot from {when}.',
   'standing.0': 'Hated',
