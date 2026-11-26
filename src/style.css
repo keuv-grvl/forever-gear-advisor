@@ -558,8 +558,14 @@ main > :nth-last-child(2) {
     padding: 0.45rem 0;
     border-bottom: 1px solid var(--border);
   }
+  /* Ligne dépliée et ses options : un seul bloc gris, sans espace blanc entre les deux. */
   .gear tr.open {
     border-bottom-color: transparent;
+    padding-bottom: 0;
+  }
+  .gear tr.options-row {
+    background: var(--hover);
+    padding-top: 0;
   }
   .gear td {
     border-bottom: 0;
@@ -597,4 +603,11 @@ main > :nth-last-child(2) {
   .gain {
     min-width: 2.8rem;
   }
+}
+
+/* Options dépliées : un trait pointillé entre deux options, pour suivre les lignes sur le fond gris. */
+.gear tr.options-row .candidates li + li {
+  margin-top: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px dashed var(--border);
 }
