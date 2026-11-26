@@ -37,14 +37,18 @@ const specName = ref('')
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
 // `sortBy` remplace `sort` (défaut passé de « gain » à « emplacement ») : l'ancien choix est ignoré une fois.
-const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, ahead: 0, hiddenOrigins: [] as string[], repReachedOnly: false })
+const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, hiddenOrigins: [] as string[], repReachedOnly: false })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
 const sortBy = ref<'gain' | 'slot'>(prefs.sortBy === 'gain' ? 'gain' : 'slot')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
-// Niveaux d'avance : 0 par défaut, 6 au plus.
+// Niveaux d'avance (0 à 6) : pas mémorisés, remis à 0 au rechargement de la page et à chaque autre perso
+// (un changement de langue recharge le même perso : on garde la valeur).
 const MAX_AHEAD = 6
-const savedAhead = Number(prefs.ahead)
-const ahead = ref(Number.isInteger(savedAhead) && savedAhead >= 0 ? Math.min(savedAhead, MAX_AHEAD) : 0)
+const ahead = ref(0)
+watch(
+  () => props.data.profile.id,
+  () => (ahead.value = 0),
+)
 /** Saisie du champ : entier borné à 0..6, sinon on garde la valeur précédente. */
 function setAhead(e: Event) {
   const input = e.target as HTMLInputElement
@@ -55,12 +59,11 @@ function setAhead(e: Event) {
 const repReachedOnly = ref(prefs.repReachedOnly === true)
 const origins = ref<Origin[]>(ORIGINS.filter((o) => !hidden.includes(o)))
 watch(
-  [sortBy, mainArmorOnly, ahead, origins, repReachedOnly],
+  [sortBy, mainArmorOnly, origins, repReachedOnly],
   () =>
     writePrefs({
       sortBy: sortBy.value,
       mainArmorOnly: mainArmorOnly.value,
-      ahead: ahead.value,
       hiddenOrigins: ORIGINS.filter((o) => !origins.value.includes(o)),
       repReachedOnly: repReachedOnly.value,
     }),
