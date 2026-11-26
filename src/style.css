@@ -532,3 +532,69 @@ details.more .candidates {
 main > :nth-last-child(2) {
   margin-bottom: 2.5rem;
 }
+
+/* Mobile : chaque emplacement devient une carte (emplacement et scores en haut, objet dessous, options sur toute
+   la largeur), au lieu d'un tableau qui déborde. */
+@media (max-width: 640px) {
+  main {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  .table-wrap {
+    overflow-x: visible;
+  }
+  .gear,
+  .gear tbody {
+    display: block;
+  }
+  .gear thead {
+    display: none;
+  }
+  .gear tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .gear tr.open {
+    border-bottom-color: transparent;
+  }
+  .gear td {
+    border-bottom: 0;
+    padding: 0.1rem 0.3rem;
+  }
+  .gear td.slot {
+    flex: 1 1 auto;
+    font-weight: 600;
+  }
+  .gear td.best::before {
+    content: '→ ';
+    color: var(--muted);
+  }
+  .gear td.best .bar {
+    width: 100%;
+  }
+  .gear td.item {
+    order: 3;
+    flex: 1 1 100%;
+    padding-left: 1.4rem;
+  }
+  .gear tr.options-row > td:first-child {
+    display: none;
+  }
+  .gear tr.options-row > td {
+    flex: 1 1 100%;
+    padding: 0.3rem 0.3rem 0.6rem;
+  }
+  .gear tr.options-row .candidates {
+    padding-left: 0.5rem;
+  }
+  .sources {
+    margin-left: 0;
+  }
+  .gain {
+    min-width: 2.8rem;
+  }
+}

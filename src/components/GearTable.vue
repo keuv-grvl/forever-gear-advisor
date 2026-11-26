@@ -309,7 +309,7 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
                 <span v-else class="expand" aria-hidden="true"></span>
                 {{ r.label }}
               </td>
-              <td>
+              <td class="item">
                 <template v-if="r.item">
                   <a
                     :href="wowheadItemUrl(r.item.item.id, r.item.bonus_list?.[0])"
