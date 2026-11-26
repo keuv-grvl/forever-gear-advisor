@@ -37,14 +37,14 @@ const specName = ref('')
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
 // `sortBy` remplace `sort` (défaut passé de « gain » à « emplacement ») : l'ancien choix est ignoré une fois.
-const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, anticipate: false, ahead: -1, hiddenOrigins: [] as string[], repReachedOnly: false })
+const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, ahead: 0, hiddenOrigins: [] as string[], repReachedOnly: false })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
 const sortBy = ref<'gain' | 'slot'>(prefs.sortBy === 'gain' ? 'gain' : 'slot')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
-// Niveaux d'avance (0 à 6). L'ancienne case « Anticiper (+5) » cochée devient 5.
+// Niveaux d'avance : 0 par défaut, 6 au plus.
 const MAX_AHEAD = 6
 const savedAhead = Number(prefs.ahead)
-const ahead = ref(Number.isInteger(savedAhead) && savedAhead >= 0 ? Math.min(savedAhead, MAX_AHEAD) : prefs.anticipate === true ? 5 : 0)
+const ahead = ref(Number.isInteger(savedAhead) && savedAhead >= 0 ? Math.min(savedAhead, MAX_AHEAD) : 0)
 /** Saisie du champ : entier borné à 0..6, sinon on garde la valeur précédente. */
 function setAhead(e: Event) {
   const input = e.target as HTMLInputElement
