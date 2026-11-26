@@ -296,6 +296,7 @@ details.more .candidates {
 /* Tableau d'équipement (src/components/GearTable.vue) : une ligne par emplacement, options dépliables. */
 :root {
   --hover: rgba(127, 127, 127, 0.08);
+  --sep: rgba(127, 127, 127, 0.55);
   --bar: rgba(127, 127, 127, 0.22);
 }
 .gear .num {
@@ -567,6 +568,10 @@ main > :nth-last-child(2) {
     background: var(--hover);
     padding-top: 0;
   }
+  /* Le fond est sur la ligne : pas une 2e couche de gris semi-transparent sur la cellule. */
+  .gear tr.options-row > td {
+    background: none;
+  }
   .gear td {
     border-bottom: 0;
     padding: 0.1rem 0.3rem;
@@ -609,5 +614,5 @@ main > :nth-last-child(2) {
 .gear tr.options-row .candidates li + li {
   margin-top: 0.35rem;
   padding-top: 0.35rem;
-  border-top: 1px dashed var(--border);
+  border-top: 1px dashed var(--sep);
 }
