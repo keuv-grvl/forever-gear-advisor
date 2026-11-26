@@ -45,9 +45,13 @@ const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
 const MAX_AHEAD = 6
 const savedAhead = Number(prefs.ahead)
 const ahead = ref(Number.isInteger(savedAhead) && savedAhead >= 0 ? Math.min(savedAhead, MAX_AHEAD) : prefs.anticipate === true ? 5 : 0)
-// Valeur affichée pendant le glissement ; le calcul ne repart qu'au relâchement (événement change).
-const aheadDraft = ref(ahead.value)
-watch(ahead, (v) => (aheadDraft.value = v))
+/** Saisie du champ : entier borné à 0..6, sinon on garde la valeur précédente. */
+function setAhead(e: Event) {
+  const input = e.target as HTMLInputElement
+  const n = Math.round(Number(input.value))
+  if (input.value !== '' && Number.isFinite(n)) ahead.value = Math.min(MAX_AHEAD, Math.max(0, n))
+  input.value = String(ahead.value)
+}
 const repReachedOnly = ref(prefs.repReachedOnly === true)
 const origins = ref<Origin[]>(ORIGINS.filter((o) => !hidden.includes(o)))
 watch(
@@ -269,16 +273,10 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
       </span>
       <span class="control">
         <label class="ahead"
-          >{{ aheadDraft > 0 ? t('reco.anticipate', { n: aheadDraft }) : t('reco.anticipateNone') }}
-          <input
-            type="range"
-            min="0"
-            :max="MAX_AHEAD"
-            step="1"
-            :value="aheadDraft"
-            @input="aheadDraft = Number(($event.target as HTMLInputElement).value)"
-            @change="ahead = Number(($event.target as HTMLInputElement).value)"
-        /></label>
+          >{{ t('reco.anticipate') }}
+          <input type="number" min="0" :max="MAX_AHEAD" step="1" inputmode="numeric" :value="ahead" @change="setAhead" />
+          {{ t('reco.anticipateUnit') }}</label
+        >
         <Hint :text="t('hint.anticipate')" />
       </span>
     </div>

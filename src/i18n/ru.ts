@@ -55,8 +55,8 @@ export const ru: Messages = {
   'reco.sortGain': 'Прирост',
   'reco.sortSlot': 'Ячейка',
   'reco.mainArmor': 'Только основной тип брони',
-  'reco.anticipate': "Наперёд: +{n} ур.",
-  'reco.anticipateNone': "Наперёд: нет",
+  'reco.anticipate': "Наперёд на",
+  'reco.anticipateUnit': "ур.",
   'reco.repReached': "Только достигнутая репутация",
   'hint.repReached':
     "Скрывает предметы, требующие репутации, которой у персонажа ещё нет. Если снято: они предлагаются с указанием недостающей репутации.",

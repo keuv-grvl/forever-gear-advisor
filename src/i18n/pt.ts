@@ -55,8 +55,8 @@ export const pt: Messages = {
   'reco.sortGain': 'Ganho',
   'reco.sortSlot': 'Espaço',
   'reco.mainArmor': 'Só o tipo de armadura principal',
-  'reco.anticipate': "Antecipar: +{n} níveis",
-  'reco.anticipateNone': "Antecipar: não",
+  'reco.anticipate': "Antecipar",
+  'reco.anticipateUnit': "níveis",
   'reco.repReached': "Só reputação alcançada",
   'hint.repReached':
     "Oculta os itens que exigem uma reputação que seu personagem ainda não alcançou. Desmarcado: eles são sugeridos, com a reputação que falta.",

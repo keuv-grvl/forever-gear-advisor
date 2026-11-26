@@ -55,8 +55,8 @@ export const fr: Messages = {
   'reco.sortGain': 'Gain',
   'reco.sortSlot': 'Emplacement',
   'reco.mainArmor': "Type d'armure principal seulement",
-  'reco.anticipate': "Anticiper : +{n} niveaux",
-  'reco.anticipateNone': "Anticiper : non",
+  'reco.anticipate': "Anticiper de",
+  'reco.anticipateUnit': "niveaux",
   'reco.repReached': "Réputation atteinte seulement",
   'hint.repReached':
     "Masque les objets qui demandent une réputation que ton perso n'a pas encore atteinte. Décoché : ils sont proposés, avec la réputation qui manque.",

@@ -55,8 +55,8 @@ export const de: Messages = {
   'reco.sortGain': 'Zugewinn',
   'reco.sortSlot': 'Platz',
   'reco.mainArmor': 'Nur Hauptrüstungstyp',
-  'reco.anticipate': "Vorausplanen: +{n} Stufen",
-  'reco.anticipateNone': "Vorausplanen: nein",
+  'reco.anticipate': "Vorausplanen um",
+  'reco.anticipateUnit': "Stufen",
   'reco.repReached': "Nur erreichter Ruf",
   'hint.repReached':
     "Blendet Gegenstände aus, die einen Ruf erfordern, den dein Charakter noch nicht erreicht hat. Abgewählt: Sie werden vorgeschlagen, mit dem fehlenden Ruf.",

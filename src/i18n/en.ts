@@ -61,8 +61,8 @@ export const en = {
   'reco.sortGain': 'Gain',
   'reco.sortSlot': 'Slot',
   'reco.mainArmor': 'Main armor type only',
-  'reco.anticipate': "Look ahead: +{n} levels",
-  'reco.anticipateNone': "Look ahead: none",
+  'reco.anticipate': "Look ahead",
+  'reco.anticipateUnit': "levels",
   'reco.repReached': "Reached reputation only",
   'hint.repReached':
     "Hides items that require a reputation your character hasn’t reached yet. Unchecked: they are suggested, with the reputation still missing.",

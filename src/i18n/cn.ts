@@ -55,8 +55,8 @@ export const cn: Messages = {
   'reco.sortGain': '提升幅度',
   'reco.sortSlot': '部位',
   'reco.mainArmor': '仅限主要护甲类型',
-  'reco.anticipate': "提前规划：+{n}级",
-  'reco.anticipateNone': "提前规划：无",
+  'reco.anticipate': "提前规划",
+  'reco.anticipateUnit': "级",
   'reco.repReached': "仅限已达成的声望",
   'hint.repReached':
     "隐藏需要角色尚未达到的声望的物品。取消勾选时，会推荐这些物品并显示还差的声望。",

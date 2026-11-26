@@ -617,17 +617,14 @@ main > :nth-last-child(2) {
   border-top: 1px dashed var(--sep);
 }
 
-/* Curseur « Anticiper » : libellé puis curseur sur la même ligne. */
+/* Champ « Anticiper de [n] niveaux ». */
 label.ahead {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  font-variant-numeric: tabular-nums;
+  gap: 0.4rem;
 }
-label.ahead input[type='range'] {
-  width: 7rem;
+label.ahead input[type='number'] {
   flex: none;
-  padding: 0;
-  border: 0;
-  accent-color: var(--q-uncommon);
+  width: 3.2rem;
+  padding: 0.2rem 0.3rem;
 }

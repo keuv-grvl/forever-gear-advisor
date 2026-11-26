@@ -55,8 +55,8 @@ export const ko: Messages = {
   'reco.sortGain': '향상폭',
   'reco.sortSlot': '부위',
   'reco.mainArmor': '주 방어구 종류만',
-  'reco.anticipate': "미리 보기: +{n}레벨",
-  'reco.anticipateNone': "미리 보기: 없음",
+  'reco.anticipate': "미리 보기",
+  'reco.anticipateUnit': "레벨",
   'reco.repReached': "달성한 평판만",
   'hint.repReached':
     "캐릭터가 아직 달성하지 못한 평판이 필요한 아이템을 숨깁니다. 해제하면 부족한 평판과 함께 추천합니다.",
