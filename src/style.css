@@ -616,3 +616,18 @@ main > :nth-last-child(2) {
   padding-top: 0.35rem;
   border-top: 1px dashed var(--sep);
 }
+
+/* Curseur « Anticiper » : libellé puis curseur sur la même ligne. */
+label.ahead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+label.ahead input[type='range'] {
+  width: 7rem;
+  flex: none;
+  padding: 0;
+  border: 0;
+  accent-color: var(--q-uncommon);
+}

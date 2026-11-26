@@ -55,7 +55,8 @@ export const fr: Messages = {
   'reco.sortGain': 'Gain',
   'reco.sortSlot': 'Emplacement',
   'reco.mainArmor': "Type d'armure principal seulement",
-  'reco.anticipate': 'Anticiper (+5 niveaux)',
+  'reco.anticipate': "Anticiper : +{n} niveaux",
+  'reco.anticipateNone': "Anticiper : non",
   'reco.repReached': "Réputation atteinte seulement",
   'hint.repReached':
     "Masque les objets qui demandent une réputation que ton perso n'a pas encore atteinte. Décoché : ils sont proposés, avec la réputation qui manque.",
@@ -84,7 +85,7 @@ export const fr: Messages = {
   'hint.spec': "Les stats n'ont pas la même valeur selon la spé (poids Polestar). Par défaut : la spé où tu as mis le plus de points de talent.",
   'hint.sort': "Gain : les emplacements où l'amélioration est la plus forte d'abord. Emplacement : l'ordre de la fiche personnage (tête, cou, épaules…).",
   'hint.anticipate':
-    "Propose aussi des objets jusqu'à 5 niveaux au-dessus du tien, pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
+    "Propose aussi des objets jusqu'à ce nombre de niveaux au-dessus du tien (0 à 6), pour préparer la suite. Le niveau requis est indiqué à côté de chaque objet.",
   'hint.origins':
     "Un objet est proposé si au moins une de ses sources est cochée. « Métiers » : un craft lié quand ramassé seulement s'il est de ton métier ; un craft lié quand équipé toujours, avec son prix à l'HV s'il est en vente (sinon, à faire fabriquer). « Butin lié quand équipé » : objets échangeables sans autre source connue, en général du butin de monstre ou de coffre, souvent en vente à l'HV ; les objets à stats aléatoires (« de la baleine »…) seulement s'ils sont en vente (armes exclues). Les drops liés quand ramassés (boss de donjon…) ne sont pas dans les données : ils sont dans « Source inconnue ».",
   'hint.armorOnly': 'Ta classe ne porte que du {best} : cette option ne change rien.',

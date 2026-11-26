@@ -55,7 +55,8 @@ export const de: Messages = {
   'reco.sortGain': 'Zugewinn',
   'reco.sortSlot': 'Platz',
   'reco.mainArmor': 'Nur Hauptrüstungstyp',
-  'reco.anticipate': 'Vorausplanen (+5 Stufen)',
+  'reco.anticipate': "Vorausplanen: +{n} Stufen",
+  'reco.anticipateNone': "Vorausplanen: nein",
   'reco.repReached': "Nur erreichter Ruf",
   'hint.repReached':
     "Blendet Gegenstände aus, die einen Ruf erfordern, den dein Charakter noch nicht erreicht hat. Abgewählt: Sie werden vorgeschlagen, mit dem fehlenden Ruf.",
@@ -86,7 +87,7 @@ export const de: Messages = {
   'hint.sort':
     'Zugewinn: Plätze mit der größten Verbesserung zuerst. Platz: Reihenfolge des Charakterfensters (Kopf, Hals, Schulter…).',
   'hint.anticipate':
-    'Schlägt auch Gegenstände bis zu 5 Stufen über deiner vor, damit du vorausplanen kannst. Die benötigte Stufe steht neben jedem Gegenstand.',
+    "Schlägt auch Gegenstände bis zu so vielen Stufen über deiner vor (0 bis 6), um vorauszuplanen. Die benötigte Stufe steht neben jedem Gegenstand.",
   'hint.origins':
     "Ein Gegenstand wird vorgeschlagen, wenn mindestens eine seiner Quellen angehakt ist. „Berufe“: beim Aufheben gebundene Herstellung nur aus deinem Beruf; beim Anlegen gebundene immer, mit Auktionshauspreis, wenn angeboten (sonst herstellen lassen). „Beute (beim Anlegen gebunden)“: handelbare Gegenstände ohne andere bekannte Quelle, meist Beute von Monstern oder aus Truhen, oft im Auktionshaus; Gegenstände mit Zufallswerten („des Wals“…) nur, wenn sie angeboten werden (ohne Waffen). Beim Aufheben gebundene Drops (Dungeonbosse…) sind nicht in den Daten: Sie fallen unter „Unbekannte Quelle“.",
   'hint.armorOnly': 'Deine Klasse trägt nur {best}: Diese Option ändert nichts.',

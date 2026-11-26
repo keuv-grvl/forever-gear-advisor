@@ -61,7 +61,8 @@ export const en = {
   'reco.sortGain': 'Gain',
   'reco.sortSlot': 'Slot',
   'reco.mainArmor': 'Main armor type only',
-  'reco.anticipate': 'Look ahead (+5 levels)',
+  'reco.anticipate': "Look ahead: +{n} levels",
+  'reco.anticipateNone': "Look ahead: none",
   'reco.repReached': "Reached reputation only",
   'hint.repReached':
     "Hides items that require a reputation your character hasn’t reached yet. Unchecked: they are suggested, with the reputation still missing.",
@@ -91,7 +92,8 @@ export const en = {
   // Infobulles
   'hint.spec': 'Stats are not worth the same for every spec (Polestar weights). Default: the spec with the most talent points.',
   'hint.sort': 'Gain: slots with the biggest upgrade first. Slot: character sheet order (head, neck, shoulder…).',
-  'hint.anticipate': 'Also suggests items up to 5 levels above yours, to plan ahead. The required level is shown next to each item.',
+  'hint.anticipate':
+    "Also suggests items up to this many levels above yours (0 to 6), to plan ahead. The required level is shown next to each item.",
   'hint.origins':
     "An item is suggested if at least one of its sources is checked. “Professions”: a Bind on Pickup craft only if it is from your profession; a Bind on Equip craft always, with its Auction House price when for sale (otherwise, have it crafted). “Bind on Equip loot”: tradable items with no other known source, usually loot from monsters or chests, often sold at the Auction House; random-stat items (“of the Whale”…) only when for sale (weapons excluded). Bind on Pickup drops (dungeon bosses…) are not in the data: they fall under “Unknown source”.",
   'hint.armorOnly': 'Your class only wears {best}: this option changes nothing.',

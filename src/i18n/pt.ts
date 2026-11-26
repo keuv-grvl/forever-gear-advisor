@@ -55,7 +55,8 @@ export const pt: Messages = {
   'reco.sortGain': 'Ganho',
   'reco.sortSlot': 'Espaço',
   'reco.mainArmor': 'Só o tipo de armadura principal',
-  'reco.anticipate': 'Antecipar (+5 níveis)',
+  'reco.anticipate': "Antecipar: +{n} níveis",
+  'reco.anticipateNone': "Antecipar: não",
   'reco.repReached': "Só reputação alcançada",
   'hint.repReached':
     "Oculta os itens que exigem uma reputação que seu personagem ainda não alcançou. Desmarcado: eles são sugeridos, com a reputação que falta.",
@@ -86,7 +87,7 @@ export const pt: Messages = {
   'hint.sort':
     'Ganho: primeiro os espaços com a maior melhoria. Espaço: a ordem da ficha do personagem (cabeça, pescoço, ombros…).',
   'hint.anticipate':
-    'Sugere também itens até 5 níveis acima do seu, para você se preparar. O nível necessário aparece ao lado de cada item.',
+    "Sugere também itens até este número de níveis acima do seu (0 a 6), para se preparar. O nível necessário aparece ao lado de cada item.",
   'hint.origins':
     "Um item é sugerido se pelo menos uma das suas fontes estiver marcada. “Profissões”: um item fabricado vinculado quando coletado só se for da sua profissão; um vinculado quando equipado sempre, com o preço na Casa de Leilões se estiver à venda (senão, encomende). “Saque vinculado quando equipado”: itens negociáveis sem outra fonte conhecida, geralmente saque de monstros ou baús, muitas vezes no leilão; itens com atributos aleatórios (“da Baleia”…) só se estiverem à venda (sem armas). Os drops vinculados quando coletados (chefes de masmorra…) não estão nos dados: eles entram em “Fonte desconhecida”.",
   'hint.armorOnly': 'Sua classe só usa {best}: esta opção não muda nada.',

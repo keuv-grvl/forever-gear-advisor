@@ -37,20 +37,26 @@ const specName = ref('')
 // Préférences gardées dans le navigateur ; une valeur inattendue retombe sur le défaut.
 // Les origines décochées sont gardées (plutôt que les cochées) : une origine ajoutée plus tard sera cochée.
 // `sortBy` remplace `sort` (défaut passé de « gain » à « emplacement ») : l'ancien choix est ignoré une fois.
-const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, anticipate: false, hiddenOrigins: [] as string[], repReachedOnly: false })
+const prefs = readPrefs({ sortBy: 'slot', mainArmorOnly: true, anticipate: false, ahead: -1, hiddenOrigins: [] as string[], repReachedOnly: false })
 const hidden = Array.isArray(prefs.hiddenOrigins) ? prefs.hiddenOrigins : []
 const sortBy = ref<'gain' | 'slot'>(prefs.sortBy === 'gain' ? 'gain' : 'slot')
 const mainArmorOnly = ref(prefs.mainArmorOnly !== false)
-const anticipate = ref(prefs.anticipate === true)
+// Niveaux d'avance (0 à 6). L'ancienne case « Anticiper (+5) » cochée devient 5.
+const MAX_AHEAD = 6
+const savedAhead = Number(prefs.ahead)
+const ahead = ref(Number.isInteger(savedAhead) && savedAhead >= 0 ? Math.min(savedAhead, MAX_AHEAD) : prefs.anticipate === true ? 5 : 0)
+// Valeur affichée pendant le glissement ; le calcul ne repart qu'au relâchement (événement change).
+const aheadDraft = ref(ahead.value)
+watch(ahead, (v) => (aheadDraft.value = v))
 const repReachedOnly = ref(prefs.repReachedOnly === true)
 const origins = ref<Origin[]>(ORIGINS.filter((o) => !hidden.includes(o)))
 watch(
-  [sortBy, mainArmorOnly, anticipate, origins, repReachedOnly],
+  [sortBy, mainArmorOnly, ahead, origins, repReachedOnly],
   () =>
     writePrefs({
       sortBy: sortBy.value,
       mainArmorOnly: mainArmorOnly.value,
-      anticipate: anticipate.value,
+      ahead: ahead.value,
       hiddenOrigins: ORIGINS.filter((o) => !origins.value.includes(o)),
       repReachedOnly: repReachedOnly.value,
     }),
@@ -70,7 +76,7 @@ watch(
 )
 
 const spec = computed(() => findSpec(game.value.weights, classKey.value, specName.value))
-const maxLevel = computed(() => profile.value.level + (anticipate.value ? 5 : 0))
+const maxLevel = computed(() => profile.value.level + ahead.value)
 const side = computed(() => sideOf(profile.value.faction.type))
 const doneQuests = computed(() => new Set(props.data.quests?.done ?? []))
 // Métiers et recettes connues (absents si l'API ne les a pas donnés : aucun craft écarté).
@@ -119,7 +125,7 @@ const advice = computed(() => {
     level: profile.value.level,
     faction: profile.value.faction.type,
     weights: weightsAt(game.value.weights, spec.value, profile.value.level),
-    anticipate: anticipate.value ? 5 : 0,
+    anticipate: ahead.value,
     perSlot: 3,
     mainArmorOnly: mainArmorOnly.value,
     sources: game.value.sources,
@@ -262,7 +268,17 @@ const footer = computed(() => t('reco.footer', { date: game.value.generated }).s
         <Hint :text="t('hint.repReached')" />
       </span>
       <span class="control">
-        <label><input v-model="anticipate" type="checkbox" /> {{ t('reco.anticipate') }}</label>
+        <label class="ahead"
+          >{{ aheadDraft > 0 ? t('reco.anticipate', { n: aheadDraft }) : t('reco.anticipateNone') }}
+          <input
+            type="range"
+            min="0"
+            :max="MAX_AHEAD"
+            step="1"
+            :value="aheadDraft"
+            @input="aheadDraft = Number(($event.target as HTMLInputElement).value)"
+            @change="ahead = Number(($event.target as HTMLInputElement).value)"
+        /></label>
         <Hint :text="t('hint.anticipate')" />
       </span>
     </div>

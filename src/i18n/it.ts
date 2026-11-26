@@ -55,7 +55,8 @@ export const it: Messages = {
   'reco.sortGain': 'Guadagno',
   'reco.sortSlot': 'Slot',
   'reco.mainArmor': 'Solo il tipo di armatura principale',
-  'reco.anticipate': 'Anticipa (+5 livelli)',
+  'reco.anticipate': "Anticipare: +{n} livelli",
+  'reco.anticipateNone': "Anticipare: no",
   'reco.repReached': "Solo reputazione raggiunta",
   'hint.repReached':
     "Nasconde gli oggetti che richiedono una reputazione che il tuo personaggio non ha ancora raggiunto. Deselezionato: vengono proposti, con la reputazione mancante.",
@@ -86,7 +87,7 @@ export const it: Messages = {
   'hint.sort':
     "Guadagno: prima gli slot con il miglioramento più grande. Slot: l'ordine della scheda del personaggio (testa, collo, spalle…).",
   'hint.anticipate':
-    'Propone anche oggetti fino a 5 livelli sopra il tuo, per prepararti a ciò che verrà. Il livello richiesto è indicato accanto a ogni oggetto.',
+    "Propone anche oggetti fino a questo numero di livelli sopra il tuo (da 0 a 6), per prepararti. Il livello richiesto è indicato accanto a ogni oggetto.",
   'hint.origins':
     "Un oggetto viene proposto se almeno una delle sue fonti è selezionata. «Professioni»: un oggetto creato vincolato alla raccolta solo se è della tua professione; uno vincolato all'equipaggiamento sempre, con il prezzo alla casa d'aste se in vendita (altrimenti, fallo creare). «Bottino vincolato all'equipaggiamento»: oggetti scambiabili senza altra fonte nota, di solito bottino di mostri o forzieri, spesso alla casa d'aste; gli oggetti con statistiche casuali («of the Whale»…) solo se in vendita (armi escluse). I drop vincolati alla raccolta (boss delle spedizioni…) non sono nei dati: rientrano in «Fonte sconosciuta».",
   'hint.armorOnly': 'La tua classe indossa solo {best}: questa opzione non cambia nulla.',

@@ -55,7 +55,8 @@ export const es: Messages = {
   'reco.sortGain': 'Ganancia',
   'reco.sortSlot': 'Ranura',
   'reco.mainArmor': 'Solo el tipo de armadura principal',
-  'reco.anticipate': 'Anticipar (+5 niveles)',
+  'reco.anticipate': "Anticipar: +{n} niveles",
+  'reco.anticipateNone': "Anticipar: no",
   'reco.repReached': "Solo reputación alcanzada",
   'hint.repReached':
     "Oculta los objetos que requieren una reputación que tu personaje aún no tiene. Desmarcado: se proponen, con la reputación que falta.",
@@ -86,7 +87,7 @@ export const es: Messages = {
   'hint.sort':
     'Ganancia: primero las ranuras con la mayor mejora. Ranura: el orden de la ficha de personaje (cabeza, cuello, hombro…).',
   'hint.anticipate':
-    'Propone también objetos hasta 5 niveles por encima del tuyo, para ir preparando lo que viene. El nivel requerido aparece junto a cada objeto.',
+    "Propone también objetos hasta este número de niveles por encima del tuyo (0 a 6), para preparar lo que viene. El nivel requerido aparece junto a cada objeto.",
   'hint.origins':
     "Se propone un objeto si al menos una de sus fuentes está marcada. «Profesiones»: un objeto fabricado que se liga al recogerlo solo si es de tu profesión; uno que se liga al equiparlo siempre, con su precio en la casa de subastas si está a la venta (si no, encárgalo). «Botín que se liga al equiparlo»: objetos comerciables sin otra fuente conocida, normalmente botín de monstruos o cofres, a menudo en la casa de subastas; los objetos con estadísticas aleatorias («de la ballena»…) solo si están a la venta (sin armas). Los objetos que se ligan al recogerlos (jefes de mazmorra…) no están en los datos: entran en «Fuente desconocida».",
   'hint.armorOnly': 'Tu clase solo lleva {best}: esta opción no cambia nada.',
